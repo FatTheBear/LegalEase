@@ -10,35 +10,47 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    protected $fillable = ['name', 'email', 'password', 'role', 'status'];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    public function lawyerProfile()
+    {
+        return $this->hasOne(LawyerProfile::class);
+    }
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    public function customerProfile()
+    {
+        return $this->hasOne(CustomerProfile::class);
+    }
+
+    public function availabilitySlots()
+    {
+        return $this->hasMany(AvailabilitySlot::class, 'lawyer_id');
+    }
+
+    public function appointmentsAsLawyer()
+    {
+        return $this->hasMany(Appointment::class, 'lawyer_id');
+    }
+
+    public function appointmentsAsCustomer()
+    {
+        return $this->hasMany(Appointment::class, 'customer_id');
+    }
+
+    public function announcements()
+    {
+        return $this->hasMany(Announcement::class, 'created_by');
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class, 'lawyer_id');
+    }
 }

@@ -7,31 +7,26 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
-     *
-     * @return void
+     * Chạy migration.
      */
-    public function up()
+    public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('user_id')->constrained()->onDelete('cascade');
-        $table->string('specialization'); // chuyên ngành
-        $table->integer('experience_years')->nullable();
-        $table->string('location'); // tỉnh / thành phố
-        $table->text('bio')->nullable();
-        $table->string('license_number')->nullable();
-        $table->boolean('verified')->default(false);
-        $table->timestamps();
+            $table->id();
+            $table->string('name', 100);
+            $table->string('email', 255)->unique();
+            $table->string('password', 255);
+            $table->enum('role', ['admin', 'lawyer', 'customer'])->default('customer');
+            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->rememberToken(); // dùng cho tính năng "remember me"
+            $table->timestamps();
         });
     }
 
     /**
-     * Reverse the migrations.
-     *
-     * @return void
+     * Rollback migration.
      */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('users');
     }

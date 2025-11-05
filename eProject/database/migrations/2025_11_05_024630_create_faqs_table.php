@@ -11,13 +11,15 @@ return new class extends Migration
      *
      * @return void
      */
-    public function up()
-    {
-        Schema::create('lawyer_profiles', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
-    }
+public function up()
+{
+    Schema::create('faqs', function (Blueprint $table) {
+        $table->id();
+        $table->text('question');
+        $table->text('answer');
+        $table->timestamps();
+    });
+}
 
     /**
      * Reverse the migrations.
@@ -26,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('lawyer_profiles');
+        Schema::dropIfExists('faqs');
     }
 };
