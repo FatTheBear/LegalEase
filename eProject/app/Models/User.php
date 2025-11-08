@@ -34,6 +34,16 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
+
     public function lawyerProfile()
     {
         return $this->hasOne(LawyerProfile::class);
