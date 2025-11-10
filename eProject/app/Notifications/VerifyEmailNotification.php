@@ -1,0 +1,56 @@
+<?php
+
+namespace App\Notifications;
+
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Carbon;
+
+class VerifyEmailNotification extends Notification
+{
+    use Queueable;
+
+    /**
+     * Get the notification's delivery channels.
+     */
+    public function via($notifiable)
+    {
+        return ['mail'];
+    }
+
+    /**
+     * Get the mail representation of the notification.
+     */
+    public function toMail($notifiable)
+    {
+        $verificationUrl = $this->verificationUrl($notifiable);
+
+        return (new MailMessage)
+            ->subject('Verify Your Email Address - LegalEase')
+            ->greeting('Hello ' . $notifiable->name . '!')
+            ->line('Thank you for registering with LegalEase.')
+            ->line('Please click the button below to verify your email address.')
+            ->action('Verify Email Address', $verificationUrl)
+            ->line('This link will expire in 60 minutes.')
+            ->line('If you did not create an account, no further action is required.')
+            ->salutation('Best regards, LegalEase Team');
+    }
+
+    /**
+     * Get the verification URL for the given notifiable.
+     */
+    protected function verificationUrl($notifiable)
+    {
+        return URL::temporarySignedRoute(
+            'verification.verify',
+            Carbon::now()->addMinutes(60),
+            [
+                'id' => $notifiable->getKey(),
+                'hash' => sha1($notifiable->getEmailForVerification()),
+            ]
+        );
+    }
+}

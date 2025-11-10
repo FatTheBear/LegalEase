@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'LegalEase')</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -15,19 +16,19 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="{{ url('/') }}">Trang chủ</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('lawyers.index') }}">Luật sư</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('appointments.index') }}">Lịch hẹn</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('announcements.index') }}">Thông báo</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url('/') }}">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('lawyers.index') }}">Lawyers</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('appointments.index') }}">Appointments</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('announcements.index') }}">Announcements</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('faqs.index') }}">FAQ</a></li>
                 @guest
-                    <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Đăng nhập</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('register') }}">Đăng ký</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Login</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('register.choice') }}">Register</a></li>
                 @else
-                    <li class="nav-item"><a class="nav-link" href="#">Xin chào, {{ Auth::user()->name }}</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Hello, {{ Auth::user()->name }}</a></li>
                     <li class="nav-item">
                         <form action="{{ route('logout') }}" method="POST">@csrf
-                            <button class="btn btn-link nav-link">Đăng xuất</button>
+                            <button class="btn btn-link nav-link">Logout</button>
                         </form>
                     </li>
                 @endguest
