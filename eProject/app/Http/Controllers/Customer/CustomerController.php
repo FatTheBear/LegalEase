@@ -8,6 +8,6 @@ class CustomerController extends Controller
 {
     public function dashboard()
     {
-        return view('customers.dashboard');
+        return view('customer.dashboard');
     }
 }

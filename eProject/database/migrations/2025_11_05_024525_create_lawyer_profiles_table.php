@@ -18,9 +18,11 @@ public function up()
         $table->foreignId('user_id')->constrained()->onDelete('cascade');
         $table->string('specialization', 50);
         $table->integer('experience')->nullable();
+        $table->string('license_number', 100)->nullable(); // Số chứng chỉ hành nghề
+        $table->string('certificate_path', 500)->nullable(); // Đường dẫn file chứng chỉ (upload)
         $table->string('city', 50)->nullable();
         $table->string('province', 50)->nullable();
-        $table->boolean('verified')->default(false);
+        $table->enum('approval_status', ['pending', 'approved', 'rejected'])->default('pending'); // Admin duyệt
         $table->float('rating')->default(0);
         $table->text('bio')->nullable();
         $table->string('avatar', 255)->nullable();
