@@ -1,95 +1,116 @@
-@extends('layouts.app')
-@section('title', 'Customer Registration')
+@extends('layouts.auth')
+
+@section('title', 'Customer Sign Up - LegalEase')
 
 @section('content')
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-body p-4">
-                <h2 class="mb-4 text-center">Customer Registration</h2>
-                
-                @if($errors->any())
-                    <div class="alert alert-danger">
-                        <ul class="mb-0">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+<div class="auth-card p-5">
+    <div class="text-center mb-4">
+        <h1 class="h3 mb-3 text-primary">
+            <i class="fas fa-balance-scale me-2"></i>LegalEase
+        </h1>
+        <h2 class="h4 text-success">
+            <i class="fas fa-user me-2"></i>Customer Registration
+        </h2>
+        <p class="text-muted">Join our platform to connect with professional lawyers</p>
+    </div>
 
-                <form method="POST" action="{{ route('register.customer.submit') }}" novalidate>
-                    @csrf
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Full Name <span class="text-danger">*</span></label>
-                        <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" 
-                               value="{{ old('name') }}">
-                        @error('name')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Email <span class="text-danger">*</span></label>
-                        <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" 
-                               value="{{ old('email') }}">
-                        @error('email')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Phone Number</label>
-                        <input type="text" name="phone" class="form-control @error('phone') is-invalid @enderror" 
-                               value="{{ old('phone') }}">
-                        @error('phone')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Address</label>
-                        <textarea name="address" class="form-control @error('address') is-invalid @enderror" 
-                                  rows="2">{{ old('address') }}</textarea>
-                        @error('address')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Password <span class="text-danger">*</span></label>
-                        <input type="password" name="password" class="form-control @error('password') is-invalid @enderror">
-                        <small class="text-muted">Minimum 6 characters</small>
-                        @error('password')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
-                        <input type="password" name="password_confirmation" class="form-control">
-                    </div>
-
-                    <button type="submit" class="btn btn-primary w-100 mb-3">Register</button>
-                </form>
-
-                <hr>
-
-                <div class="text-center">
-                    <p class="mb-0">
-                        <a href="{{ route('register.choice') }}" class="text-decoration-none">
-                            ← Back to account type selection
-                        </a>
-                    </p>
-                    <p class="mb-0 mt-2">Already have an account? 
-                        <a href="{{ route('login') }}" class="text-decoration-none fw-bold">
-                            Login now
-                        </a>
-                    </p>
-                </div>
-            </div>
+    @if ($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @foreach ($errors->all() as $error)
+                <div>{{ $error }}</div>
+            @endforeach
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
+    @endif
+
+    <form method="POST" action="{{ route('register.customer.submit') }}">
+        @csrf
+        
+        <div class="mb-3">
+            <label for="name" class="form-label">
+                <i class="fas fa-user me-1"></i>Full Name
+            </label>
+            <input type="text" 
+                   class="form-control @error('name') is-invalid @enderror" 
+                   id="name" 
+                   name="name" 
+                   value="{{ old('name') }}" 
+                   required 
+                   autocomplete="name" 
+                   autofocus
+                   placeholder="Enter your full name">
+            @error('name')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="mb-3">
+            <label for="email" class="form-label">
+                <i class="fas fa-envelope me-1"></i>Email Address
+            </label>
+            <input type="email" 
+                   class="form-control @error('email') is-invalid @enderror" 
+                   id="email" 
+                   name="email" 
+                   value="{{ old('email') }}" 
+                   required 
+                   autocomplete="email"
+                   placeholder="Enter your email address">
+            @error('email')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="mb-3">
+            <label for="password" class="form-label">
+                <i class="fas fa-lock me-1"></i>Password
+            </label>
+            <input type="password" 
+                   class="form-control @error('password') is-invalid @enderror" 
+                   id="password" 
+                   name="password" 
+                   required 
+                   autocomplete="new-password"
+                   placeholder="Create a strong password">
+            @error('password')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="mb-4">
+            <label for="password_confirmation" class="form-label">
+                <i class="fas fa-lock me-1"></i>Confirm Password
+            </label>
+            <input type="password" 
+                   class="form-control" 
+                   id="password_confirmation" 
+                   name="password_confirmation" 
+                   required 
+                   autocomplete="new-password"
+                   placeholder="Confirm your password">
+        </div>
+
+        <div class="d-grid">
+            <button type="submit" class="btn btn-success btn-lg">
+                <i class="fas fa-user-plus me-2"></i>Create Customer Account
+            </button>
+        </div>
+    </form>
+
+    <hr class="my-4">
+
+    <div class="text-center">
+        <p class="mb-2 text-muted">Already have an account?</p>
+        <a href="{{ route('login') }}" class="btn btn-outline-primary">
+            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+        </a>
+    </div>
+
+    <div class="text-center mt-3">
+        <p class="text-muted small mb-1">Are you a lawyer?</p>
+        <a href="{{ route('register.lawyer') }}" class="text-warning">
+            <i class="fas fa-user-tie me-1"></i>Register as Lawyer instead
+        </a>
     </div>
 </div>
 @endsection

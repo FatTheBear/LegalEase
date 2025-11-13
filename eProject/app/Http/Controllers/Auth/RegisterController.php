@@ -4,113 +4,109 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\CustomerProfile;
-use App\Models\LawyerProfile;
-use Illuminate\Auth\Events\Registered;
+use App\Models\DocumentUpload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rules;
 
 class RegisterController extends Controller
 {
-    // Hiển thị trang chọn loại đăng ký
-    public function showChoiceForm()
-    {
-        return view('auth.register-choice');
-    }
-
-    // Hiển thị form đăng ký Customer
-    public function showCustomerForm()
+    /**
+     * Show customer registration form
+     */
+    public function showCustomerRegistrationForm()
     {
         return view('auth.register-customer');
     }
 
-    // Hiển thị form đăng ký Lawyer
-    public function showLawyerForm()
+    /**
+     * Show lawyer registration form
+     */
+    public function showLawyerRegistrationForm()
     {
         return view('auth.register-lawyer');
     }
 
-    // Xử lý đăng ký Customer
+    /**
+     * Handle customer registration
+     */
     public function registerCustomer(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6|confirmed',
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // Tạo user
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => 'customer',
-            'status' => 'active',
-            // Xóa dòng này để email chưa verified
+            'status' => 'active', // Customer can use immediately
         ]);
 
-        // Tạo customer profile
-        CustomerProfile::create([
-            'user_id' => $user->id,
-            'phone' => $request->phone,
-            'address' => $request->address,
-        ]);
+        // Auto login after registration
+        auth()->login($user);
 
-        // Gửi email xác thực
-        event(new Registered($user));
-
-        return redirect()->route('login')->with('success', 'Registration successful! Please check your email to verify your account.');
+        return redirect()->route('customer.dashboard')
+            ->with('success', 'Customer registration successful! Welcome to LegalEase.');
     }
 
-    // Xử lý đăng ký Lawyer
+    /**
+     * Handle lawyer registration
+     */
     public function registerLawyer(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6|confirmed',
-            'specialization' => 'required|string|max:50',
-            'experience' => 'nullable|integer|min:0',
-            'license_number' => 'required|string|max:100',
-            'certificate' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120', // Max 5MB
-            'city' => 'nullable|string|max:50',
-            'province' => 'nullable|string|max:50',
-            'bio' => 'nullable|string',
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'specialization' => 'required|string|max:255',
+            'experience_years' => 'required|integer|min:0',
+            'workplace' => 'required|string|max:255',
+            'license_number' => 'required|string|max:255',
+            'documents.*' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048', // Max 2MB per file
+        ], [
+            'documents.*.required' => 'Please upload at least one document.',
+            'documents.*.mimes' => 'Documents must be PDF, JPG, JPEG, or PNG files.',
+            'documents.*.max' => 'Each document must not exceed 2MB.',
         ]);
 
-        // Upload certificate
-        $certificatePath = null;
-        if ($request->hasFile('certificate')) {
-            $certificatePath = $request->file('certificate')->store('certificates', 'public');
-        }
-
-        // Tạo user với status pending
+        // Create user with pending status
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => 'lawyer',
-            'status' => 'inactive', // Chưa active cho đến khi admin duyệt
-            'approval_status' => 'pending', // Chờ admin duyệt
+            'status' => 'pending', // Needs admin approval
         ]);
 
-        // Tạo lawyer profile
-        LawyerProfile::create([
-            'user_id' => $user->id,
+        // Store lawyer profile information
+        $user->lawyerProfile()->create([
             'specialization' => $request->specialization,
-            'experience' => $request->experience,
+            'experience_years' => $request->experience_years,
+            'workplace' => $request->workplace,
             'license_number' => $request->license_number,
-            'certificate_path' => $certificatePath,
-            'city' => $request->city,
-            'province' => $request->province,
-            'bio' => $request->bio,
-            'approval_status' => 'pending', // Chờ admin duyệt
         ]);
 
-        return redirect()->route('login')->with('success', 'Registration successful! Your account is pending admin approval.');
+        // Handle document uploads
+        if ($request->hasFile('documents')) {
+            foreach ($request->file('documents') as $index => $file) {
+                $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
+                $filePath = $file->storeAs('lawyer_documents', $fileName, 'public');
+
+                DocumentUpload::create([
+                    'user_id' => $user->id,
+                    'file_name' => $fileName,
+                    'file_path' => $filePath,
+                    'document_type' => 'certificate', // Default type
+                ]);
+            }
+        }
+
+        return redirect()->route('login')
+            ->with('success', 'Lawyer registration submitted successfully! Your account is pending admin approval. You will receive an email once approved.');
     }
 }
-

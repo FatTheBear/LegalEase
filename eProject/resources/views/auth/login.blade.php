@@ -1,63 +1,105 @@
-@extends('layouts.app')
-@section('title', 'Login')
+@extends('layouts.auth')
+
+@section('title', 'Sign In - LegalEase')
 
 @section('content')
-<div class="row justify-content-center">
-    <div class="col-md-5">
-        <div class="card shadow-sm">
-            <div class="card-body p-4">
-                <h2 class="mb-4 text-center">Login</h2>
-                
-                @if(session('error'))
-                    <div class="alert alert-danger">
-                        {{ session('error') }}
-                    </div>
-                @endif
+<div class="auth-card p-5">
+    <div class="text-center mb-4">
+        <h1 class="h3 mb-3 text-primary">
+            <i class="fas fa-balance-scale me-2"></i>LegalEase
+        </h1>
+        <h2 class="h4 text-muted">Sign In to Your Account</h2>
+    </div>
 
-                @if(session('success'))
-                    <div class="alert alert-success">
-                        {{ session('success') }}
-                    </div>
-                @endif
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
 
-                <form method="POST" action="{{ route('login') }}" novalidate>
-                    @csrf
-                    <div class="mb-3">
-                        <label class="form-label">Email/Username:</label>
-                        <input type="text" name="email" class="form-control @error('email') is-invalid @enderror" 
-                               value="{{ old('email') }}" autofocus>
-                        @error('email')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Password:</label>
-                        <input type="password" name="password" class="form-control @error('password') is-invalid @enderror">
-                        @error('password')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
+    @if ($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @foreach ($errors->all() as $error)
+                <div>{{ $error }}</div>
+            @endforeach
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
 
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" name="remember" class="form-check-input" id="remember">
-                        <label class="form-check-label" for="remember">Remember me</label>
-                    </div>
+    <form method="POST" action="{{ route('login') }}">
+        @csrf
+        
+        <div class="mb-3">
+            <label for="email" class="form-label">
+                <i class="fas fa-envelope me-1"></i>Email Address
+            </label>
+            <input type="email" 
+                   class="form-control @error('email') is-invalid @enderror" 
+                   id="email" 
+                   name="email" 
+                   value="{{ old('email') }}" 
+                   required 
+                   autocomplete="email" 
+                   autofocus
+                   placeholder="Enter your email">
+            @error('email')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
 
-                    <button type="submit" class="btn btn-primary w-100 mb-3">Login</button>
-                </form>
+        <div class="mb-4">
+            <label for="password" class="form-label">
+                <i class="fas fa-lock me-1"></i>Password
+            </label>
+            <input type="password" 
+                   class="form-control @error('password') is-invalid @enderror" 
+                   id="password" 
+                   name="password" 
+                   required 
+                   autocomplete="current-password"
+                   placeholder="Enter your password">
+            @error('password')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
 
-                <hr>
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="remember" name="remember">
+            <label class="form-check-label" for="remember">
+                Remember me
+            </label>
+        </div>
 
-                <div class="text-center">
-                    <p class="mb-0">Don't have an account? 
-                        <a href="{{ route('register.choice') }}" class="text-decoration-none fw-bold">
-                            Register now
-                        </a>
-                    </p>
-                </div>
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+            </button>
+        </div>
+    </form>
+
+    <hr class="my-4">
+
+    <div class="text-center">
+        <p class="mb-3 text-muted">Don't have an account?</p>
+        <div class="row g-2">
+            <div class="col-6">
+                <a href="{{ route('register.customer') }}" class="btn btn-outline-success w-100">
+                    <i class="fas fa-user me-2"></i>Sign Up as Customer
+                </a>
+            </div>
+            <div class="col-6">
+                <a href="{{ route('register.lawyer') }}" class="btn btn-outline-warning w-100">
+                    <i class="fas fa-user-tie me-2"></i>Sign Up as Lawyer
+                </a>
             </div>
         </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="#" class="text-muted small">
+            <i class="fas fa-key me-1"></i>Forgot Password?
+        </a>
     </div>
 </div>
 @endsection

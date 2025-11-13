@@ -1,334 +1,239 @@
-@extends('layouts.app')
-@section('title', 'Lawyer Registration')
+@extends('layouts.auth')
+
+@section('title', 'Lawyer Sign Up - LegalEase')
 
 @section('content')
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card shadow-sm">
-            <div class="card-body p-4">
-                <h2 class="mb-4 text-center">Lawyer Registration</h2>
-                
-                <div class="alert alert-info">
-                    <i class="bi bi-info-circle"></i> 
-                    Your account will be activated after Admin approves your profile and professional license.
+<div class="auth-card p-5">
+    <div class="text-center mb-4">
+        <h1 class="h3 mb-3 text-primary">
+            <i class="fas fa-balance-scale me-2"></i>LegalEase
+        </h1>
+        <h2 class="h4 text-warning">
+            <i class="fas fa-user-tie me-2"></i>Lawyer Registration
+        </h2>
+        <p class="text-muted">Join our platform as a professional lawyer</p>
+        <div class="alert alert-info small">
+            <i class="fas fa-info-circle me-1"></i>
+            Your account will be reviewed by our admin team before activation.
+        </div>
+    </div>
+
+    @if ($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @foreach ($errors->all() as $error)
+                <div>{{ $error }}</div>
+            @endforeach
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    <form method="POST" action="{{ route('register.lawyer.submit') }}" enctype="multipart/form-data">
+        @csrf
+        
+        <!-- Personal Information -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-user me-2"></i>Personal Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Full Name *</label>
+                    <input type="text" 
+                           class="form-control @error('name') is-invalid @enderror" 
+                           id="name" 
+                           name="name" 
+                           value="{{ old('name') }}" 
+                           required 
+                           placeholder="Enter your full name">
+                    @error('name')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
-                @if($errors->any())
-                    <div class="alert alert-danger">
-                        <ul class="mb-0">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email Address *</label>
+                    <input type="email" 
+                           class="form-control @error('email') is-invalid @enderror" 
+                           id="email" 
+                           name="email" 
+                           value="{{ old('email') }}" 
+                           required 
+                           placeholder="Enter your professional email">
+                    @error('email')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="password" class="form-label">Password *</label>
+                        <input type="password" 
+                               class="form-control @error('password') is-invalid @enderror" 
+                               id="password" 
+                               name="password" 
+                               required 
+                               placeholder="Create a strong password">
+                        @error('password')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
-                @endif
-
-                <form method="POST" action="{{ route('register.lawyer.submit') }}" enctype="multipart/form-data" novalidate>
-                    @csrf
-                    
-                    <h5 class="mb-3">Personal Information</h5>
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Full Name <span class="text-danger">*</span></label>
-                            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" 
-                                   value="{{ old('name') }}">
-                            @error('name')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">Email <span class="text-danger">*</span></label>
-                            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" 
-                                   value="{{ old('email') }}">
-                            @error('email')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="password_confirmation" class="form-label">Confirm Password *</label>
+                        <input type="password" 
+                               class="form-control" 
+                               id="password_confirmation" 
+                               name="password_confirmation" 
+                               required 
+                               placeholder="Confirm your password">
                     </div>
+                </div>
+            </div>
+        </div>
 
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Password <span class="text-danger">*</span></label>
-                            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror">
-                            <small class="text-muted">Minimum 6 characters</small>
-                            @error('password')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+        <!-- Professional Information -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-briefcase me-2"></i>Professional Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="specialization" class="form-label">Specialization *</label>
+                    <input type="text" 
+                           class="form-control @error('specialization') is-invalid @enderror" 
+                           id="specialization" 
+                           name="specialization" 
+                           value="{{ old('specialization') }}" 
+                           required 
+                           placeholder="e.g., Criminal Law, Corporate Law, Family Law">
+                    @error('specialization')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
-                            <input type="password" name="password_confirmation" class="form-control">
-                        </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="experience_years" class="form-label">Years of Experience *</label>
+                        <input type="number" 
+                               class="form-control @error('experience_years') is-invalid @enderror" 
+                               id="experience_years" 
+                               name="experience_years" 
+                               value="{{ old('experience_years') }}" 
+                               min="0" 
+                               required 
+                               placeholder="Years">
+                        @error('experience_years')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
-
-                    <hr class="my-4">
-
-                    <h5 class="mb-3">Professional Information</h5>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Specialization <span class="text-danger">*</span></label>
-                            <select name="specialization" class="form-select @error('specialization') is-invalid @enderror">
-                                <option value="">-- Select specialization --</option>
-                                <option value="Criminal Law" {{ old('specialization') == 'Criminal Law' ? 'selected' : '' }}>Criminal Law</option>
-                                <option value="Civil Law" {{ old('specialization') == 'Civil Law' ? 'selected' : '' }}>Civil Law</option>
-                                <option value="Family Law" {{ old('specialization') == 'Family Law' ? 'selected' : '' }}>Family Law</option>
-                                <option value="Corporate Law" {{ old('specialization') == 'Corporate Law' ? 'selected' : '' }}>Corporate Law</option>
-                                <option value="Real Estate Law" {{ old('specialization') == 'Real Estate Law' ? 'selected' : '' }}>Real Estate Law</option>
-                                <option value="Labor Law" {{ old('specialization') == 'Labor Law' ? 'selected' : '' }}>Labor Law</option>
-                                <option value="Other" {{ old('specialization') == 'Other' ? 'selected' : '' }}>Other</option>
-                            </select>
-                            @error('specialization')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">Years of Experience</label>
-                            <input type="number" name="experience" class="form-control @error('experience') is-invalid @enderror" 
-                                   value="{{ old('experience') }}" min="0">
-                            @error('experience')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">License Number <span class="text-danger">*</span></label>
-                        <input type="text" name="license_number" class="form-control @error('license_number') is-invalid @enderror" 
-                               value="{{ old('license_number') }}">
+                    <div class="col-md-6 mb-3">
+                        <label for="license_number" class="form-label">License Number *</label>
+                        <input type="text" 
+                               class="form-control @error('license_number') is-invalid @enderror" 
+                               id="license_number" 
+                               name="license_number" 
+                               value="{{ old('license_number') }}" 
+                               required 
+                               placeholder="Professional license number">
                         @error('license_number')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
+                </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Upload Professional License <span class="text-danger">*</span></label>
-                        <input type="file" name="certificate" class="form-control @error('certificate') is-invalid @enderror" 
-                               accept=".pdf,.jpg,.jpeg,.png">
-                        <small class="text-muted">Format: PDF, JPG, PNG. Maximum 5MB</small>
-                        @error('certificate')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">City</label>
-                            <input type="text" name="city" class="form-control @error('city') is-invalid @enderror" 
-                                   value="{{ old('city') }}">
-                            @error('city')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">Province/State</label>
-                            <input type="text" name="province" class="form-control @error('province') is-invalid @enderror" 
-                                   value="{{ old('province') }}">
-                            @error('province')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Bio</label>
-                        <textarea name="bio" class="form-control @error('bio') is-invalid @enderror" 
-                                  rows="4" placeholder="Brief description of your experience, achievements...">{{ old('bio') }}</textarea>
-                        @error('bio')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <button type="submit" class="btn btn-success w-100 mb-3">Register</button>
-                </form>
-
-                <hr>
-
-                <div class="text-center">
-                    <p class="mb-0">
-                        <a href="{{ route('register.choice') }}" class="text-decoration-none">
-                            ← Back to account type selection
-                        </a>
-                    </p>
-                    <p class="mb-0 mt-2">Already have an account? 
-                        <a href="{{ route('login') }}" class="text-decoration-none fw-bold">
-                            Login now
-                        </a>
-                    </p>
+                <div class="mb-3">
+                    <label for="workplace" class="form-label">Current Workplace *</label>
+                    <input type="text" 
+                           class="form-control @error('workplace') is-invalid @enderror" 
+                           id="workplace" 
+                           name="workplace" 
+                           value="{{ old('workplace') }}" 
+                           required 
+                           placeholder="Law firm, organization, or self-employed">
+                    @error('workplace')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
             </div>
         </div>
+
+        <!-- Document Upload -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-file-upload me-2"></i>Required Documents</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="documents" class="form-label">Upload Certificates & Licenses *</label>
+                    <input type="file" 
+                           class="form-control @error('documents.*') is-invalid @enderror" 
+                           id="documents" 
+                           name="documents[]" 
+                           multiple 
+                           accept=".pdf,.jpg,.jpeg,.png" 
+                           required>
+                    <div class="form-text">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Upload your law degree, bar admission certificate, professional licenses, etc. 
+                        <br>Accepted formats: PDF, JPG, PNG. Maximum 2MB per file.
+                    </div>
+                    @error('documents.*')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div id="file-preview" class="mt-3"></div>
+            </div>
+        </div>
+
+        <div class="d-grid">
+            <button type="submit" class="btn btn-warning btn-lg">
+                <i class="fas fa-paper-plane me-2"></i>Submit Application for Review
+            </button>
+        </div>
+    </form>
+
+    <hr class="my-4">
+
+    <div class="text-center">
+        <p class="mb-2 text-muted">Already have an account?</p>
+        <a href="{{ route('login') }}" class="btn btn-outline-primary">
+            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+        </a>
+    </div>
+
+    <div class="text-center mt-3">
+        <p class="text-muted small mb-1">Looking for legal services?</p>
+        <a href="{{ route('register.customer') }}" class="text-success">
+            <i class="fas fa-user me-1"></i>Register as Customer instead
+        </a>
     </div>
 </div>
 @endsection
 
-@section('content')
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card shadow-sm">
-            <div class="card-body p-4">
-                <h2 class="mb-4 text-center">Đăng ký Luật sư</h2>
-                
-                <div class="alert alert-info">
-                    <i class="bi bi-info-circle"></i> 
-                    Tài khoản của bạn sẽ được kích hoạt sau khi Admin phê duyệt hồ sơ và chứng chỉ hành nghề.
-                </div>
-
-                @if($errors->any())
-                    <div class="alert alert-danger">
-                        <ul class="mb-0">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
-                <form method="POST" action="{{ route('register.lawyer.submit') }}" enctype="multipart/form-data">
-                    @csrf
-                    
-                    <h5 class="mb-3">Thông tin cá nhân</h5>
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
-                            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" 
-                                   value="{{ old('name') }}" required>
-                            @error('name')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">Email <span class="text-danger">*</span></label>
-                            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" 
-                                   value="{{ old('email') }}" required>
-                            @error('email')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Mật khẩu <span class="text-danger">*</span></label>
-                            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required>
-                            <small class="text-muted">Tối thiểu 6 ký tự</small>
-                            @error('password')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">Xác nhận mật khẩu <span class="text-danger">*</span></label>
-                            <input type="password" name="password_confirmation" class="form-control" required>
-                        </div>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <h5 class="mb-3">Thông tin nghề nghiệp</h5>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Chuyên môn <span class="text-danger">*</span></label>
-                            <select name="specialization" class="form-select @error('specialization') is-invalid @enderror" required>
-                                <option value="">-- Chọn chuyên môn --</option>
-                                <option value="Luật hình sự" {{ old('specialization') == 'Luật hình sự' ? 'selected' : '' }}>Luật hình sự</option>
-                                <option value="Luật dân sự" {{ old('specialization') == 'Luật dân sự' ? 'selected' : '' }}>Luật dân sự</option>
-                                <option value="Luật gia đình" {{ old('specialization') == 'Luật gia đình' ? 'selected' : '' }}>Luật gia đình</option>
-                                <option value="Luật doanh nghiệp" {{ old('specialization') == 'Luật doanh nghiệp' ? 'selected' : '' }}>Luật doanh nghiệp</option>
-                                <option value="Luật bất động sản" {{ old('specialization') == 'Luật bất động sản' ? 'selected' : '' }}>Luật bất động sản</option>
-                                <option value="Luật lao động" {{ old('specialization') == 'Luật lao động' ? 'selected' : '' }}>Luật lao động</option>
-                                <option value="Khác" {{ old('specialization') == 'Khác' ? 'selected' : '' }}>Khác</option>
-                            </select>
-                            @error('specialization')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">Số năm kinh nghiệm</label>
-                            <input type="number" name="experience" class="form-control @error('experience') is-invalid @enderror" 
-                                   value="{{ old('experience') }}" min="0">
-                            @error('experience')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Số chứng chỉ hành nghề <span class="text-danger">*</span></label>
-                        <input type="text" name="license_number" class="form-control @error('license_number') is-invalid @enderror" 
-                               value="{{ old('license_number') }}" required>
-                        @error('license_number')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Upload chứng chỉ hành nghề <span class="text-danger">*</span></label>
-                        <input type="file" name="certificate" class="form-control @error('certificate') is-invalid @enderror" 
-                               accept=".pdf,.jpg,.jpeg,.png" required>
-                        <small class="text-muted">Định dạng: PDF, JPG, PNG. Tối đa 5MB</small>
-                        @error('certificate')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Thành phố</label>
-                            <input type="text" name="city" class="form-control @error('city') is-invalid @enderror" 
-                                   value="{{ old('city') }}">
-                            @error('city')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">Tỉnh/Thành phố</label>
-                            <input type="text" name="province" class="form-control @error('province') is-invalid @enderror" 
-                                   value="{{ old('province') }}">
-                            @error('province')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Giới thiệu bản thân</label>
-                        <textarea name="bio" class="form-control @error('bio') is-invalid @enderror" 
-                                  rows="4" placeholder="Mô tả ngắn về kinh nghiệm, thành tích...">{{ old('bio') }}</textarea>
-                        @error('bio')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <button type="submit" class="btn btn-success w-100 mb-3">Đăng ký</button>
-                </form>
-
-                <hr>
-
-                <div class="text-center">
-                    <p class="mb-0">
-                        <a href="{{ route('register.choice') }}" class="text-decoration-none">
-                            ← Quay lại chọn loại tài khoản
-                        </a>
-                    </p>
-                    <p class="mb-0 mt-2">Đã có tài khoản? 
-                        <a href="{{ route('login') }}" class="text-decoration-none fw-bold">
-                            Đăng nhập ngay
-                        </a>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+@section('scripts')
+<script>
+document.getElementById('documents').addEventListener('change', function(e) {
+    const preview = document.getElementById('file-preview');
+    preview.innerHTML = '';
+    
+    if (e.target.files.length > 0) {
+        const fileList = document.createElement('div');
+        fileList.className = 'mt-2';
+        
+        for (let i = 0; i < e.target.files.length; i++) {
+            const file = e.target.files[i];
+            const fileItem = document.createElement('div');
+            fileItem.className = 'alert alert-light d-flex align-items-center mb-2';
+            fileItem.innerHTML = `
+                <i class="fas fa-file me-2"></i>
+                <span class="me-auto">${file.name}</span>
+                <small class="text-muted">${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+            `;
+            fileList.appendChild(fileItem);
+        }
+        
+        preview.appendChild(fileList);
+    }
+});
+</script>
 @endsection

@@ -9,19 +9,22 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Notifications\VerifyEmailNotification;
 
-class User extends Authenticatable implements MustVerifyEmail
+
+class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
     protected $fillable = ['name', 'email', 'password', 'role', 'status', 'email_verified_at', 'approval_status'];
 
-    /**
-     * Send custom email verification notification
-     */
-    public function sendEmailVerificationNotification()
-    {
-        $this->notify(new VerifyEmailNotification);
-    }
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
 
     public function lawyerProfile()
     {
@@ -58,8 +61,45 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Notification::class);
     }
 
+    public function documentUploads()
+    {
+        return $this->hasMany(DocumentUpload::class);
+    }
+
     public function ratings()
     {
         return $this->hasMany(Rating::class, 'lawyer_id');
+    }
+
+    // Relationship cho documents upload
+    public function documents()
+    {
+        return $this->hasMany(DocumentUpload::class);
+    }
+
+    // Helper methods
+    public function isLawyer()
+    {
+        return $this->role === 'lawyer';
+    }
+
+    public function isCustomer()
+    {
+        return $this->role === 'customer';
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isActive()
+    {
+        return $this->status === 'active';
+    }
+
+    public function isPending()
+    {
+        return $this->status === 'pending';
     }
 }
