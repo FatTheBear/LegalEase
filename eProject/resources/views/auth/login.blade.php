@@ -34,12 +34,11 @@
             <label for="email" class="form-label">
                 <i class="fas fa-envelope me-1"></i>Email Address
             </label>
-            <input type="email" 
+            <input type="text" 
                    class="form-control @error('email') is-invalid @enderror" 
                    id="email" 
                    name="email" 
                    value="{{ old('email') }}" 
-                   required 
                    autocomplete="email" 
                    autofocus
                    placeholder="Enter your email">
@@ -56,7 +55,6 @@
                    class="form-control @error('password') is-invalid @enderror" 
                    id="password" 
                    name="password" 
-                   required 
                    autocomplete="current-password"
                    placeholder="Enter your password">
             @error('password')

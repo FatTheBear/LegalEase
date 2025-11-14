@@ -13,6 +13,14 @@ use Illuminate\Validation\Rules;
 class RegisterController extends Controller
 {
     /**
+     * Show registration choice form
+     */
+    public function showChoiceForm()
+    {
+        return view('auth.register-choice');
+    }
+
+    /**
      * Show customer registration form
      */
     public function showCustomerRegistrationForm()
