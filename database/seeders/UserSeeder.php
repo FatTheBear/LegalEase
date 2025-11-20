@@ -12,41 +12,43 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // 🧑‍💼 Admin
-        User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('123456'),
-            'role' => 'admin',
-        ]);
-
         // ⚖️ Luật sư
-        $lawyer = User::create([
-            'name' => 'Lawyer One',
-            'email' => 'lawyer@example.com',
-            'password' => Hash::make('123456'),
-            'role' => 'lawyer',
-        ]);
+        $lawyer = User::firstOrCreate(
+            ['email' => 'lawyer@example.com'],
+            [
+                'name' => 'Lawyer One',
+                'password' => Hash::make('123456'),
+                'role' => 'lawyer',
+                'status' => 'active',
+            ]
+        );
 
-        LawyerProfile::create([
-            'user_id' => $lawyer->id,
-            'specialization' => 'Dân sự',
-            'experience_years' => 5,
-            'bio' => 'Luật sư chuyên về tư vấn dân sự và hợp đồng.',
-        ]);
+        LawyerProfile::firstOrCreate(
+            ['user_id' => $lawyer->id],
+            [
+                'specialization' => 'Dân sự',
+                'experience' => 5,
+                'bio' => 'Luật sư chuyên về tư vấn dân sự và hợp đồng.',
+            ]
+        );
 
         // 👤 Khách hàng
-        $customer = User::create([
-            'name' => 'Customer One',
-            'email' => 'customer@example.com',
-            'password' => Hash::make('123456'),
-            'role' => 'customer',
-        ]);
+        $customer = User::firstOrCreate(
+            ['email' => 'customer@example.com'],
+            [
+                'name' => 'Customer One',
+                'password' => Hash::make('123456'),
+                'role' => 'customer',
+                'status' => 'active',
+            ]
+        );
 
-        CustomerProfile::create([
-            'user_id' => $customer->id,
-            'phone' => '0909123456',
-            'address' => 'Hà Nội, Việt Nam',
-        ]);
+        CustomerProfile::firstOrCreate(
+            ['user_id' => $customer->id],
+            [
+                'phone' => '0909123456',
+                'address' => 'Hà Nội, Việt Nam',
+            ]
+        );
     }
 }

@@ -11,7 +11,7 @@
             <div class="card text-white bg-primary">
                 <div class="card-body">
                     <h5 class="card-title">Total Appointments</h5>
-                    <h2 class="mb-0">{{ $pending + $completed }}</h2>
+                    <h2 class="mb-0">{{ $totalAppointments }}</h2>
                 </div>
             </div>
         </div>
@@ -19,17 +19,8 @@
         <div class="col-md-3 mb-3">
             <div class="card text-white bg-warning">
                 <div class="card-body">
-                    <h5 class="card-title">Pending</h5>
-                    <h2 class="mb-0">{{ $pending }}</h2>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3 mb-3">
-            <div class="card text-white bg-success">
-                <div class="card-body">
-                    <h5 class="card-title">Completed</h5>
-                    <h2 class="mb-0">{{ $completed }}</h2>
+                    <h5 class="card-title">Pending Appointments</h5>
+                    <h2 class="mb-0">{{ $pendingAppointments }}</h2>
                 </div>
             </div>
         </div>
@@ -38,7 +29,16 @@
             <div class="card text-white bg-info">
                 <div class="card-body">
                     <h5 class="card-title">Average Rating</h5>
-                    <h2 class="mb-0">{{ number_format($rating, 1) }} ⭐</h2>
+                    <h2 class="mb-0">{{ $averageRating ? number_format($averageRating, 1) : 'N/A' }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">Average Rating</h5>
+                    <h2 class="mb-0">{{ $averageRating ? number_format($averageRating, 1) . ' ⭐' : 'N/A' }}</h2>
                 </div>
             </div>
         </div>

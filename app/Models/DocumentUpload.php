@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class DocumentUpload extends Model
 {
@@ -15,7 +16,12 @@ class DocumentUpload extends Model
         'file_path',
         'document_type',
         'file_extension',
-        'file_size'
+        'file_size',
+    ];
+
+    // Casts
+    protected $casts = [
+        'file_size' => 'integer',
     ];
 
     /**
@@ -31,21 +37,29 @@ class DocumentUpload extends Model
      */
     public function getFileUrlAttribute()
     {
-        return asset('storage/' . $this->file_path);
+        // Dùng Storage::url để tương thích với disk hiện tại (public, s3, ...)
+        return $this->file_path ? Storage::url($this->file_path) : null;
     }
 
     /**
-     * Accessor để format file size
+     * Accessor để format file size (ví dụ: 1.23 MB)
      */
     public function getFormattedSizeAttribute()
     {
-        $bytes = $this->file_size;
-        $units = ['B', 'KB', 'MB', 'GB'];
-        
-        for ($i = 0; $bytes > 1024; $i++) {
-            $bytes /= 1024;
+        $bytes = (int) $this->file_size;
+
+        if ($bytes <= 0) {
+            return '0 B';
         }
-        
+
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+
+        $i = 0;
+        while ($bytes >= 1024 && $i < count($units) - 1) {
+            $bytes /= 1024;
+            $i++;
+        }
+
         return round($bytes, 2) . ' ' . $units[$i];
     }
 

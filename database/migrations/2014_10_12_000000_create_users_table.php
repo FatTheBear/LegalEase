@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('password', 255);
             $table->enum('role', ['admin', 'lawyer', 'customer'])->default('customer');
             $table->enum('status', ['pending', 'active', 'rejected'])->default('active');
+            $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken(); // dùng cho tính năng "remember me"
             $table->timestamps();
         });

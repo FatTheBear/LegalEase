@@ -13,11 +13,11 @@
         @foreach($lawyers as $lawyer)
         <tr>
             <td>{{ $loop->iteration }}</td>
-            <td>{{ $lawyer->user->name }}</td>
-            <td>{{ $lawyer->specialization }}</td>
-            <td>{{ $lawyer->experience }} năm</td>
-            <td>{{ $lawyer->province }}</td>
-            <td>{{ $lawyer->rating }}</td>
+            <td>{{ $lawyer->name }}</td>
+            <td>{{ $lawyer->lawyerProfile->specialization ?? 'N/A' }}</td>
+            <td>{{ $lawyer->lawyerProfile->experience ?? 0 }} năm</td>
+            <td>{{ $lawyer->lawyerProfile->province ?? 'N/A' }}</td>
+            <td>{{ $lawyer->lawyerProfile->rating ?? 'Chưa có' }}</td>
         </tr>
         @endforeach
     </tbody>

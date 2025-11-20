@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules;
+use Illuminate\Support\Str;
 
 class RegisterController extends Controller
 {
@@ -100,19 +101,25 @@ class RegisterController extends Controller
         ]);
 
         // Handle document uploads
-        if ($request->hasFile('documents')) {
-            foreach ($request->file('documents') as $index => $file) {
-                $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
-                $filePath = $file->storeAs('lawyer_documents', $fileName, 'public');
+        foreach ($request->file('documents') as $index => $file) {
+    $extension = $file->getClientOriginalExtension() ?: $file->extension();
+    $fileSize = $file->getSize(); // bytes
 
-                DocumentUpload::create([
-                    'user_id' => $user->id,
-                    'file_name' => $fileName,
-                    'file_path' => $filePath,
-                    'document_type' => 'certificate', // Default type
-                ]);
-            }
-        }
+    $originalBase = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+    $safeBase = \Illuminate\Support\Str::slug($originalBase) ?: 'file';
+    $fileName = time() . '_' . $index . '_' . $safeBase . '.' . $extension;
+
+    $filePath = $file->storeAs('lawyer_documents', $fileName, 'public');
+
+    DocumentUpload::create([
+        'user_id' => $user->id,
+        'file_name' => $fileName,
+        'file_path' => $filePath,
+        'file_extension' => $extension,
+        'file_size' => $fileSize,
+        'document_type' => 'certificate',
+    ]);
+}
 
         return redirect()->route('login')
             ->with('success', 'Lawyer registration submitted successfully! Your account is pending admin approval. You will receive an email once approved.');
