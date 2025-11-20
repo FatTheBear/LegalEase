@@ -1,69 +1,33 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Register</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
+@extends('layouts.app')
+@section('title', 'Đăng ký')
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header text-center">Register</div>
-                <div class="card-body">
-                    @if($errors->any())
-                        <div class="alert alert-danger">
-                            Registration failed! Please check your information.
-                        </div>
-                    @endif
-
-                    <form method="POST" action="{{ route('register') }}">
-                        @csrf
-
-                        <div class="mb-3">
-                            <label>Name</label>
-                            <input type="text" name="name" class="form-control" value="{{ old('name') }}">
-                            @error('name')
-                                <div class="text-danger">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <label>Email</label>
-                            <input type="email" name="email" class="form-control" value="{{ old('email') }}">
-                            @error('email')
-                                <div class="text-danger">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <label>Password</label>
-                            <input type="password" name="password" class="form-control">
-                            @error('password')
-                                <div class="text-danger">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <label>Confirm Password</label>
-                            <input type="password" name="password_confirmation" class="form-control">
-                            @error('password_confirmation')
-                                <div class="text-danger">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100">Register</button>
-                    </form>
-
-                    <div class="text-center mt-3">
-                        <p>Already have an account? <a href="{{ route('login') }}">Login here</a></p>
-                    </div>
-                </div>
+@section('content')
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <h2 class="mb-4 text-center">Tạo tài khoản</h2>
+        <form method="POST" action="{{ route('register') }}">
+            @csrf
+            <div class="mb-3">
+                <label>Tên:</label>
+                <input type="text" name="name" class="form-control" required>
             </div>
-        </div>
+            <div class="mb-3">
+                <label>Email:</label>
+                <input type="email" name="email" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label>Mật khẩu:</label>
+                <input type="password" name="password" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label>Vai trò:</label>
+                <select name="role" class="form-control">
+                    <option value="customer">Khách hàng</option>
+                    <option value="lawyer">Luật sư</option>
+                </select>
+            </div>
+            <button class="btn btn-success w-100">Đăng ký</button>
+        </form>
     </div>
 </div>
-
-</body>
-</html>
+@endsection
