@@ -1,144 +1,104 @@
 @extends('layouts.app')
-@section('title', 'Lawyer Profile - ' . $lawyer->name)
+@section('title', $lawyer->name . ' - Đặt lịch tư vấn')
 
 @section('content')
 <div class="container mt-5">
-    <div class="row">
-        <!-- Lawyer Profile Section -->
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <!-- Lawyer Header -->
-                    <div class="d-flex align-items-center mb-4">
-                        @if($lawyer->lawyerProfile->avatar ?? false)
-                            <img src="{{ asset('storage/' . $lawyer->lawyerProfile->avatar) }}" alt="{{ $lawyer->name }}" class="rounded-circle me-4" style="width: 120px; height: 120px; object-fit: cover;">
-                        @else
-                            <div class="rounded-circle bg-secondary me-4 d-flex align-items-center justify-content-center" style="width: 120px; height: 120px;">
-                                <i class="bi bi-person-fill text-white" style="font-size: 3rem;"></i>
-                            </div>
-                        @endif
-                        <div>
-                            <h2 class="mb-2">{{ $lawyer->name }}</h2>
-                            <p class="text-muted mb-1">
-                                <i class="bi bi-briefcase"></i>
-                                <strong>Specialization:</strong> {{ $lawyer->lawyerProfile->specialization ?? 'N/A' }}
-                            </p>
-                            <p class="text-muted mb-1">
-                                <i class="bi bi-geo-alt"></i>
-                                <strong>Location:</strong> {{ $lawyer->lawyerProfile->city ?? 'N/A' }}, {{ $lawyer->lawyerProfile->province ?? 'N/A' }}
-                            </p>
-                            <p class="text-warning">
-                                <i class="bi bi-star-fill"></i>
-                                <strong>Rating:</strong> {{ $lawyer->lawyerProfile->rating ?? '0' }}/5.0
-                            </p>
-                        </div>
-                    </div>
-
-                    <hr>
-
-                    <!-- Experience & License -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <p><strong>Years of Experience:</strong></p>
-                            <p class="text-primary">{{ $lawyer->lawyerProfile->experience ?? '0' }} years</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>License Number:</strong></p>
-                            <p class="text-primary">{{ $lawyer->lawyerProfile->license_number ?? 'N/A' }}</p>
-                        </div>
-                    </div>
-
-                    <hr>
-
-                    <!-- Bio -->
-                    <div class="mb-4">
-                        <h5 class="mb-3">Professional Bio</h5>
-                        <p>{{ $lawyer->lawyerProfile->bio ?? 'No bio available' }}</p>
-                    </div>
-
-                    <hr>
-
-                    <!-- Approval Status -->
-                    <div class="alert alert-info d-flex align-items-center">
-                        <i class="bi bi-check-circle me-2"></i>
-                        <span><strong>Status:</strong> {{ ucfirst($lawyer->lawyerProfile->approval_status ?? 'pending') }}</span>
-                    </div>
-                </div>
-            </div>
+    <div class="row justify-content-center">
+        <div class="col-md-4 text-center mb-4">
+            <img src="{{ $lawyer->avatar ?? asset('images/default-lawyer.jpg') }}" 
+                 class="rounded-circle shadow" width="150" height="150" alt="{{ $lawyer->name }}">
+            <h3 class="mt-3">{{ $lawyer->name }}</h3>
+            <p class="text-muted">
+                <i class="bi bi-briefcase"></i> 
+                {{ $lawyer->lawyerProfile->specialization ?? 'Luật sư đa ngành' }}
+            </p>
+            <p>
+                <i class="bi bi-geo-alt"></i> 
+                {{ $lawyer->lawyerProfile->province ?? 'Toàn quốc' }}
+            </p>
         </div>
 
-        <!-- Booking Section -->
-        <div class="col-md-4">
-            <div class="card shadow-sm sticky-top" style="top: 20px;">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-calendar-check"></i> Chọn khung giờ tư vấn (2 tiếng/lượt)
+                    </h4>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title mb-4">Book an Appointment</h5>
+                    @if(session('success'))
+                        <div class="alert alert-success">{{ session('success') }}</div>
+                    @endif
 
-                    @auth
-                        @if(auth()->user()->role === 'customer')
-                            <form action="{{ route('appointments.store') }}" method="POST">
-                                @csrf
-                                <input type="hidden" name="lawyer_id" value="{{ $lawyer->id }}">
+                    @if($availableSlots->count() > 0)
+                        <form action="{{ route('appointments.store') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="lawyer_id" value="{{ $lawyer->id }}">
 
-                                <div class="mb-3">
-                                    <label for="date" class="form-label">Preferred Date</label>
-                                    <input type="date" class="form-control @error('date') is-invalid @enderror" 
-                                           id="date" name="date" required min="{{ date('Y-m-d') }}">
-                                    @error('date')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Chọn slot trống:</label>
+                                <div class="row g-3">
+                                    @foreach($availableSlots as $slot)
+                                        <div class="col-md-6">
+                                            <div class="form-check border rounded p-3 hover-shadow 
+                                                {{ old('slot_id') == $slot->id ? 'border-primary bg-light' : '' }}">
+                                                <input class="form-check-input" type="radio" 
+                                                       name="slot_id" id="slot{{ $slot->id }}" 
+                                                       value="{{ $slot->id }}" required>
+                                                <label class="form-check-label d-block" for="slot{{ $slot->id }}">
+                                                    <strong>
+                                                        {{ \Carbon\Carbon::parse($slot->date)->format('d/m/Y (l)') }}
+                                                    </strong><br>
+                                                    <span class="text-success">
+                                                        {{ \Carbon\Carbon::parse($slot->start_time)->format('H:i') }}
+                                                        → {{ \Carbon\Carbon::parse($slot->end_time)->format('H:i') }}
+                                                    </span>
+                                                    <small class="text-muted d-block">Còn trống</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 </div>
-
-                                <div class="mb-3">
-                                    <label for="time" class="form-label">Preferred Time</label>
-                                    <input type="time" class="form-control @error('time') is-invalid @enderror" 
-                                           id="time" name="time" required>
-                                    @error('time')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="notes" class="form-label">Notes (Optional)</label>
-                                    <textarea class="form-control @error('notes') is-invalid @enderror" 
-                                              id="notes" name="notes" rows="4" placeholder="Describe your legal matter..."></textarea>
-                                    @error('notes')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <button type="submit" class="btn btn-primary w-100">
-                                    <i class="bi bi-calendar-check"></i> Book Appointment
-                                </button>
-                            </form>
-                        @else
-                            <div class="alert alert-warning">
-                                <i class="bi bi-info-circle"></i>
-                                Only customers can book appointments.
                             </div>
-                        @endif
+
+                            <div class="mb-3">
+                                <label class="form-label">Ghi chú (không bắt buộc)</label>
+                                <textarea name="notes" class="form-control" rows="3" 
+                                          placeholder="Ví dụ: Tôi cần tư vấn về hợp đồng lao động...">{{ old('notes') }}</textarea>
+                            </div>
+
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-success btn-lg px-5">
+                                    <i class="bi bi-check-circle"></i> Xác nhận đặt lịch
+                                </button>
+                            </div>
+                        </form>
                     @else
-                        <div class="alert alert-info">
-                            <p class="mb-2"><strong>Please login to book an appointment</strong></p>
-                            <a href="{{ route('login') }}" class="btn btn-primary w-100 mb-2">
-                                <i class="bi bi-box-arrow-in-right"></i> Login
+                        <div class="text-center py-5">
+                            <i class="bi bi-calendar-x display-1 text-muted"></i>
+                            <h5 class="mt-3 text-muted">Luật sư hiện chưa có lịch trống</h5>
+                            <p>Vui lòng quay lại sau hoặc chọn luật sư khác.</p>
+                            <a href="{{ route('lawyers.index') }}" class="btn btn-outline-primary">
+                                Xem danh sách luật sư
                             </a>
-                            <p class="text-center text-muted mb-0">
-                                Don't have an account? <a href="{{ route('register.choice') }}">Register now</a>
-                            </p>
                         </div>
-                    @endauth
+                    @endif
                 </div>
             </div>
         </div>
     </div>
 </div>
+@endsection
 
+@section('styles')
 <style>
-    @media (max-width: 768px) {
-        .card.sticky-top {
-            position: static !important;
-            margin-top: 2rem;
-        }
-    }
+.hover-shadow {
+    transition: all 0.2s;
+    cursor: pointer;
+}
+.hover-shadow:hover {
+    box-shadow: 0 4px 15px rgba(0,123,255,0.2) !important;
+    border-color: #007bff !important;
+}
 </style>
 @endsection

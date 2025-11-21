@@ -2,27 +2,24 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Rating extends Model
 {
-    use HasFactory;
-
-    protected $fillable = ['appointment_id', 'lawyer_id', 'customer_id', 'score', 'comment'];
-
-    public function appointment()
-    {
-        return $this->belongsTo(Appointment::class);
-    }
+    protected $fillable = ['lawyer_id', 'client_id', 'rating', 'comment', 'appointment_id'];
 
     public function lawyer()
     {
         return $this->belongsTo(User::class, 'lawyer_id');
     }
 
-    public function customer()
+    public function client()
     {
-        return $this->belongsTo(User::class, 'customer_id');
+        return $this->belongsTo(User::class, 'client_id');
+    }
+
+    public function appointment()
+    {
+        return $this->belongsTo(Appointment::class);
     }
 }

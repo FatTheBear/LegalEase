@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Lawyer;
 
+use App\Http\Controllers\Controller;
 use App\Models\Announcement;
 
 class AnnouncementController extends Controller

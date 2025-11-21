@@ -34,7 +34,7 @@
                     <i class="bi bi-person-circle" style="font-size: 3rem; color: #ffc107;"></i>
                     <h5 class="card-title mt-3">My Profile</h5>
                     <p class="card-text">Update your personal information</p>
-                    <a href="#" class="btn btn-warning">Edit Profile</a>
+                    <a href="{{ route('profile.edit') }}" class="btn btn-warning">Edit Profile</a>
                 </div>
             </div>
         </div>

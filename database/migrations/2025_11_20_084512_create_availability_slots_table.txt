@@ -8,22 +8,23 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('ratings', function (Blueprint $table) {
+        Schema::create('availability_slots', function (Blueprint $table) {
             $table->id();
             $table->foreignId('lawyer_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('client_id')->constrained('users')->onDelete('cascade');
-            $table->unsignedTinyInteger('rating')->comment('1-5 sao');
-            $table->text('comment')->nullable();
+            $table->date('date');                                        // đúng kiểu date
+            $table->time('start_time');
+            $table->time('end_time');
+            $table->boolean('is_booked')->default(false);
             $table->foreignId('appointment_id')->nullable()->constrained()->onDelete('set null');
             $table->timestamps();
 
-            // Không cho 1 khách đánh giá 1 luật sư nhiều lần
-            $table->unique(['lawyer_id', 'client_id']);
+            // Không cho trùng slot cùng ngày + giờ bắt đầu
+            $table->unique(['lawyer_id', 'date', 'start_time']);
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('ratings');
+        Schema::dropIfExists('availability_slots');
     }
 };

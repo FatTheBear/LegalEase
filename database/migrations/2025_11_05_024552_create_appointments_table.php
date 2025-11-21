@@ -6,30 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-public function up()
-{
-    Schema::create('appointments', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('customer_id')->constrained('users')->onDelete('cascade');
-        $table->foreignId('lawyer_id')->constrained('users')->onDelete('cascade');
-        $table->foreignId('slot_id')->constrained('availability_slots')->onDelete('cascade');
-        $table->dateTime('appointment_time');
-        $table->enum('status', ['booked', 'cancelled', 'rescheduled'])->default('booked');
-        $table->text('note')->nullable();
-        $table->timestamps();
-    });
-}
+    public function up()
+    {
+        Schema::create('appointments', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('client_id')->nullable()->constrained('users')->onDelete('cascade');
+            $table->foreignId('lawyer_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('slot_id')->nullable()->constrained('availability_slots')->onDelete('set null');
+            $table->dateTime('appointment_time');
+            $table->dateTime('end_time')->nullable();
+            $table->enum('status', ['pending', 'confirmed', 'cancelled', 'completed'])->default('pending');
+            $table->text('notes')->nullable();
+            $table->text('cancel_reason')->nullable();
+            $table->timestamps();
+        });
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
+    }
+
     public function down()
     {
         Schema::dropIfExists('appointments');
