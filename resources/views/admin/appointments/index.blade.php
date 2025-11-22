@@ -161,7 +161,7 @@
                         <label class="form-label">Customer</label>
                         <select name="customer_id" class="form-select">
                             <option value="">-- All Customers --</option>
-                            @foreach($customers as $customer)
+                            @foreach($clients as $customer)
                                 <option value="{{ $customer->id }}" 
                                     {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
                                     {{ $customer->name }} ({{ $customer->email }})

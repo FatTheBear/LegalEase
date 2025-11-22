@@ -9,7 +9,7 @@
     <style>
         /* ===================== NAVBAR ===================== */
         .navbar-custom {
-            background: linear-gradient(90deg, #4b6cb7, #182848);
+            background: linear-gradient(90deg, #a86f20, #603207);
         }
         .navbar-custom .nav-link {
             color: #fff;
@@ -31,7 +31,7 @@
 
         /* ===================== FOOTER ===================== */
         footer {
-            background: linear-gradient(to right, #4b6cb7, #182848);
+            background: linear-gradient(to right, #a86f20, #603207);
             color: #fff;
         }
         footer a {
@@ -118,7 +118,7 @@
                     @endauth
                     {{-- announcement --}}
                     <li class="nav-item"><a class="nav-link" href="{{ route('announcements.index') }}">Announcements</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('faqs.index') }}">FAQ</a></li>
+                    {{-- <li class="nav-item"><a class="nav-link" href="{{ route('faqs.index') }}">FAQ</a></li> --}}
 
                     <!-- USER MENU -->
                     @guest
@@ -137,7 +137,7 @@
                                 @elseif(auth()->user()->role === 'customer')
                                     <li><a class="dropdown-item" href="{{ route('customer.dashboard') }}">My Dashboard</a></li>
                                 @endif
-                                <li><a class="dropdown-item" href="{{ route('profile.edit') }}">Profile Settings</a></li>
+                                {{-- <li><a class="dropdown-item" href="{{ route('profile.edit') }}">Profile Settings</a></li> --}}
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form action="{{ route('logout') }}" method="POST" class="d-inline">
@@ -175,7 +175,7 @@
                 <a href="{{ url('/') }}">Home</a> |
                 <a href="{{ route('lawyers.index') }}">Lawyers</a> |
                 <a href="{{ route('appointments.index') }}">Appointments</a> |
-                <a href="{{ route('faqs.index') }}">FAQ</a>
+                {{-- <a href="{{ route('faqs.index') }}">FAQ</a> --}}
             </div>
             <small>© {{ date('Y') }} LegalEase — Nền tảng tư vấn pháp lý trực tuyến uy tín</small>
         </div>
