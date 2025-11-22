@@ -23,8 +23,8 @@ class LawyerController extends Controller
         $province  = $request->query('province');
 
         $query = User::where('role', 'lawyer')
-                     ->where('status', 'active')
-                     ->with(['lawyerProfile', 'ratings']);
+                    ->where('status', 'active')
+                    ->with(['lawyerProfile', 'ratings']);
 
         if ($specialty) {
             $query->whereHas('lawyerProfile', function ($q) use ($specialty) {
@@ -40,8 +40,22 @@ class LawyerController extends Controller
 
         $lawyers = $query->paginate(9)->withQueryString();
 
-        return view('lawyers.index', compact('lawyers'));
+        // ===== Lấy dữ liệu dynamic cho select =====
+        $specializations = \App\Models\LawyerProfile::where('approval_status', 'approved')
+                            ->distinct()
+                            ->pluck('specialization')
+                            ->sort()
+                            ->toArray();
+
+        $provinces = \App\Models\LawyerProfile::where('approval_status', 'approved')
+                            ->distinct()
+                            ->pluck('province')
+                            ->sort()
+                            ->toArray();
+
+        return view('lawyers.index', compact('lawyers', 'specializations', 'provinces'));
     }
+
 
     /**
      * Trang chi tiết luật sư + chọn slot đặt lịch

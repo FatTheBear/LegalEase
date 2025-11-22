@@ -14,6 +14,27 @@ class LawyerSeeder extends Seeder
      */
     public function run(): void
     {
+        // ===== SAMPLE LAWYER ACCOUNT (dễ nhớ để test) =====
+        $sampleLawyer = User::create([
+            'name' => 'Nguyễn Văn A - Sample Lawyer',
+            'email' => 'sample.lawyer@example.com',
+            'password' => Hash::make('password123'),
+            'role' => 'lawyer',
+            'status' => 'active',
+            'email_verified_at' => now(),
+        ]);
+
+        LawyerProfile::create([
+            'user_id' => $sampleLawyer->id,
+            'specialization' => 'Luật Hành chính',
+            'province' => 'Hà Nội',
+            'experience' => 8,
+            'license_number' => 'SAMPLE-001',
+            'bio' => 'Luật sư mẫu để test',
+            'approval_status' => 'approved',
+        ]);
+
+        // ===== OTHER VERIFIED LAWYERS =====
         $verifiedLawyers = [
             ['name' => 'John Smith', 'email' => 'john.smith@legalease.com', 'specialization' => 'Criminal Law', 'province' => 'New York'],
             ['name' => 'Sarah Johnson', 'email' => 'sarah.johnson@legalease.com', 'specialization' => 'Corporate Law', 'province' => 'California'],
@@ -84,5 +105,9 @@ class LawyerSeeder extends Seeder
         }
 
         echo "✅ 15 verified lawyers with profiles and 5 pending lawyers created successfully!\n";
+        echo "\n🔐 SAMPLE LAWYER ACCOUNT FOR TESTING:\n";
+        echo "Email: sample.lawyer@example.com\n";
+        echo "Password: password123\n";
+        echo "Status: Active ✅ (Approved)\n";
     }
 }

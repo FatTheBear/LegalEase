@@ -56,11 +56,11 @@ class RegisterController extends Controller
             'status' => 'active', // Customer can use immediately
         ]);
 
-        // Auto login after registration
-        auth()->login($user);
+        // Send email verification notification
+        $user->notify(new \App\Notifications\VerifyEmailNotification());
 
-        return redirect()->route('customer.dashboard')
-            ->with('success', 'Customer registration successful! Welcome to LegalEase.');
+        return redirect()->route('login')
+            ->with('success', 'Registration successful! Please check your email to verify your account before logging in.');
     }
 
     /**

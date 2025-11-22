@@ -9,7 +9,7 @@
         <div class="col-md-6">
             <h1 class="display-4 fw-bold">Welcome to LegalEase ⚖️</h1>
             <p class="lead">Connect with verified lawyers quickly, securely, and conveniently.</p>
-            <a href="{{ route('home') }}" class="btn btn-primary btn-lg me-2">Find a Lawyer</a>
+            <a href="{{ route('lawyers.index') }}" class="btn btn-primary btn-lg me-2">Find a Lawyer</a>
             @guest
                 <a href="{{ route('register.choice') }}" class="btn btn-outline-secondary btn-lg">Register</a>
             @endguest

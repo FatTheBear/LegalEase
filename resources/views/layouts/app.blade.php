@@ -6,12 +6,53 @@
     <title>@yield('title', 'LegalEase')</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        /* ===================== NAVBAR ===================== */
+        .navbar-custom {
+            background: linear-gradient(90deg, #4b6cb7, #182848);
+        }
+        .navbar-custom .nav-link {
+            color: #fff;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .navbar-custom .nav-link:hover {
+            color: #ffd700;
+        }
+        .navbar-custom .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffd700;
+        }
+        .badge-notification {
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        /* ===================== FOOTER ===================== */
+        footer {
+            background: linear-gradient(to right, #4b6cb7, #182848);
+            color: #fff;
+        }
+        footer a {
+            color: #ffd700;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+        .footer-links a {
+            margin: 0 10px;
+        }
+    </style>
     @yield('styles')
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<body class="d-flex flex-column min-vh-100">
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-custom shadow-sm">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{{ url('/') }}">LegalEase</a>
+            <a class="navbar-brand" href="{{ url('/') }}">LegalEase</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -21,7 +62,7 @@
                     <li class="nav-item"><a class="nav-link" href="{{ route('lawyers.index') }}">Lawyers</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('appointments.index') }}">Appointments</a></li>
 
-                    <!-- NOTIFICATION DROPDOWN – CHỈ HIỆN KHI ĐÃ ĐĂNG NHẬP -->
+                    <!-- NOTIFICATION DROPDOWN -->
                     @auth
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle position-relative d-flex align-items-center" 
@@ -33,8 +74,7 @@
                                     $unreadCount = Auth::user()->notifications()->where('is_read', false)->count();
                                 @endphp
                                 @if($unreadCount > 0)
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
-                                          style="font-size: 0.65rem;">
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger badge-notification">
                                         {{ $unreadCount > 99 ? '99+' : $unreadCount }}
                                         <span class="visually-hidden">unread notifications</span>
                                     </span>
@@ -76,13 +116,14 @@
                             </ul>
                         </li>
                     @endauth
-
+                    {{-- announcement --}}
+                    <li class="nav-item"><a class="nav-link" href="{{ route('announcements.index') }}">Announcements</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('faqs.index') }}">FAQ</a></li>
 
                     <!-- USER MENU -->
                     @guest
                         <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Login</a></li>
-                        <li class="nav-item"><a class="nav-link btn btn-outline-light btn-sm px-3 ms-2" href="{{ route('register.choice') }}">Register</a></li>
+                        <li class="nav-item"><a class="nav-link btn btn-outline-warning btn-sm px-3 ms-2" href="{{ route('register.choice') }}">Register</a></li>
                     @else
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
@@ -122,13 +163,21 @@
         </div>
     @endif
 
+    <!-- MAIN CONTENT -->
     <main class="container mt-4 mb-5">
         @yield('content')
     </main>
 
-    <footer class="bg-light border-top py-4 mt-auto">
+    <!-- FOOTER -->
+    <footer class="mt-auto py-5">
         <div class="container text-center">
-            <small class="text-muted">© {{ date('Y') }} LegalEase — Nền tảng tư vấn pháp lý trực tuyến uy tín</small>
+            <div class="mb-3 footer-links">
+                <a href="{{ url('/') }}">Home</a> |
+                <a href="{{ route('lawyers.index') }}">Lawyers</a> |
+                <a href="{{ route('appointments.index') }}">Appointments</a> |
+                <a href="{{ route('faqs.index') }}">FAQ</a>
+            </div>
+            <small>© {{ date('Y') }} LegalEase — Nền tảng tư vấn pháp lý trực tuyến uy tín</small>
         </div>
     </footer>
 

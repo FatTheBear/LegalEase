@@ -12,11 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('appointments', function (Blueprint $table) {
-            // Thay đổi enum status từ ['booked', 'cancelled', 'rescheduled'] 
-            // thành ['pending', 'confirmed', 'completed', 'cancelled']
-            $table->enum('status', ['pending', 'confirmed', 'completed', 'cancelled'])
-                  ->default('pending')
-                  ->change();
+            // Thay đổi status từ enum sang string (Doctrine không support enum change)
+            $table->string('status')->default('pending')->change();
         });
     }
 
@@ -26,9 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('appointments', function (Blueprint $table) {
-            $table->enum('status', ['booked', 'cancelled', 'rescheduled'])
-                  ->default('booked')
-                  ->change();
+            $table->string('status')->default('pending')->change();
         });
     }
 };

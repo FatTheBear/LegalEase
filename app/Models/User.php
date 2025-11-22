@@ -106,6 +106,38 @@ class User extends Authenticatable
     {
         return $this->status === 'pending';
     }
-    // Thêm vào model User.php
 
+    /**
+     * Get the email address that should be used for verification.
+     */
+    public function getEmailForVerification()
+    {
+        return $this->email;
+    }
+
+    /**
+     * Mark the user's email as verified.
+     */
+    public function markEmailAsVerified()
+    {
+        return $this->forceFill([
+            'email_verified_at' => $this->freshTimestamp(),
+        ])->save();
+    }
+
+    /**
+     * Determine if the user has verified their email address.
+     */
+    public function hasVerifiedEmail()
+    {
+        return null !== $this->email_verified_at;
+    }
+
+    /**
+     * Send the email verification notification.
+     */
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new VerifyEmailNotification());
+    }
 }

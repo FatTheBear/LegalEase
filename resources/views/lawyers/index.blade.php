@@ -10,28 +10,22 @@
         <div class="col-md-5">
             <select name="specialization" class="form-select">
                 <option value="">Select Specialization</option>
-                <option value="Criminal Law" {{ request('specialization') == 'Criminal Law' ? 'selected' : '' }}>Criminal Law</option>
-                <option value="Corporate Law" {{ request('specialization') == 'Corporate Law' ? 'selected' : '' }}>Corporate Law</option>
-                <option value="Family Law" {{ request('specialization') == 'Family Law' ? 'selected' : '' }}>Family Law</option>
-                <option value="Intellectual Property" {{ request('specialization') == 'Intellectual Property' ? 'selected' : '' }}>Intellectual Property</option>
-                <option value="Immigration Law" {{ request('specialization') == 'Immigration Law' ? 'selected' : '' }}>Immigration Law</option>
-                <option value="Tax Law" {{ request('specialization') == 'Tax Law' ? 'selected' : '' }}>Tax Law</option>
-                <option value="Real Estate Law" {{ request('specialization') == 'Real Estate Law' ? 'selected' : '' }}>Real Estate Law</option>
-                <option value="Employment Law" {{ request('specialization') == 'Employment Law' ? 'selected' : '' }}>Employment Law</option>
-                <option value="Civil Litigation" {{ request('specialization') == 'Civil Litigation' ? 'selected' : '' }}>Civil Litigation</option>
-                <option value="Contract Law" {{ request('specialization') == 'Contract Law' ? 'selected' : '' }}>Contract Law</option>
+                @foreach($specializations as $spec)
+                    <option value="{{ $spec }}" {{ request('specialization') == $spec ? 'selected' : '' }}>
+                        {{ $spec }}
+                    </option>
+                @endforeach
             </select>
         </div>
 
         <div class="col-md-5">
             <select name="province" class="form-select">
                 <option value="">Select Province/State</option>
-                <option value="New York" {{ request('province') == 'New York' ? 'selected' : '' }}>New York</option>
-                <option value="California" {{ request('province') == 'California' ? 'selected' : '' }}>California</option>
-                <option value="Florida" {{ request('province') == 'Florida' ? 'selected' : '' }}>Florida</option>
-                <option value="Texas" {{ request('province') == 'Texas' ? 'selected' : '' }}>Texas</option>
-                <option value="Illinois" {{ request('province') == 'Illinois' ? 'selected' : '' }}>Illinois</option>
-                <option value="Massachusetts" {{ request('province') == 'Massachusetts' ? 'selected' : '' }}>Massachusetts</option>
+                @foreach($provinces as $prov)
+                    <option value="{{ $prov }}" {{ request('province') == $prov ? 'selected' : '' }}>
+                        {{ $prov }}
+                    </option>
+                @endforeach
             </select>
         </div>
 
@@ -113,10 +107,11 @@
         @endforelse
     </div>
 
-    <!-- Pagination -->
+    {{-- Pagination --}}
     <div class="mt-4">
-        {{ $lawyers->appends(request()->query())->links() }}
+        {{ $lawyers->appends(request()->query())->links('pagination::bootstrap-5') }}
     </div>
+
 </div>
 @endsection
 

@@ -62,12 +62,16 @@ class AnnouncementController extends Controller
             'content' => 'required|string',
             'type' => 'nullable|string|in:general,info',
         ]);
-        
+
+        // Thêm created_by = id người đang đăng nhập
+        $validated['created_by'] = auth()->id();
+
         Announcement::create($validated);
-        
+
         return redirect()->route('admin.announcements.index')
-                       ->with('success', 'Announcement created successfully!');
+                    ->with('success', 'Announcement created successfully!');
     }
+
 
     /**
      * Display the specified announcement
