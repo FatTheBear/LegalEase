@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -32,6 +32,17 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials, $remember)) {
             $user = Auth::user();
+            
+            // Admin không cần verify email
+            if ($user->role !== 'admin') {
+                // Check if email is verified
+                if (!$user->hasVerifiedEmail()) {
+                    Auth::logout();
+                    throw ValidationException::withMessages([
+                        'email' => ['Please verify your email before logging in. Check your inbox for the verification link.'],
+                    ]);
+                }
+            }
             
             // Check user status for lawyers
             if ($user->role === 'lawyer' && $user->status !== 'active') {

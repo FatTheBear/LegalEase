@@ -12,6 +12,9 @@ use App\Http\Controllers\Lawyer\AnnouncementController;
 use App\Http\Controllers\Lawyer\AvailabilityController;
 use App\Http\Controllers\Lawyer\ProfileController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\AppointmentController as AdminAppointmentController;
+use App\Http\Controllers\Admin\AnnouncementController as AdminAnnouncementController;
 
 
 // ĐÃ XÓA DÒNG NÀY: use App\Http\Controllers\PublicLawyerController; ← Không tồn tại → lỗi
@@ -40,6 +43,10 @@ Route::post('/register/customer', [RegisterController::class, 'registerCustomer'
 
 Route::get('/register/lawyer', [RegisterController::class, 'showLawyerRegistrationForm'])->name('register.lawyer');
 Route::post('/register/lawyer', [RegisterController::class, 'registerLawyer'])->name('register.lawyer.submit');
+
+// Email Verification Routes
+Route::get('/email/verify/{id}/{hash}', [\App\Http\Controllers\Auth\VerificationController::class, 'verify'])->name('verification.verify');
+Route::post('/email/resend', [\App\Http\Controllers\Auth\VerificationController::class, 'resend'])->name('verification.resend');
 
 // Public placeholders
 Route::get('/appointments', function() {
@@ -78,8 +85,12 @@ Route::middleware(['auth'])->group(function () {
     // Admin Routes
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard'); // nếu cần riêng
-        Route::get('/users', [AdminController::class, 'manageUsers'])->name('users');
-        Route::put('/users/{id}', [AdminController::class, 'updateUser'])->name('users.update');
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
+        Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
+        Route::put('/users/{id}/activate', [UserController::class, 'activate'])->name('users.activate');
+        Route::put('/users/{id}/deactivate', [UserController::class, 'deactivate'])->name('users.deactivate');
+        Route::put('/users/{id}/ban', [UserController::class, 'ban'])->name('users.ban');
         Route::get('/lawyers', [AdminController::class, 'manageLawyers'])->name('lawyers');
         Route::get('/lawyers/{id}', [AdminController::class, 'showLawyerProfile'])->name('lawyers.show');
         Route::put('/lawyers/{id}/approve', [AdminController::class, 'approveLawyer'])->name('lawyers.approve');
@@ -96,13 +107,13 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/appointments/{id}', [AdminAppointmentController::class, 'destroy'])->name('appointments.destroy');
         
         // Announcement Management
-        Route::get('/announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
-        Route::get('/announcements/create', [AnnouncementController::class, 'create'])->name('announcements.create');
-        Route::post('/announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
-        Route::get('/announcements/{id}', [AnnouncementController::class, 'show'])->name('announcements.show');
-        Route::get('/announcements/{id}/edit', [AnnouncementController::class, 'edit'])->name('announcements.edit');
-        Route::put('/announcements/{id}', [AnnouncementController::class, 'update'])->name('announcements.update');
-        Route::delete('/announcements/{id}', [AnnouncementController::class, 'destroy'])->name('announcements.destroy');
+        Route::get('/announcements', [AdminAnnouncementController::class, 'index'])->name('announcements.index');
+        Route::get('/announcements/create', [AdminAnnouncementController::class, 'create'])->name('announcements.create');
+        Route::post('/announcements', [AdminAnnouncementController::class, 'store'])->name('announcements.store');
+        Route::get('/announcements/{id}', [AdminAnnouncementController::class, 'show'])->name('announcements.show');
+        Route::get('/announcements/{id}/edit', [AdminAnnouncementController::class, 'edit'])->name('announcements.edit');
+        Route::put('/announcements/{id}', [AdminAnnouncementController::class, 'update'])->name('announcements.update');
+        Route::delete('/announcements/{id}', [AdminAnnouncementController::class, 'destroy'])->name('announcements.destroy');
     });
     
     // Appointments Routes
