@@ -23,7 +23,7 @@ class LawyerSeeder extends Seeder
                 'password' => Hash::make('password123'),
                 'role' => 'lawyer',
                 'status' => 'active',
-                // 'approval_status' => 'approved',
+                'approval_status' => 'approved',
                 'email_verified_at' => now(),
             ],
             [
@@ -32,7 +32,7 @@ class LawyerSeeder extends Seeder
                 'password' => Hash::make('password123'),
                 'role' => 'lawyer',
                 'status' => 'active',
-                // 'approval_status' => 'approved',
+                'approval_status' => 'approved',
                 'email_verified_at' => now(),
             ],
             [
@@ -41,7 +41,7 @@ class LawyerSeeder extends Seeder
                 'password' => Hash::make('password123'),
                 'role' => 'lawyer',
                 'status' => 'active',
-                // 'approval_status' => 'approved',
+                'approval_status' => 'pending',
                 'email_verified_at' => now(),
             ],
             [
@@ -50,7 +50,7 @@ class LawyerSeeder extends Seeder
                 'password' => Hash::make('password123'),
                 'role' => 'lawyer',
                 'status' => 'active',
-                // 'approval_status' => 'approved',
+                'approval_status' => 'pending',
                 'email_verified_at' => now(),
             ],
             [
@@ -59,7 +59,7 @@ class LawyerSeeder extends Seeder
                 'password' => Hash::make('password123'),
                 'role' => 'lawyer',
                 'status' => 'active',
-                // 'approval_status' => 'approved',
+                'approval_status' => 'rejected',
                 'email_verified_at' => now(),
             ],
         ];
@@ -71,9 +71,10 @@ class LawyerSeeder extends Seeder
          User::create([
     'name' => 'Lawyer Pending',
     'email' => 'lawyer.pending@example.com',
-    'password' => bcrypt('123456'), // Dùng bcrypt()
+    'password' => bcrypt('123456'),
     'role' => 'lawyer',
     'status' => 'active',
+    'approval_status' => 'pending',
 ]);
         echo "✅ 5 Sample lawyers created successfully!\n";
     }
