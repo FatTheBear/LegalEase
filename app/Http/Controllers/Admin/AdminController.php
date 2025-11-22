@@ -15,12 +15,14 @@ class AdminController extends Controller
 {
     public function dashboard()
     {
+        \Log::info('Admin Dashboard accessed by: ' . auth()->user()->email);
+        
         $totalUsers = User::count();
         $totalLawyers = User::where('role', 'lawyer')->count();
         $pendingAppointments = Appointment::where('status', 'pending')->count();
         $totalAppointments = Appointment::count();
         $recentLawyers = User::where('role', 'lawyer')->latest()->take(5)->get();
-        $recentAppointments = Appointment::with(['client', 'lawyer'])->latest()->take(5)->get();
+        $recentAppointments = Appointment::with(['customer', 'lawyer'])->latest()->take(5)->get();
      
         return view('admin.dashboard', compact(
             'totalUsers',
@@ -29,16 +31,13 @@ class AdminController extends Controller
             'totalAppointments',
             'recentLawyers',
             'recentAppointments'
-       
         ));
-
-
     }
 
     public function manageUsers()
     {
         $users = User::with('customerProfile')->get();
-        return view('admin.users.index', compact('users'));
+        return view('admin.users', compact('users'));
     }
 
     public function updateUser(Request $request, $id)
@@ -54,18 +53,36 @@ class AdminController extends Controller
 
     public function manageLawyers()
     {
-        $lawyers = User::where('role', 'lawyer')->with('lawyer')->get();
-        return view('admin.lawyers.index', compact('lawyers'));
+        $lawyers = User::where('role', 'lawyer')->with('lawyerProfile')->get();
+        return view('admin.lawyers', compact('lawyers'));
+    }
+
+    public function showLawyerProfile($id)
+    {
+        $lawyer = User::where('role', 'lawyer')
+            ->with('lawyerProfile')
+            ->findOrFail($id);
+        return view('admin.lawyers.show', compact('lawyer'));
     }
 
     public function approveLawyer($id)
     {
         $user = User::findOrFail($id);
         if ($user->role !== 'lawyer') {
-            return redirect()->route('admin.lawyers.index')->with('error', 'Không phải luật sư.');
+            return redirect()->route('admin.lawyers')->with('error', 'Not a lawyer.');
         }
-        $user->update(['status' => 'active']);
-        return redirect()->route('admin.lawyers.index')->with('success', 'Duyệt luật sư thành công.');
+        $user->update(['approval_status' => 'approved']);
+        return redirect()->route('admin.lawyers')->with('success', 'Lawyer approved successfully.');
+    }
+
+    public function rejectLawyer($id)
+    {
+        $user = User::findOrFail($id);
+        if ($user->role !== 'lawyer') {
+            return redirect()->route('admin.lawyers')->with('error', 'Not a lawyer.');
+        }
+        $user->update(['approval_status' => 'rejected']);
+        return redirect()->route('admin.lawyers')->with('success', 'Lawyer rejected.');
     }
 
     public function updateLawyer(Request $request, $id)
@@ -76,29 +93,6 @@ class AdminController extends Controller
         }
         $user->update(['status' => $request->status]);
         return redirect()->route('admin.lawyers.index')->with('success', 'Cập nhật trạng thái luật sư thành công.');
-    }
-
-    public function manageAppointments()
-    {
-        $appointments = Appointment::with(['client', 'lawyer'])->get();
-        return view('admin.appointments.index', compact('appointments'));
-    }
-
-    public function updateAppointment(Request $request, $id)
-    {
-        $appointment = Appointment::findOrFail($id);
-        $appointment->update(['status' => $request->status]);
-        Notification::create([
-            'user_id' => $appointment->client_id,
-            'type' => 'appointment_status_updated',
-            'content' => 'Lịch hẹn vào ' . $appointment->date . ' ' . $appointment->time . ' đã được cập nhật trạng thái thành ' . $request->status . '.',
-        ]);
-        Notification::create([
-            'user_id' => $appointment->lawyer_id,
-            'type' => 'appointment_status_updated',
-            'content' => 'Lịch hẹn vào ' . $appointment->date . ' ' . $appointment->time . ' đã được cập nhật trạng thái thành ' . $request->status . '.',
-        ]);
-        return redirect()->route('admin.appointments.index')->with('success', 'Cập nhật trạng thái lịch hẹn thành công.');
     }
 
     public function manageAnnouncements()
@@ -112,9 +106,30 @@ class AdminController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
+            'type' => 'nullable|string|in:general,info',
         ]);
-        Announcement::create($request->only('title', 'content'));
-        return redirect()->route('admin.announcements.index')->with('success', 'Thêm thông báo thành công.');
+        Announcement::create($request->only('title', 'content', 'type'));
+        return redirect()->route('admin.announcements')->with('success', 'Announcement created successfully.');
+    }
+
+    public function updateAnnouncement(Request $request, $id)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'type' => 'nullable|string|in:general,info',
+        ]);
+        
+        $announcement = Announcement::findOrFail($id);
+        $announcement->update($request->only('title', 'content', 'type'));
+        return redirect()->route('admin.announcements')->with('success', 'Announcement updated successfully.');
+    }
+
+    public function deleteAnnouncement($id)
+    {
+        $announcement = Announcement::findOrFail($id);
+        $announcement->delete();
+        return redirect()->route('admin.announcements')->with('success', 'Announcement deleted successfully.');
     }
 
     public function manageFaqs()

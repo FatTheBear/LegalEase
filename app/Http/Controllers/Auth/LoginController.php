@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -28,8 +28,9 @@ class LoginController extends Controller
         ]);
 
         $credentials = $request->only('email', 'password');
+        $remember = $request->has('remember');
 
-        if (Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials, $remember)) {
             $user = Auth::user();
             
             // Check user status for lawyers

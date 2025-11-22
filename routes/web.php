@@ -81,11 +81,28 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/users', [AdminController::class, 'manageUsers'])->name('users');
         Route::put('/users/{id}', [AdminController::class, 'updateUser'])->name('users.update');
         Route::get('/lawyers', [AdminController::class, 'manageLawyers'])->name('lawyers');
+        Route::get('/lawyers/{id}', [AdminController::class, 'showLawyerProfile'])->name('lawyers.show');
         Route::put('/lawyers/{id}/approve', [AdminController::class, 'approveLawyer'])->name('lawyers.approve');
+        Route::put('/lawyers/{id}/reject', [AdminController::class, 'rejectLawyer'])->name('lawyers.reject');
         Route::put('/lawyers/{id}', [AdminController::class, 'updateLawyer'])->name('lawyers.update');
-        Route::get('/appointments', [AdminController::class, 'manageAppointments'])->name('appointments');
-        Route::put('/appointments/{id}', [AdminController::class, 'updateAppointment'])->name('appointments.update');
-        Route::get('/announcements', [AdminController::class, 'manageAnnouncements'])->name('announcements');
+        
+        // Appointment Management
+        Route::get('/appointments', [AdminAppointmentController::class, 'index'])->name('appointments.index');
+        Route::get('/appointments/{id}', [AdminAppointmentController::class, 'show'])->name('appointments.show');
+        Route::get('/appointments/{id}/edit', [AdminAppointmentController::class, 'edit'])->name('appointments.edit');
+        Route::put('/appointments/{id}', [AdminAppointmentController::class, 'update'])->name('appointments.update');
+        Route::put('/appointments/{id}/confirm', [AdminAppointmentController::class, 'confirm'])->name('appointments.confirm');
+        Route::put('/appointments/{id}/cancel', [AdminAppointmentController::class, 'cancel'])->name('appointments.cancel');
+        Route::delete('/appointments/{id}', [AdminAppointmentController::class, 'destroy'])->name('appointments.destroy');
+        
+        // Announcement Management
+        Route::get('/announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
+        Route::get('/announcements/create', [AnnouncementController::class, 'create'])->name('announcements.create');
+        Route::post('/announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
+        Route::get('/announcements/{id}', [AnnouncementController::class, 'show'])->name('announcements.show');
+        Route::get('/announcements/{id}/edit', [AnnouncementController::class, 'edit'])->name('announcements.edit');
+        Route::put('/announcements/{id}', [AnnouncementController::class, 'update'])->name('announcements.update');
+        Route::delete('/announcements/{id}', [AnnouncementController::class, 'destroy'])->name('announcements.destroy');
     });
     
     // Appointments Routes

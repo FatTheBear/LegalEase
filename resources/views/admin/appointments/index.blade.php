@@ -1,0 +1,446 @@
+@extends('layouts.app')
+@section('title', 'Manage Appointments')
+
+@section('content')
+<style>
+    .card-beige {
+        background: linear-gradient(135deg, #a0826d 0%, #8b6f5f 100%);
+        border: 0;
+        color: white;
+    }
+    .card-beige .card-text {
+        opacity: 0.9;
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0"><i class="bi bi-calendar-event"></i> Manage Appointments</h2>
+            <p class="text-muted mb-0">Manage all appointments of lawyers and customers</p>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle"></i> {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card card-beige shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="card-text mb-0">Total</p>
+                            <h3 class="mb-0">{{ $stats['total'] ?? 0 }}</h3>
+                        </div>
+                        <i class="bi bi-calendar3" style="font-size: 2rem; opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-beige shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="card-text mb-0">Pending</p>
+                            <h3 class="mb-0">{{ $stats['pending'] ?? 0 }}</h3>
+                        </div>
+                        <i class="bi bi-hourglass-split" style="font-size: 2rem; opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-beige shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="card-text mb-0">Confirmed</p>
+                            <h3 class="mb-0">{{ $stats['confirmed'] ?? 0 }}</h3>
+                        </div>
+                        <i class="bi bi-check-circle" style="font-size: 2rem; opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-beige shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="card-text mb-0">Cancelled</p>
+                            <h3 class="mb-0">{{ $stats['cancelled'] ?? 0 }}</h3>
+                        </div>
+                        <i class="bi bi-x-circle" style="font-size: 2rem; opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-light border-bottom">
+            <h5 class="mb-0"><i class="bi bi-funnel"></i> Search & Filter</h5>
+        </div>
+        <div class="card-body">
+            <form method="GET" action="{{ route('admin.appointments.index') }}" class="needs-validation" novalidate>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Search (Name/Email)</label>
+                        <input type="text" name="search" class="form-control" 
+                               placeholder="Enter name or email..." 
+                               value="{{ request('search') }}">
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-select">
+                            <option value="">-- All --</option>
+                            <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
+                            <option value="confirmed" {{ request('status') === 'confirmed' ? 'selected' : '' }}>Confirmed</option>
+                            <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Completed</option>
+                            <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Lawyer</label>
+                        <select name="lawyer_id" class="form-select">
+                            <option value="">-- All Lawyers --</option>
+                            @foreach($lawyers as $lawyer)
+                                <option value="{{ $lawyer->id }}" 
+                                    {{ request('lawyer_id') == $lawyer->id ? 'selected' : '' }}>
+                                    {{ $lawyer->name }}
+                                    @if($lawyer->lawyerProfile)
+                                        ({{ $lawyer->lawyerProfile->specialization ?? 'N/A' }})
+                                    @endif
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 d-flex gap-2 align-items-end">
+                        <button type="submit" class="btn btn-primary flex-grow-1">
+                            <i class="bi bi-search"></i> Search
+                        </button>
+                        <a href="{{ route('admin.appointments.index') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-clockwise"></i> Reset
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Advanced Filter -->
+                <div class="row g-3 mt-2 border-top pt-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" name="start_date" class="form-control" 
+                               value="{{ request('start_date') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">End Date</label>
+                        <input type="date" name="end_date" class="form-control" 
+                               value="{{ request('end_date') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Customer</label>
+                        <select name="customer_id" class="form-select">
+                            <option value="">-- All Customers --</option>
+                            @foreach($customers as $customer)
+                                <option value="{{ $customer->id }}" 
+                                    {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
+                                    {{ $customer->name }} ({{ $customer->email }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Sort By</label>
+                        <select name="sort_by" class="form-select">
+                            <option value="appointment_time" {{ request('sort_by') === 'appointment_time' ? 'selected' : '' }}>Appointment Time</option>
+                            <option value="created_at" {{ request('sort_by') === 'created_at' ? 'selected' : '' }}>Created Date</option>
+                            <option value="status" {{ request('sort_by') === 'status' ? 'selected' : '' }}>Status</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Appointments Table -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-list-check"></i> Appointments List</h5>
+            <small class="text-muted">{{ $appointments->total() }} appointments</small>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 5%">#</th>
+                            <th style="width: 15%">Customer</th>
+                            <th style="width: 15%">Lawyer</th>
+                            <th style="width: 15%">Date & Time</th>
+                            <th style="width: 10%">Status</th>
+                            <th style="width: 12%">Created</th>
+                            <th style="width: 18%">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($appointments as $index => $appointment)
+                        <tr>
+                            <td>{{ $appointments->firstItem() + $index }}</td>
+                            <td>
+                                <div>
+                                    <strong>{{ $appointment->customer->name ?? 'N/A' }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ $appointment->customer->email ?? 'N/A' }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <strong>{{ $appointment->lawyer->name ?? 'N/A' }}</strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        @if($appointment->lawyer && $appointment->lawyer->lawyerProfile)
+                                            {{ $appointment->lawyer->lawyerProfile->specialization ?? 'Specialization' }}
+                                        @else
+                                            N/A
+                                        @endif
+                                    </small>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <strong>{{ $appointment->appointment_time ? \Carbon\Carbon::parse($appointment->appointment_time)->format('m/d/Y') : 'N/A' }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ $appointment->appointment_time ? \Carbon\Carbon::parse($appointment->appointment_time)->format('H:i') : 'N/A' }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                @if($appointment->status === 'pending')
+                                    <span class="badge bg-warning">
+                                        <i class="bi bi-hourglass-split"></i> Pending
+                                    </span>
+                                @elseif($appointment->status === 'confirmed')
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle"></i> Confirmed
+                                    </span>
+                                @elseif($appointment->status === 'completed')
+                                    <span class="badge bg-info">
+                                        <i class="bi bi-check2-all"></i> Completed
+                                    </span>
+                                @else
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-x-circle"></i> Cancelled
+                                    </span>
+                                @endif
+                            </td>
+                            <td>
+                                <small class="text-muted">{{ $appointment->created_at->format('m/d/Y H:i') }}</small>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" 
+                                            data-bs-target="#viewModal{{ $appointment->id }}" title="View Details">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <a href="{{ route('admin.appointments.edit', $appointment->id) }}" 
+                                       class="btn btn-outline-warning" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    @if($appointment->status === 'pending')
+                                        <button type="button" class="btn btn-outline-success btn-confirm-appointment" 
+                                                data-id="{{ $appointment->id }}" title="Confirm">
+                                            <i class="bi bi-check"></i>
+                                        </button>
+                                    @endif
+                                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" 
+                                            data-bs-target="#cancelModal{{ $appointment->id }}" title="Cancel">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- View Modal -->
+                        <div class="modal fade" id="viewModal{{ $appointment->id }}" tabindex="-1">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-light">
+                                        <h5 class="modal-title">
+                                            <i class="bi bi-info-circle"></i> Appointment Details
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6 class="text-muted mb-1">Customer</h6>
+                                                <p class="mb-3">
+                                                    <strong>{{ $appointment->customer->name ?? 'N/A' }}</strong><br>
+                                                    <small class="text-muted">{{ $appointment->customer->email ?? 'N/A' }}</small>
+                                                </p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6 class="text-muted mb-1">Lawyer</h6>
+                                                <p class="mb-3">
+                                                    <strong>{{ $appointment->lawyer->name ?? 'N/A' }}</strong><br>
+                                                    <small class="text-muted">
+                                                        @if($appointment->lawyer && $appointment->lawyer->lawyerProfile)
+                                                            {{ $appointment->lawyer->lawyerProfile->specialization ?? 'N/A' }}
+                                                        @else
+                                                            N/A
+                                                        @endif
+                                                    </small>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6 class="text-muted mb-1">Appointment Date</h6>
+                                                <p class="mb-3">
+                                                    <strong>
+                                                        {{ $appointment->appointment_time ? \Carbon\Carbon::parse($appointment->appointment_time)->format('m/d/Y') : 'N/A' }}
+                                                    </strong>
+                                                </p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6 class="text-muted mb-1">Time</h6>
+                                                <p class="mb-3">
+                                                    <strong>
+                                                        {{ $appointment->appointment_time ? \Carbon\Carbon::parse($appointment->appointment_time)->format('H:i') : 'N/A' }}
+                                                    </strong>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="mb-3">
+                                            <h6 class="text-muted mb-1">Status</h6>
+                                            <p>
+                                                @if($appointment->status === 'pending')
+                                                    <span class="badge bg-warning"><i class="bi bi-hourglass-split"></i> Pending</span>
+                                                @elseif($appointment->status === 'confirmed')
+                                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Confirmed</span>
+                                                @elseif($appointment->status === 'completed')
+                                                    <span class="badge bg-info"><i class="bi bi-check2-all"></i> Completed</span>
+                                                @else
+                                                    <span class="badge bg-danger"><i class="bi bi-x-circle"></i> Cancelled</span>
+                                                @endif
+                                            </p>
+                                        </div>
+                                        @if($appointment->note)
+                                            <div class="mb-3">
+                                                <h6 class="text-muted mb-1">Notes</h6>
+                                                <p class="bg-light p-3 rounded">{{ $appointment->note }}</p>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cancel Modal -->
+                        <div class="modal fade" id="cancelModal{{ $appointment->id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-light border-danger">
+                                        <h5 class="modal-title text-danger">
+                                            <i class="bi bi-exclamation-triangle"></i> Confirm Cancel Appointment
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form action="{{ route('admin.appointments.cancel', $appointment->id) }}" method="POST">
+                                        @csrf
+                                        @method('PUT')
+                                        <div class="modal-body">
+                                            <p class="text-muted">Are you sure you want to cancel this appointment?</p>
+                                            <div class="mb-3">
+                                                <label class="form-label">Reason (Optional)</label>
+                                                <textarea name="reason" class="form-control" rows="3" 
+                                                          placeholder="Enter reason for cancellation..."></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                                            <button type="submit" class="btn btn-danger">
+                                                <i class="bi bi-x-circle"></i> Cancel Appointment
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        @empty
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                                <p class="text-muted mt-3">No appointments found</p>
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            @if($appointments->hasPages())
+            <nav class="mt-4">
+                {{ $appointments->links() }}
+            </nav>
+            @endif
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script>
+document.querySelectorAll('.btn-confirm-appointment').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const appointmentId = this.getAttribute('data-id');
+        if (confirm('Are you sure you want to confirm this appointment?')) {
+            fetch(`/admin/appointments/${appointmentId}/confirm`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred!');
+            });
+        }
+    });
+});
+</script>
+@endsection
