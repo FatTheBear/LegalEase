@@ -1,19 +1,23 @@
 <?php
+
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class AvailabilitySlot extends Model
 {
-    use HasFactory;
-
-    protected $fillable = [
-        'lawyer_id', 'start_time', 'end_time', 'is_active'
-    ];
+    protected $fillable = ['lawyer_id', 'date', 'start_time', 'end_time', 'is_booked', 'appointment_id'];
+    // app/Models/AvailabilitySlot.php
+    protected $dates = ['date']; // hoặc
+    protected $casts = ['date' => 'date'];
 
     public function lawyer()
     {
         return $this->belongsTo(User::class, 'lawyer_id');
+    }
+
+    public function appointment()
+    {
+        return $this->belongsTo(Appointment::class);
     }
 }

@@ -57,7 +57,7 @@ class User extends Authenticatable
 
     public function notifications()
     {
-        return $this->hasMany(Notification::class);
+        return $this->hasMany(\App\Models\Notification::class, 'user_id');
     }
 
     public function documentUploads()
@@ -68,6 +68,11 @@ class User extends Authenticatable
     public function ratings()
     {
         return $this->hasMany(Rating::class, 'lawyer_id');
+    }
+
+    public function givenRatings()
+    {
+        return $this->hasMany(Rating::class, 'client_id');
     }
 
     // Relationship cho documents upload
@@ -101,4 +106,6 @@ class User extends Authenticatable
     {
         return $this->status === 'pending';
     }
+    // Thêm vào model User.php
+
 }
