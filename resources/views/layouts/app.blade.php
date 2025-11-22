@@ -21,6 +21,11 @@
                 <li class="nav-item"><a class="nav-link" href="{{ route('appointments.index') }}">Appointments</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('announcements.index') }}">Announcements</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('faqs.index') }}">FAQ</a></li>
+                @auth
+                    @if(Auth::user()->role === 'admin')
+                        <li class="nav-item"><a class="nav-link" href="{{ route('admin.dashboard') }}">Management</a></li>
+                    @endif
+                @endauth
                 @guest
                     <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Login</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('register.choice') }}">Register</a></li>
