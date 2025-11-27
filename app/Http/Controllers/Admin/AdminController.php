@@ -10,6 +10,7 @@ use App\Models\News;
 use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\Rating;
 
 class AdminController extends Controller
 {
@@ -21,6 +22,7 @@ class AdminController extends Controller
         $totalLawyers = User::where('role', 'lawyer')->count();
         $pendingAppointments = Appointment::where('status', 'pending')->count();
         $totalAppointments = Appointment::count();
+        $totalRatings = Rating::count();
         $recentLawyers = User::where('role', 'lawyer')->latest()->take(5)->get();
         $recentAppointments = Appointment::with(['client', 'lawyer'])->latest()->take(5)->get();
      
@@ -29,6 +31,7 @@ class AdminController extends Controller
             'totalLawyers',
             'pendingAppointments',
             'totalAppointments',
+            'totalRatings',
             'recentLawyers',
             'recentAppointments'
         ));
@@ -162,5 +165,39 @@ class AdminController extends Controller
         ]);
         News::create($request->only('title', 'content'));
         return redirect()->route('admin.news.index')->with('success', 'Thêm tin tức thành công.');
+    }
+    public function manageRatings()
+    {
+        $ratings = Rating::with(['client', 'lawyer'])->latest()->paginate(10);
+        return view('admin.ratings.index', compact('ratings'));
+    }
+
+    public function editRating($id)
+    {
+        $rating = Rating::findOrFail($id);
+        return view('admin.ratings.edit', compact('rating'));
+    }
+
+    public function updateRating(Request $request, $id)
+    {
+        $request->validate([
+            'rating' => 'required|numeric|min:0.5|max:5',
+            'comment' => 'nullable|string|max:500'
+        ]);
+
+        $rating = Rating::findOrFail($id);
+        $rating->update([
+            'rating' => $request->rating,
+            'comment' => $request->comment,
+        ]);
+
+        return redirect()->route('admin.ratings.index')->with('success', 'Rating updated successfully.');
+    }
+
+    public function deleteRating($id)
+    {
+        $rating = Rating::findOrFail($id);
+        $rating->delete();
+        return redirect()->route('admin.ratings.index')->with('success', 'Rating deleted successfully.');
     }
 }

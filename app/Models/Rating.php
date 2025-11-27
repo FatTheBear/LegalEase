@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Rating extends Model
 {
-    protected $fillable = ['lawyer_id', 'client_id', 'rating', 'comment', 'appointment_id'];
+    protected $fillable = ['appointment_id', 'lawyer_id', 'client_id', 'rating', 'comment'];
+
+    public function appointment()
+    {
+        return $this->belongsTo(Appointment::class);
+    }
 
     public function lawyer()
     {
@@ -16,10 +21,5 @@ class Rating extends Model
     public function client()
     {
         return $this->belongsTo(User::class, 'client_id');
-    }
-
-    public function appointment()
-    {
-        return $this->belongsTo(Appointment::class);
     }
 }

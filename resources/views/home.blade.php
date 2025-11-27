@@ -2,79 +2,16 @@
 @section('title', 'Home')
 
 @section('content')
-<style>
-    /* Palette Colors */
-    :root {
-        --mulled-wine: #49110B;
-        --woodland: #56483B;
-        --antique-marble: #C8C2B7;
-        --charcoal-smoke: #191A1E;
-        --sandlight: #AD9E89;
-        --goat-milk: #E7E5DB;
-    }
-
-    /* Hero Section */
-    .hero-section h1 { color: var(--mulled-wine); }
-    .hero-section p.lead { color: var(--woodland); }
-    .hero-section .btn-primary { background-color: var(--mulled-wine); border-color: var(--mulled-wine); }
-    .hero-section .btn-outline-secondary { color: var(--woodland); border-color: var(--woodland); }
-    .hero-section .btn-outline-secondary:hover { background-color: var(--woodland); color: var(--goat-milk); }
-
-    /* Cards for lawyers */
-    .card-lawyer {
-        background-color: var(--antique-marble);
-        border: 1px solid var(--sandlight);
-        border-radius: 12px;
-        transition: transform 0.3s, box-shadow 0.3s;
-    }
-    .card-lawyer:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    }
-    .card-lawyer .card-title { color: var(--mulled-wine); font-weight: 600; }
-    .card-lawyer .card-text { color: var(--woodland); }
-    .card-lawyer img { border-top-left-radius: 12px; border-top-right-radius: 12px; }
-
-    /* Book button */
-    .btn-book {
-        background-color: var(--sandlight);
-        color: var(--charcoal-smoke);
-        border: none;
-    }
-    .btn-book:hover {
-        background-color: var(--mulled-wine);
-        color: var(--goat-milk);
-    }
-
-    /* Announcements */
-    .list-group-item {
-        background-color: var(--goat-milk);
-        border-left: 5px solid var(--mulled-wine);
-        border-radius: 8px;
-        margin-bottom: 10px;
-        transition: background 0.3s;
-    }
-    .list-group-item:hover {
-        background-color: var(--sandlight);
-    }
-    .list-group-item h5 { color: var(--mulled-wine); font-weight: 600; }
-    .list-group-item p { color: var(--woodland); }
-
-    /* Search Card */
-    .card-search {
-        background-color: var(--goat-milk);
-        border: 1px solid var(--sandlight);
-        border-radius: 12px;
-    }
-</style>
 
 <div class="container py-5">
 
     {{-- Hero Section --}}
     <div class="row align-items-center mb-5 hero-section">
         <div class="col-md-6">
-            <h1 class="display-4 fw-bold">Welcome to LegalEase ⚖️</h1>
+            <h1 class="display-4 fw-bold">Welcome to LegalEase</h1>
+            
             <p class="lead">Connect with verified lawyers quickly, securely, and conveniently.</p>
+            
             <a href="{{ route('lawyers.index') }}" class="btn btn-primary btn-lg me-2">Find a Lawyer</a>
             @guest
                 <a href="{{ route('register.choice') }}" class="btn btn-outline-secondary btn-lg">Register</a>
@@ -82,7 +19,7 @@
             @endguest
         </div>
         <div class="col-md-6 text-center">
-            <img src="/images/home-hero.png" alt="LegalEase" class="img-fluid rounded">
+            <img src="/images/logohome1.png" alt="LegalEase" class="img-fluid rounded">
         </div>
     </div>
 
@@ -133,7 +70,7 @@
                                     <span class="text-muted">No Ratings Yet</span>
                                 @endif
                             </p>
-                            <a href="{{ route('lawyers.show', $lawyer->id) }}" class="btn btn-book w-100">Book Appointment</a>
+                            <a href="{{ route('lawyers.show', $lawyer->id) }}" class="btn btn-book w-100 btn-primary">Book Appointment</a>
                         </div>
                     </div>
                 </div>
@@ -148,15 +85,25 @@
 
     {{-- Announcements --}}
     <h2 class="mb-4">Legal Updates & Announcements</h2>
-    <div class="list-group mb-5">
+    <div class="list-group mb-5 ">
         @foreach($announcements as $announcement)
-            <a href="{{ route('announcements.index') }}" class="list-group-item list-group-item-action">
-                <div class="d-flex w-100 justify-content-between">
+            <a href="{{ route('announcements.index') }}" class="list-group-item list-group-item-action btn-primary"
+                       style="
+                            background-color: #3A4B41; 
+                            color: #FFD700; 
+                            padding: 20px; 
+                            border-radius: 12px; 
+                            margin-bottom: 12px; 
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                            transition: 0.25s;
+                        ">
+                <div class="d-flex w-100 justify-content-between btn-primary">
                     <h5 class="mb-1">{{ $announcement->title }}</h5>
                     <small>{{ $announcement->created_at->format('d/m/Y') }}</small>
                 </div>
                 <p class="mb-1 text-truncate">{{ $announcement->content }}</p>
             </a>
+            <br>
         @endforeach
     </div>
 

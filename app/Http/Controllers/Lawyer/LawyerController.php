@@ -80,6 +80,9 @@ class LawyerController extends Controller
     /**
      * Dashboard của Lawyer
      */
+    /**
+ * Dashboard của Lawyer (với lịch sử rating)
+ */
     public function dashboard()
     {
         $user = Auth::user();
@@ -112,13 +115,21 @@ class LawyerController extends Controller
         $averageRating = $user->ratings()->avg('rating') ?? 0;
         $averageRating = $averageRating > 0 ? number_format($averageRating, 1) : null;
 
+        // ⭐ Lịch sử rating / feedback
+        $ratings = $user->ratings()
+            ->with('client')
+            ->latest()
+            ->get();
+
         return view('lawyers.dashboard', compact(
             'appointments',
             'notifications',
             'totalAppointments',
             'pendingAppointments',
             'confirmedAppointments',
-            'averageRating'
+            'averageRating',
+            'ratings' // thêm vào
         ));
     }
+
 }

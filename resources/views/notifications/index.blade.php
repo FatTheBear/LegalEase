@@ -1,9 +1,9 @@
 @extends('layouts.app')
-@section('title', 'Thông báo')
+@section('title', 'Notifications')
 
 @section('content')
 <div class="container mt-4">
-    <h2>Thông báo của bạn</h2>
+    <h2>Your Notifications</h2>
     @foreach($notifications as $notif)
         <div class="card mb-2 {{ $notif->is_read ? '' : 'border-primary' }}">
             <div class="card-body">

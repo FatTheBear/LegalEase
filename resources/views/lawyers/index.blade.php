@@ -47,8 +47,17 @@
                 <div class="card h-100 shadow-sm hover-shadow border-0">
                     <div class="card-body d-flex flex-column">
                         <div class="text-center mb-3">
-                            <img src="{{ $lawyer->avatar ?? asset('images/default-lawyer.jpg') }}"
-                                 class="rounded-circle" width="100" height="100" alt="{{ $lawyer->name }}">
+                            @php
+                            $avatarUrl = $lawyer->avatar
+                                ? asset('storage/' . $lawyer->avatar)
+                                : 'https://ui-avatars.com/api/?name=' . urlencode($lawyer->name) . '&background=35563c&color=ffffff&size=150';
+                            @endphp
+
+                            <img src="{{ $avatarUrl }}" 
+                                class="rounded-circle shadow"
+                                width="150" height="150"
+                                alt="{{ $lawyer->name }}">
+
                         </div>
 
                         <h5 class="card-title text-center mb-2">
@@ -108,7 +117,7 @@
     </div>
 
     {{-- Pagination --}}
-    <div class="mt-4">
+    <div class="mt-4 ">
         {{ $lawyers->appends(request()->query())->links('pagination::bootstrap-5') }}
     </div>
 

@@ -16,7 +16,7 @@
 <div class="container-fluid py-4">
     <!-- Header Section -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
+        <div class="w-100 text-center">
             <h2 class="mb-0"><i class="bi bi-calendar-event"></i> Manage Appointments</h2>
             <p class="text-muted mb-0">Manage all appointments of lawyers and customers</p>
         </div>

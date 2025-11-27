@@ -1,186 +1,399 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'LegalEase')</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="/css/theme.css">
+
     <style>
-        /* ===================== NAVBAR ===================== */
-        .navbar-custom {
-            background: linear-gradient(90deg, #a86f20, #603207);
+        /* ========================= NAVBAR GLASS EFFECT ========================= */
+        .navbar-glass {
+            background: rgba(40, 62, 49, 0.95);
+            backdrop-filter: blur(6px);
+            transition: all 0.35s ease;
         }
-        .navbar-custom .nav-link {
+
+        .navbar-glass.scrolled {
+            background: rgba(46, 69, 56, 0.5); 
+            backdrop-filter: blur(10px);
+        }
+
+        .navbar-glass .navbar-brand {
+            color: #ffd700;
+            font-size: 1.55rem;
+            font-weight: 700;
+        }
+
+        .navbar-glass .nav-link {
             color: #fff;
             font-weight: 500;
-            transition: color 0.2s;
+            padding: 8px 16px;
+            transition: 0.25s;
         }
-        .navbar-custom .nav-link:hover {
+
+        .navbar-glass .nav-link:hover {
             color: #ffd700;
         }
-        .navbar-custom .navbar-brand {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #ffd700;
-        }
+
         .badge-notification {
             font-size: 0.65rem;
             font-weight: 600;
+            background: #d90000;
         }
 
-        /* ===================== FOOTER ===================== */
+        .navbar-shadow {
+            box-shadow: 0 3px 15px rgba(0,0,0,0.15);
+        }
+
+        body {
+            padding-top: 76px;
+        }
+
         footer {
             background: linear-gradient(to right, #a86f20, #603207);
             color: #fff;
         }
+
         footer a {
             color: #ffd700;
             text-decoration: none;
         }
+
         footer a:hover {
             text-decoration: underline;
         }
-        .footer-links a {
-            margin: 0 10px;
+        
+        /* ========================= CUSTOM DROPDOWN GLASS EFFECT ========================= */
+        /* ========================= CUSTOM DROPDOWN OFFSET (KHOẢNG CÁCH DƯỚI NAVBAR) ========================= */
+        .dropdown-menu-glass {
+            margin-top: 23px !important; /* Tăng khoảng cách 10px so với navbar */
+            background: rgba(255, 255, 255, 0.6) !important; /* Nền trắng trong suốt */
+            backdrop-filter: blur(8px); /* Hiệu ứng làm mờ */
+            border: 1px solid rgba(255, 255, 255, 0.3); /* Đường viền nhẹ */
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Đảm bảo chữ trong dropdown vẫn dễ đọc */
+        .dropdown-menu-glass .dropdown-item {
+            color: #000000; /* Chữ trắng */
+            background-color: transparent !important;
+        }
+
+        /* Hover effect cho dropdown item */
+        .dropdown-menu-glass .dropdown-item:hover,
+        .dropdown-menu-glass .dropdown-item.bg-light.fw-medium {
+            background-color: rgba(255, 255, 255, 0.6) !important;
+            color: #ffd700;
+        }
+        
+        /* Chỉnh lại màu text mặc định trong dropdown */
+        .dropdown-menu-glass .text-muted,
+        .dropdown-menu-glass .text-primary {
+            color: #000000 !important;
+        }
+
+        /* Chỉnh lại màu text primary trong dropdown */
+        .dropdown-menu-glass .text-primary {
+            color: #ffd700 !important;
+        }
+
+        /* Chỉnh độ rộng của Notification Dropdown */
+        .notification-dropdown-menu {
+            /* Mặc định rộng hơn cho desktop */
+            width: 360px !important; 
+            max-width: 90vw !important; /* Giới hạn độ rộng trên thiết bị di động */
         }
     </style>
+
     @yield('styles')
 </head>
+
 <body class="d-flex flex-column min-vh-100">
 
-    <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-lg navbar-custom shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-glass navbar-shadow fixed-top">
         <div class="container">
             <a class="navbar-brand" href="{{ url('/') }}">LegalEase</a>
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
+
                     <li class="nav-item"><a class="nav-link" href="{{ url('/') }}">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('lawyers.index') }}">Lawyers</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('appointments.index') }}">Appointments</a></li>
 
-                    <!-- NOTIFICATION DROPDOWN -->
                     @auth
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle position-relative d-flex align-items-center" 
-                               href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-bell fs-5"></i>
-                                <span class="ms-1 d-none d-lg-inline">Notifications</span>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle position-relative d-flex align-items-center"
+                           href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-bell fs-5"></i>
+                            <span class="ms-1 d-none d-lg-inline">Notifications</span>
+                            @php
+                                $unread = Auth::user()->notifications()->where('is_read', false)->count();
+                            @endphp
+                            @if($unread > 0)
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill badge-notification">
+                                    {{ $unread > 99 ? '99+' : $unread }}
+                                </span>
+                            @endif
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow dropdown-menu-glass notification-dropdown-menu">
+                            @php
+                                $latestNotif = Auth::user()->notifications()->latest()->first();
+                            @endphp
+                            @if($latestNotif)
+                                <li>
+                                    <a class="dropdown-item py-3 {{ $latestNotif->is_read ? '' : 'bg-light fw-medium' }}"
+                                    href="{{ route('notifications.index') }}">
+                                        <div class="fw-semibold">{{ $latestNotif->title }}</div>
+                                        <div class="small text-muted">{{ Str::limit($latestNotif->message, 40) }}</div>
+                                        <div class="small text-muted mt-1">{{ $latestNotif->created_at->diffForHumans() }}</div>
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider my-1"></li>
+                                <li class="text-center">
+                                    <a class="dropdown-item text-primary fw-medium" href="{{ route('notifications.index') }}">
+                                        View all notifications
+                                    </a>
+                                </li>
+                            @else
+                                <li><div class="dropdown-item text-center text-muted py-4">No notifications yet</div></li>
+                            @endif
 
-                                @php
-                                    $unreadCount = Auth::user()->notifications()->where('is_read', false)->count();
-                                @endphp
-                                @if($unreadCount > 0)
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger badge-notification">
-                                        {{ $unreadCount > 99 ? '99+' : $unreadCount }}
-                                        <span class="visually-hidden">unread notifications</span>
-                                    </span>
-                                @endif
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow" style="width: 340px;">
-                                @php
-                                    $recentNotifs = Auth::user()->notifications()->latest()->take(6)->get();
-                                @endphp
-                                @if($recentNotifs->count() > 0)
-                                    @foreach($recentNotifs as $notif)
-                                        <li>
-                                            <a class="dropdown-item py-3 {{ $notif->is_read ? '' : 'bg-light fw-medium' }}" 
-                                               href="{{ route('notifications.index') }}">
-                                                <div class="d-flex">
-                                                    <div class="flex-shrink-0">
-                                                        @if(!$notif->is_read)
-                                                            <i class="bi bi-circle-fill text-primary me-2" style="font-size: 0.6rem;"></i>
-                                                        @endif
-                                                    </div>
-                                                    <div class="flex-grow-1">
-                                                        <div class="fw-semibold">{{ $notif->title }}</div>
-                                                        <div class="small text-muted">{{ Str::limit($notif->message, 70) }}</div>
-                                                        <div class="text-muted small mt-1">{{ $notif->created_at->diffForHumans() }}</div>
-                                                    </div>
-                                                </div>
-                                            </a>
-                                        </li>
-                                        <li><hr class="dropdown-divider my-1"></li>
-                                    @endforeach
-                                    <li class="text-center">
-                                        <a class="dropdown-item text-primary fw-medium" href="{{ route('notifications.index') }}">
-                                            View all notifications
-                                        </a>
-                                    </li>
-                                @else
-                                    <li><div class="dropdown-item text-center text-muted py-4">No notifications yet</div></li>
-                                @endif
-                            </ul>
-                        </li>
+                        </ul>
+                    </li>
                     @endauth
-                    {{-- announcement --}}
-                    <li class="nav-item"><a class="nav-link" href="{{ route('announcements.index') }}">Announcements</a></li>
-                    {{-- <li class="nav-item"><a class="nav-link" href="{{ route('faqs.index') }}">FAQ</a></li> --}}
 
-                    <!-- USER MENU -->
+                    <li class="nav-item"><a class="nav-link" href="{{ route('announcements.index') }}">Announcements</a></li>
+                    {{-- faq --}}
+                    <li class="nav-item"><a class="nav-link" href="{{ route('faqs.index') }}">FAQ</a></li>
                     @guest
                         <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Login</a></li>
-                        <li class="nav-item"><a class="nav-link btn btn-outline-warning btn-sm px-3 ms-2" href="{{ route('register.choice') }}">Register</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('register.choice') }}">Register</a></li>
                     @else
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-person-circle"></i> {{ Auth::user()->name }}
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
+                            {{-- THÊM CLASS dropdown-menu-glass TẠI ĐÂY --}}
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-glass"> 
                                 @if(auth()->user()->role === 'admin')
                                     <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}">Admin Dashboard</a></li>
                                 @elseif(auth()->user()->role === 'lawyer')
                                     <li><a class="dropdown-item" href="{{ route('lawyer.dashboard') }}">Lawyer Dashboard</a></li>
-                                @elseif(auth()->user()->role === 'customer')
+                                @else
                                     <li><a class="dropdown-item" href="{{ route('customer.dashboard') }}">My Dashboard</a></li>
                                 @endif
-                                {{-- <li><a class="dropdown-item" href="{{ route('profile.edit') }}">Profile Settings</a></li> --}}
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="dropdown-item text-danger">Logout</button>
+                                    <form action="{{ route('logout') }}" method="POST">@csrf
+                                        <button class="dropdown-item text-danger">Logout</button>
                                     </form>
                                 </li>
                             </ul>
                         </li>
                     @endguest
+
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Flash Message -->
     @if(session('success'))
-        <div class="container mt-3">
-            <div class="alert alert-success alert-dismissible fade show">
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
+    <div class="container mt-3">
+        <div class="custom-alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <span>{{ session('success') }}</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
+    </div>
     @endif
 
-    <!-- MAIN CONTENT -->
     <main class="container mt-4 mb-5">
-        @yield('content')
+        <div class="content-wrapper shadow-sm p-4 rounded-3 bg-white">
+            @yield('content')
+        </div>
     </main>
 
-    <!-- FOOTER -->
-    <footer class="mt-auto py-5">
-        <div class="container text-center">
-            <div class="mb-3 footer-links">
-                <a href="{{ url('/') }}">Home</a> |
-                <a href="{{ route('lawyers.index') }}">Lawyers</a> |
-                <a href="{{ route('appointments.index') }}">Appointments</a> |
-                {{-- <a href="{{ route('faqs.index') }}">FAQ</a> --}}
+    <footer class="footer">
+        <div class="footer-top">
+            <div class="footer-section">
+                <h2>LegalEase</h2>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Our Lawyers</a></li>
+                    <li><a href="#">News & Updates</a></li>
+                    <li><a href="#">Services</a></li>
+                </ul>
             </div>
-            <small>© {{ date('Y') }} LegalEase — Nền tảng tư vấn pháp lý trực tuyến uy tín</small>
+            <div class="footer-section">
+                <h2>Client Support</h2>
+                <ul>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">Consultation Booking</a></li>
+                </ul>
+            </div>
+            <div class="footer-section newsletter">
+                <h2>Subscribe for Legal Updates</h2>
+                <form>
+                    <input type="email" placeholder="Your email here">
+                    <button type="submit">Subscribe</button>
+                    <label>
+                        <input type="checkbox">
+                        By checking the box, you agree to receive updates from LegalEase.
+                    </label>
+                </form>
+            </div>
+        </div>
+        <div class="footer-social">
+            <a href="#"><i class="bi bi-facebook"></i></a>
+            <a href="#"><i class="bi bi-instagram"></i></a>
+            <a href="#"><i class="bi bi-twitter"></i></a>
+            <a href="#"><i class="bi bi-linkedin"></i></a>
+            <a href="#"><i class="bi bi-youtube"></i></a>
+        </div>
+        <div class="footer-bottom">
+            <p>
+                <a href="#">Terms of Service</a> |
+                <a href="#">Privacy Policy</a> |
+                <a href="#">Accessibility</a> |
+                <a href="#">Client Rights</a>
+            </p>
+            <p>©2025 LegalEase, LLC. All Rights Reserved.</p>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navbar = document.querySelector('.navbar-glass');
+            const toggleNavbarOpacity = () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            };
+            window.addEventListener('scroll', toggleNavbarOpacity);
+            toggleNavbarOpacity();
+        });
+    </script>
 </body>
 </html>
+
+<style>
+:root {
+  --primary: #3A4B41; /* same as navbar */
+  --text-light: #FFFFFF;
+  --radius: 6px;
+}
+
+.footer {
+  background-color: var(--primary);
+  color: var(--text-light);
+  padding: 40px 20px;
+  font-family: Arial, sans-serif;
+  text-align: center; /* center all content */
+}
+
+.footer a {
+  color: var(--text-light);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+.footer-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  justify-content: center; /* center the sections */
+  margin-bottom: 30px;
+}
+
+.footer-section {
+  min-width: 200px;
+  padding: 0 30px;
+}
+
+.footer-section h2 {
+  margin-bottom: 10px;
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-section ul li {
+  margin-bottom: 6px;
+}
+
+.footer-section.newsletter form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-section.newsletter input[type="email"] {
+  padding: 8px;
+  border-radius: var(--radius);
+  border: none;
+}
+
+.footer-section.newsletter button {
+  padding: 8px;
+  border: none;
+  border-radius: var(--radius);
+  background-color: var(--text-light);
+  color: var(--primary);
+  cursor: pointer;
+}
+
+.footer-section.newsletter label {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.footer-social {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  font-size: 24px; /* Bootstrap icons size */
+}
+
+.footer-social a {
+  color: var(--text-light);
+}
+
+.footer-social a:hover {
+  color: #E6CFA7;
+}
+
+.footer-bottom {
+  font-size: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 15px;
+}
+
+.footer-bottom p {
+  margin: 5px 0;
+}
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
