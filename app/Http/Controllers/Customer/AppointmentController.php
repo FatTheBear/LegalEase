@@ -11,16 +11,22 @@ use Illuminate\Support\Facades\Auth;
 class AppointmentController extends Controller
 {
     // ==================== DANH SÁCH LỊCH HẸN ====================
-    public function index()
-    {
-        $appointments = Appointment::where('client_id', Auth::id())
-            ->orWhere('lawyer_id', Auth::id())
-            ->with(['lawyer', 'client'])
-            ->latest()
-            ->get();
+public function index()
+{
+    $appointments = Appointment::where('client_id', Auth::id())
+        ->orWhere('lawyer_id', Auth::id())
+        ->with(['lawyer', 'client', 'rating'])
+        ->latest()
+        ->get();
 
-        return view('appointments.index', compact('appointments'));
-    }
+    // ➜ Lấy toàn bộ feedback đã rating để đưa xuống view
+    $feedbacks = $appointments->filter(function ($appt) {
+        return $appt->rating !== null;
+    });
+
+    return view('appointments.index', compact('appointments', 'feedbacks'));
+}
+
 
     // ==================== CHUYỂN HƯỚNG CREATE ====================
     public function create($lawyer_id)
@@ -146,4 +152,16 @@ class AppointmentController extends Controller
 
         return back()->with('success', 'Appointment cancelled successfully.');
     }
+    // ==================== LỊCH SỬ ĐÁNH GIÁ (CLIENT) ====================
+public function history()
+{
+    $feedbacks = Auth::user()
+        ->feedbacks()     // relationship trong User model
+        ->with('lawyer')  // load thông tin luật sư
+        ->latest()
+        ->get();
+
+    return view('appointments.history', compact('feedbacks'));
+}
+
 }

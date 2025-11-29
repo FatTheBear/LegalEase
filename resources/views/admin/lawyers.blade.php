@@ -2,11 +2,11 @@
 @section('title', 'Manage Lawyers')
 
 @section('content')
-<div class="container-fluid py-4">
+<div class="container-fluid py-4 text-center">
     <!-- Header Section -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="mb-0"><i class="bi bi-briefcase"></i> Manage Lawyers</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4 text-center">
+        <div class="w-100 text-center">
+            <h2 class="mb-0 text-center"><i class="bi bi-briefcase"></i> Manage Lawyers</h2>
             <p class="text-muted mb-0">View and manage all lawyer accounts</p>
         </div>
     </div>

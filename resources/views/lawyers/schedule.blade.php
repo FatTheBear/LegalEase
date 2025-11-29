@@ -17,7 +17,7 @@
                     <input type="time" name="start_time" class="form-control" required>
                 </div>
                 <div class="col-md-3 d-flex align-items-end">
-                    <button type="submit" class="btn btn-success w-100">Add 2-Hour Slot</button>
+                    <button type="submit" class="btn btn-primary w-100">Add 2-Hour Slot</button>
                 </div>
             </form>
         </div>
@@ -27,7 +27,7 @@
         <h4>Your Schedule (Future)</h4>
         @foreach($slots->groupBy('date') as $date => $daySlots)
             <div class="card mb-3">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header">
                     {{ Carbon\Carbon::parse($date)->format('l, F j, Y') }}
                 </div>
                 <div class="card-body">
@@ -44,8 +44,17 @@
                                     onsubmit="return confirm('Xóa slot này?')">
                                     @csrf
                                     @method('DELETE') {{-- FIX QUAN TRỌNG --}}
-                                    <button type="submit" class="btn btn-danger btn-sm">
-                                        <i class="bi bi-trash"></i> Xóa
+                                    <button type="submit" title="Xóa" style="
+                                        background: none;
+                                        border: none;
+                                        padding: 0;
+                                        margin: 0;
+                                        color: #d90000;
+                                        cursor: pointer;
+                                        font-size: 1rem;
+                                        line-height: 1;
+                                    ">
+                                        <i class="bi bi-x-lg"></i>
                                     </button>
                                 </form>
                             @endif

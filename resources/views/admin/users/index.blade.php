@@ -15,7 +15,7 @@
 <div class="container-fluid py-4">
     <!-- Header Section -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
+        <div class="w-100 text-center">
             <h2 class="mb-0"><i class="bi bi-people"></i> Manage Users</h2>
             <p class="text-muted mb-0">View and manage all system users</p>
         </div>
@@ -169,7 +169,7 @@
             <!-- Pagination -->
             @if($users->hasPages())
             <nav class="mt-4">
-                {{ $users->links() }}
+                {{ $users->links( 'pagination::bootstrap-5') }}
             </nav>
             @endif
         </div>

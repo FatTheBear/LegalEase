@@ -23,8 +23,8 @@ class LawyerController extends Controller
         $province  = $request->query('province');
 
         $query = User::where('role', 'lawyer')
-                     ->where('status', 'active')
-                     ->with(['lawyerProfile', 'ratings']);
+                    ->where('status', 'active')
+                    ->with(['lawyerProfile', 'ratings']);
 
         if ($specialty) {
             $query->whereHas('lawyerProfile', function ($q) use ($specialty) {
@@ -40,8 +40,22 @@ class LawyerController extends Controller
 
         $lawyers = $query->paginate(9)->withQueryString();
 
-        return view('lawyers.index', compact('lawyers'));
+        // ===== Lấy dữ liệu dynamic cho select =====
+        $specializations = \App\Models\LawyerProfile::where('approval_status', 'approved')
+                            ->distinct()
+                            ->pluck('specialization')
+                            ->sort()
+                            ->toArray();
+
+        $provinces = \App\Models\LawyerProfile::where('approval_status', 'approved')
+                            ->distinct()
+                            ->pluck('province')
+                            ->sort()
+                            ->toArray();
+
+        return view('lawyers.index', compact('lawyers', 'specializations', 'provinces'));
     }
+
 
     /**
      * Trang chi tiết luật sư + chọn slot đặt lịch
@@ -66,6 +80,9 @@ class LawyerController extends Controller
     /**
      * Dashboard của Lawyer
      */
+    /**
+ * Dashboard của Lawyer (với lịch sử rating)
+ */
     public function dashboard()
     {
         $user = Auth::user();
@@ -98,13 +115,21 @@ class LawyerController extends Controller
         $averageRating = $user->ratings()->avg('rating') ?? 0;
         $averageRating = $averageRating > 0 ? number_format($averageRating, 1) : null;
 
+        // ⭐ Lịch sử rating / feedback
+        $ratings = $user->ratings()
+            ->with('client')
+            ->latest()
+            ->get();
+
         return view('lawyers.dashboard', compact(
             'appointments',
             'notifications',
             'totalAppointments',
             'pendingAppointments',
             'confirmedAppointments',
-            'averageRating'
+            'averageRating',
+            'ratings' // thêm vào
         ));
     }
+
 }

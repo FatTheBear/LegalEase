@@ -15,7 +15,7 @@ class AppointmentController extends Controller
     {
         $appointments = Appointment::where('client_id', Auth::id())
             ->orWhere('lawyer_id', Auth::id())
-            ->with(['lawyer', 'client'])
+            ->with(['lawyer', 'client', 'rating'])
             ->latest()
             ->get();
 
@@ -139,4 +139,5 @@ class AppointmentController extends Controller
 
         return back()->with('success', 'Appointment cancelled successfully.');
     }
+    
 }
