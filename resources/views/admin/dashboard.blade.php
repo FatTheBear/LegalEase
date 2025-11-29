@@ -77,6 +77,17 @@
             </a>
         </div>
     </div>
+    <div class="card card-beige mb-4 shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="mb-0" style="color: #5d4037;"><i class="bi bi-calendar2-week me-2"></i> Manage Lawyer Schedules</h4>
+                <p class="text-muted mb-0">View and manage all lawyers’ availability slots</p>
+            </div>
+            <a href="{{ route('admin.lawyer.schedules') }}" class="btn btn-beige px-4">
+                Go to Schedules
+            </a>
+        </div>
+    </div>
 
     <div class="card">
         <div class="card-header">
