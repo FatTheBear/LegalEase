@@ -29,6 +29,7 @@
             <h3 class="mb-0">
                 {{ auth()->user()->role === 'lawyer' ? 'Incoming Consultation Requests' : 'Your Booked Appointments' }}
             </h3>
+            <br>
             @if(auth()->user()->role === 'customer')
                 <a href="{{ route('lawyers.index') }}" class="btn btn-primary">
                     <i class="bi bi-plus-circle"></i> Book a New Consultation
@@ -269,8 +270,8 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content text-center">
 
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title">Rating Details</h5>
+                    <div class="modal-header btn-primary text-white">
+                        <h5 class="modal-title ">Rating Details</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
 

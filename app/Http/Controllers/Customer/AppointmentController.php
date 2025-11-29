@@ -10,31 +10,31 @@ use Illuminate\Support\Facades\Auth;
 
 class AppointmentController extends Controller
 {
-    // ==================== DANH SÁCH LỊCH HẸN ====================
-public function index()
-{
-    $appointments = Appointment::where('client_id', Auth::id())
-        ->orWhere('lawyer_id', Auth::id())
-        ->with(['lawyer', 'client', 'rating'])
-        ->latest()
-        ->get();
+    // ==================== APPOINTMENT LIST ====================
+    public function index()
+    {
+        $appointments = Appointment::where('client_id', Auth::id())
+            ->orWhere('lawyer_id', Auth::id())
+            ->with(['lawyer', 'client', 'rating'])
+            ->latest()
+            ->get();
 
-    // ➜ Lấy toàn bộ feedback đã rating để đưa xuống view
-    $feedbacks = $appointments->filter(function ($appt) {
-        return $appt->rating !== null;
-    });
+        // ➜ Retrieve all rated feedbacks to pass to the view
+        $feedbacks = $appointments->filter(function ($appt) {
+            return $appt->rating !== null;
+        });
 
-    return view('appointments.index', compact('appointments', 'feedbacks'));
-}
+        return view('appointments.index', compact('appointments', 'feedbacks'));
+    }
 
 
-    // ==================== CHUYỂN HƯỚNG CREATE ====================
+    // ==================== CREATE REDIRECT ====================
     public function create($lawyer_id)
     {
         return redirect()->route('lawyers.show', $lawyer_id);
     }
 
-    // ==================== KHÁCH ĐẶT LỊCH ====================
+    // ==================== CUSTOMER BOOKS APPOINTMENT ====================
     public function store(Request $request)
     {
         $request->validate([
@@ -42,7 +42,7 @@ public function index()
             'slot_id'   => 'required|exists:availability_slots,id',
         ]);
 
-        // Lấy slot trống
+        // Get available slot
         $slot = AvailabilitySlot::where('id', $request->slot_id)
             ->where('lawyer_id', $request->lawyer_id)
             ->where('is_booked', false)
@@ -50,28 +50,28 @@ public function index()
 
         $client = Auth::user();
 
-        // Tránh ghép date + time nếu start_time/end_time đã là datetime
+        // Avoid concatenating date + time if start_time/end_time are already datetime objects
         $appointment_time = $slot->start_time;
         $end_time         = $slot->end_time;
 
-        // Tạo appointment
+        // Create appointment
         $appointment = Appointment::create([
-            'client_id'        => $client->id,
-            'lawyer_id'        => $slot->lawyer_id,
-            'slot_id'          => $slot->id,
+            'client_id'          => $client->id,
+            'lawyer_id'          => $slot->lawyer_id,
+            'slot_id'            => $slot->id,
             'appointment_time' => $appointment_time,
             'end_time'         => $end_time,
-            'status'           => 'pending',
-            'notes'            => $request->notes ?? null,
+            'status'             => 'pending',
+            'notes'              => $request->notes ?? null,
         ]);
 
-        // Cập nhật slot
+        // Update slot
         $slot->update([
             'is_booked'      => true,
             'appointment_id' => $appointment->id,
         ]);
 
-        // Gửi thông báo nếu có hàm notify
+        // Send notification if notify function exists
         try {
             notify($slot->lawyer_id, 'New Booking', "Customer {$client->name} booked your slot!", 'booking');
         } catch (\Exception $e) {
@@ -79,10 +79,10 @@ public function index()
         }
 
         return redirect()->route('appointments.index')
-                         ->with('success', 'Đặt lịch thành công! Chờ luật sư xác nhận.');
+                         ->with('success', 'Booking successful! Awaiting lawyer confirmation.');
     }
 
-    // ==================== LAWYER XÁC NHẬN ====================
+    // ==================== LAWYER CONFIRMATION ====================
     public function confirm($id)
     {
         $appointment = Appointment::where('id', $id)
@@ -94,12 +94,12 @@ public function index()
         $lawyer = Auth::user();
         $client = $appointment->client;
 
-        // Thông báo cho khách hàng
+        // Notify the client
         try {
             notify(
-                $client->id, // → gửi cho khách hàng
+                $client->id, // → send to client
                 'Appointment Confirmed',
-                "Lịch hẹn của bạn với {$lawyer->name} đã được xác nhận.",
+                "Your appointment with {$lawyer->name} has been confirmed.",
                 'confirmed',
                 ['appointment_id' => $appointment->id]
             );
@@ -111,7 +111,7 @@ public function index()
         return back()->with('success', 'Appointment confirmed successfully!');
     }
 
-    // ==================== HỦY LỊCH ====================
+    // ==================== CANCEL APPOINTMENT ====================
     public function cancel(Request $request, $id)
     {
         $appointment = Appointment::where('id', $id)
@@ -128,7 +128,7 @@ public function index()
             'cancel_reason' => $reason
         ]);
 
-        // Mở lại slot
+        // Re-open slot
         if ($appointment->slot) {
             $appointment->slot->update([
                 'is_booked'      => false,
@@ -139,7 +139,7 @@ public function index()
         $canceler = Auth::user();
         $receiverId = $canceler->role === 'lawyer' ? $appointment->client_id : $appointment->lawyer_id;
 
-        // Thông báo cho người kia
+        // Notify the other party
         notify(
             $receiverId,
             'Appointment Cancelled',
@@ -152,16 +152,16 @@ public function index()
 
         return back()->with('success', 'Appointment cancelled successfully.');
     }
-    // ==================== LỊCH SỬ ĐÁNH GIÁ (CLIENT) ====================
-public function history()
-{
-    $feedbacks = Auth::user()
-        ->feedbacks()     // relationship trong User model
-        ->with('lawyer')  // load thông tin luật sư
-        ->latest()
-        ->get();
+    // ==================== RATING HISTORY (CLIENT) ====================
+    public function history()
+    {
+        $feedbacks = Auth::user()
+            ->feedbacks()   // relationship in User model
+            ->with('lawyer') // load lawyer information
+            ->latest()
+            ->get();
 
-    return view('appointments.history', compact('feedbacks'));
-}
+        return view('appointments.history', compact('feedbacks'));
+    }
 
 }

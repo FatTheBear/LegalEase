@@ -69,44 +69,37 @@
         }
         
         /* ========================= CUSTOM DROPDOWN GLASS EFFECT ========================= */
-        /* ========================= CUSTOM DROPDOWN OFFSET (KHOẢNG CÁCH DƯỚI NAVBAR) ========================= */
         .dropdown-menu-glass {
-            margin-top: 23px !important; /* Tăng khoảng cách 10px so với navbar */
-            background: rgba(255, 255, 255, 0.6) !important; /* Nền trắng trong suốt */
-            backdrop-filter: blur(8px); /* Hiệu ứng làm mờ */
-            border: 1px solid rgba(255, 255, 255, 0.3); /* Đường viền nhẹ */
+            margin-top: 23px !important; /* Tăng khoảng cách so với navbar */
+            background: rgba(255, 255, 255, 0.6) !important;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
         }
 
-        /* Đảm bảo chữ trong dropdown vẫn dễ đọc */
         .dropdown-menu-glass .dropdown-item {
-            color: #000000; /* Chữ trắng */
+            color: #000000;
             background-color: transparent !important;
         }
 
-        /* Hover effect cho dropdown item */
         .dropdown-menu-glass .dropdown-item:hover,
         .dropdown-menu-glass .dropdown-item.bg-light.fw-medium {
             background-color: rgba(255, 255, 255, 0.6) !important;
             color: #ffd700;
         }
-        
-        /* Chỉnh lại màu text mặc định trong dropdown */
+
         .dropdown-menu-glass .text-muted,
         .dropdown-menu-glass .text-primary {
             color: #000000 !important;
         }
 
-        /* Chỉnh lại màu text primary trong dropdown */
         .dropdown-menu-glass .text-primary {
             color: #ffd700 !important;
         }
 
-        /* Chỉnh độ rộng của Notification Dropdown */
         .notification-dropdown-menu {
-            /* Mặc định rộng hơn cho desktop */
             width: 360px !important; 
-            max-width: 90vw !important; /* Giới hạn độ rộng trên thiết bị di động */
+            max-width: 90vw !important;
         }
     </style>
 
@@ -126,55 +119,65 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
 
+                    <!-- Link chính -->
                     <li class="nav-item"><a class="nav-link" href="{{ url('/') }}">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('lawyers.index') }}">Lawyers</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('appointments.index') }}">Appointments</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('announcements.index') }}">Announcements</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('faqs.index') }}">FAQ</a></li>
 
                     @auth
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle position-relative d-flex align-items-center"
-                           href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-bell fs-5"></i>
-                            <span class="ms-1 d-none d-lg-inline">Notifications</span>
-                            @php
-                                $unread = Auth::user()->notifications()->where('is_read', false)->count();
-                            @endphp
-                            @if($unread > 0)
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill badge-notification">
-                                    {{ $unread > 99 ? '99+' : $unread }}
-                                </span>
-                            @endif
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow dropdown-menu-glass notification-dropdown-menu">
-                            @php
-                                $latestNotif = Auth::user()->notifications()->latest()->first();
-                            @endphp
-                            @if($latestNotif)
-                                <li>
-                                    <a class="dropdown-item py-3 {{ $latestNotif->is_read ? '' : 'bg-light fw-medium' }}"
-                                    href="{{ route('notifications.index') }}">
-                                        <div class="fw-semibold">{{ $latestNotif->title }}</div>
-                                        <div class="small text-muted">{{ Str::limit($latestNotif->message, 40) }}</div>
-                                        <div class="small text-muted mt-1">{{ $latestNotif->created_at->diffForHumans() }}</div>
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider my-1"></li>
-                                <li class="text-center">
-                                    <a class="dropdown-item text-primary fw-medium" href="{{ route('notifications.index') }}">
-                                        View all notifications
-                                    </a>
-                                </li>
-                            @else
-                                <li><div class="dropdown-item text-center text-muted py-4">No notifications yet</div></li>
-                            @endif
+                        <!-- Notifications -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle position-relative d-flex align-items-center"
+                               href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-bell fs-5"></i>
+                                <span class="ms-1 d-none d-lg-inline">Notifications</span>
+                                @php
+                                    $unread = Auth::user()->notifications()->where('is_read', false)->count();
+                                @endphp
+                                @if($unread > 0)
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill badge-notification">
+                                        {{ $unread > 99 ? '99+' : $unread }}
+                                    </span>
+                                @endif
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow dropdown-menu-glass notification-dropdown-menu">
+                                @php
+                                    $latestNotif = Auth::user()->notifications()->latest()->first();
+                                @endphp
+                                @if($latestNotif)
+                                    <li>
+                                        <a class="dropdown-item py-3 {{ $latestNotif->is_read ? '' : 'bg-light fw-medium' }}"
+                                           href="{{ route('notifications.index') }}">
+                                            <div class="fw-semibold">{{ $latestNotif->title }}</div>
+                                            <div class="small text-muted">{{ Str::limit($latestNotif->message, 40) }}</div>
+                                            <div class="small text-muted mt-1">{{ $latestNotif->created_at->diffForHumans() }}</div>
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider my-1"></li>
+                                    <li class="text-center">
+                                        <a class="dropdown-item text-primary fw-medium" href="{{ route('notifications.index') }}">
+                                            View all notifications
+                                        </a>
+                                    </li>
+                                @else
+                                    <li><div class="dropdown-item text-center text-muted py-4">No notifications yet</div></li>
+                                @endif
+                            </ul>
+                        </li>
 
-                        </ul>
-                    </li>
+                        <!-- Dashboard link ra ngoài cùng -->
+                        @if(auth()->user()->role === 'admin')
+                            <li class="nav-item"><a class="nav-link fw-semibold" href="{{ route('admin.dashboard') }}">Admin Dashboard</a></li>
+                        @elseif(auth()->user()->role === 'lawyer')
+                            <li class="nav-item"><a class="nav-link fw-semibold" href="{{ route('lawyer.dashboard') }}">Lawyer Dashboard</a></li>
+                        @elseif(auth()->user()->role === 'customer')
+                            <li class="nav-item"><a class="nav-link fw-semibold" href="{{ route('customer.dashboard') }}">My Dashboard</a></li>
+                        @endif
                     @endauth
 
-                    <li class="nav-item"><a class="nav-link" href="{{ route('announcements.index') }}">Announcements</a></li>
-                    {{-- faq --}}
-                    <li class="nav-item"><a class="nav-link" href="{{ route('faqs.index') }}">FAQ</a></li>
+                    <!-- User dropdown -->
                     @guest
                         <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Login</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ route('register.choice') }}">Register</a></li>
@@ -183,16 +186,7 @@
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-person-circle"></i> {{ Auth::user()->name }}
                             </a>
-                            {{-- THÊM CLASS dropdown-menu-glass TẠI ĐÂY --}}
                             <ul class="dropdown-menu dropdown-menu-end dropdown-menu-glass"> 
-                                @if(auth()->user()->role === 'admin')
-                                    <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}">Admin Dashboard</a></li>
-                                @elseif(auth()->user()->role === 'lawyer')
-                                    <li><a class="dropdown-item" href="{{ route('lawyer.dashboard') }}">Lawyer Dashboard</a></li>
-                                @else
-                                    <li><a class="dropdown-item" href="{{ route('customer.dashboard') }}">My Dashboard</a></li>
-                                @endif
-                                <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form action="{{ route('logout') }}" method="POST">@csrf
                                         <button class="dropdown-item text-danger">Logout</button>
@@ -293,7 +287,7 @@
 
 <style>
 :root {
-  --primary: #3A4B41; /* same as navbar */
+  --primary: #3A4B41;
   --text-light: #FFFFFF;
   --radius: 6px;
 }
@@ -303,7 +297,7 @@
   color: var(--text-light);
   padding: 40px 20px;
   font-family: Arial, sans-serif;
-  text-align: center; /* center all content */
+  text-align: center;
 }
 
 .footer a {
@@ -319,7 +313,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 40px;
-  justify-content: center; /* center the sections */
+  justify-content: center;
   margin-bottom: 30px;
 }
 
@@ -374,7 +368,7 @@
   justify-content: center;
   gap: 15px;
   margin-bottom: 20px;
-  font-size: 24px; /* Bootstrap icons size */
+  font-size: 24px;
 }
 
 .footer-social a {

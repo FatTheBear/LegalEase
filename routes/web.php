@@ -17,11 +17,17 @@ use App\Http\Controllers\Admin\AppointmentController as AdminAppointmentControll
 use App\Http\Controllers\Admin\AnnouncementController as AdminAnnouncementController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\RatingController;
+use App\Http\Controllers\Admin\LawyerScheduleController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/lawyers', [LawyerController::class, 'index'])->name('lawyers.index');
 Route::get('/lawyers/{id}', [LawyerController::class, 'show'])->name('lawyers.show');
+
+
+Route::get('/lawyers/{id}/slots/{date}', [LawyerController::class, 'getSlotsByDay'])
+    ->name('lawyer.slots.by.day');
+
 
 // ==================== CÁC ROUTE KHÔNG CẦN LOGIN (PHẢI RA NGOÀI) ====================
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -55,7 +61,7 @@ Route::middleware(['auth'])->group(function () {
     // Rating route
     Route::post('/appointments/{appointment}/rate', [RatingController::class, 'store'])
         ->name('ratings.store');
-
+    
     // Dashboard
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/lawyer/dashboard', [LawyerController::class, 'dashboard'])->name('lawyer.dashboard');
@@ -66,14 +72,38 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
 
-    Route::middleware('role:lawyer')->group(function () {
-        Route::get('/lawyer/schedule', [AvailabilityController::class, 'index'])->name('lawyer.schedule');
-        Route::post('/lawyer/schedule', [AvailabilityController::class, 'store']);
-        Route::delete('/lawyer/schedule/{slot}', [AvailabilityController::class, 'destroy'])->name('lawyer.schedule.destroy');
-        
-        Route::get('/lawyer/profile/edit', [ProfileController::class, 'edit'])->name('lawyer.profile.edit');
-        Route::post('/lawyer/profile/update', [ProfileController::class, 'update'])->name('lawyer.profile.update');
-    });
+    Route::get('/lawyer/profile/edit', [ProfileController::class, 'edit'])
+    ->name('lawyer.profile.edit');
+
+Route::post('/lawyer/profile/update', [ProfileController::class, 'update'])
+    ->name('lawyer.profile.update');
+
+Route::middleware('role:lawyer')->group(function () {
+
+    Route::get('/lawyer/schedule', [AvailabilityController::class,'index'])
+        ->name('lawyer.schedule');
+
+    Route::post('/lawyer/schedule', [AvailabilityController::class,'store'])
+        ->name('lawyer.schedule.store');
+
+    Route::delete('/lawyer/schedule/toggle/{id}', [AvailabilityController::class,'destroy'])
+        ->name('lawyer.schedule.toggle');
+
+    Route::get('/lawyer/schedule/json', [AvailabilityController::class,'getSlots'])
+        ->name('lawyer.schedule.json');
+
+    Route::get('/lawyer/schedule/day/{date}', [AvailabilityController::class,'getSlotsByDay'])
+        ->name('lawyer.schedule.by-day');
+
+    Route::post('/lawyer/schedule/create-day', [AvailabilityController::class,'storeDay'])
+        ->name('lawyer.schedule.create-day');
+
+    Route::delete('/lawyer/schedule/delete-day/{date}', [AvailabilityController::class,'destroyDay'])
+        ->name('lawyer.schedule.delete-day');
+
+});
+
+
     // Admin Routes
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard'); // nếu cần riêng
@@ -111,7 +141,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/ratings/{id}/edit', [AdminController::class, 'editRating'])->name('ratings.edit');
         Route::put('/ratings/{id}', [AdminController::class, 'updateRating'])->name('ratings.update');
         Route::delete('/ratings/{id}', [AdminController::class, 'deleteRating'])->name('ratings.destroy');
-    });
+        
+        Route::get('/lawyer-schedules', [\App\Http\Controllers\Admin\LawyerScheduleController::class,'index'])->name('lawyer.schedules');
+        Route::get('/lawyer-schedules/lawyer/{lawyerId}', [\App\Http\Controllers\Admin\LawyerScheduleController::class,'getDates']);
+        Route::get('/lawyer-schedules/{lawyerId}/{date}/slots', [\App\Http\Controllers\Admin\LawyerScheduleController::class,'getSlotsByLawyerDate']);
+        Route::delete('/lawyer-schedules/delete/{id}', [\App\Http\Controllers\Admin\LawyerScheduleController::class,'deleteSlot']);
+        });
     
     // Appointments Routes
     Route::get('/appointments/create/{lawyer_id}', [AppointmentController::class, 'create'])->name('appointments.create');
