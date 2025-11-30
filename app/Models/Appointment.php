@@ -73,4 +73,5 @@ class Appointment extends Model
     {
         return in_array($this->status, ['pending', 'confirmed']);
     }
+    
 }

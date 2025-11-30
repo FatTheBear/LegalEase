@@ -10,25 +10,29 @@ use App\Models\News;
 use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\Rating;
 
 class AdminController extends Controller
 {
     public function dashboard()
     {
+        // Log when admin dashboard is accessed
         \Log::info('Admin Dashboard accessed by: ' . auth()->user()->email);
         
         $totalUsers = User::count();
         $totalLawyers = User::where('role', 'lawyer')->count();
         $pendingAppointments = Appointment::where('status', 'pending')->count();
         $totalAppointments = Appointment::count();
+        $totalRatings = Rating::count();
         $recentLawyers = User::where('role', 'lawyer')->latest()->take(5)->get();
         $recentAppointments = Appointment::with(['client', 'lawyer'])->latest()->take(5)->get();
-     
+
         return view('admin.dashboard', compact(
             'totalUsers',
             'totalLawyers',
             'pendingAppointments',
             'totalAppointments',
+            'totalRatings',
             'recentLawyers',
             'recentAppointments'
         ));
@@ -48,7 +52,7 @@ class AdminController extends Controller
             'email' => $request->email,
             'status' => $request->status,
         ]);
-        return redirect()->route('admin.users.index')->with('success', 'Cập nhật người dùng thành công.');
+        return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
     }
 
     public function manageLawyers()
@@ -89,10 +93,10 @@ class AdminController extends Controller
     {
         $user = User::findOrFail($id);
         if ($user->role !== 'lawyer') {
-            return redirect()->route('admin.lawyers.index')->with('error', 'Không phải luật sư.');
+            return redirect()->route('admin.lawyers.index')->with('error', 'Not a lawyer.');
         }
         $user->update(['status' => $request->status]);
-        return redirect()->route('admin.lawyers.index')->with('success', 'Cập nhật trạng thái luật sư thành công.');
+        return redirect()->route('admin.lawyers.index')->with('success', 'Lawyer status updated successfully.');
     }
 
     public function manageAnnouncements()
@@ -145,7 +149,7 @@ class AdminController extends Controller
             'answer' => 'required|string',
         ]);
         Faq::create($request->only('question', 'answer'));
-        return redirect()->route('admin.faqs.index')->with('success', 'Thêm FAQ thành công.');
+        return redirect()->route('admin.faqs.index')->with('success', 'FAQ added successfully.');
     }
 
     public function manageNews()
@@ -161,6 +165,41 @@ class AdminController extends Controller
             'content' => 'required|string',
         ]);
         News::create($request->only('title', 'content'));
-        return redirect()->route('admin.news.index')->with('success', 'Thêm tin tức thành công.');
+        return redirect()->route('admin.news.index')->with('success', 'News article added successfully.');
+    }
+
+    public function manageRatings()
+    {
+        $ratings = Rating::with(['client', 'lawyer'])->latest()->paginate(10);
+        return view('admin.ratings.index', compact('ratings'));
+    }
+
+    public function editRating($id)
+    {
+        $rating = Rating::findOrFail($id);
+        return view('admin.ratings.edit', compact('rating'));
+    }
+
+    public function updateRating(Request $request, $id)
+    {
+        $request->validate([
+            'rating' => 'required|numeric|min:0.5|max:5',
+            'comment' => 'nullable|string|max:500'
+        ]);
+
+        $rating = Rating::findOrFail($id);
+        $rating->update([
+            'rating' => $request->rating,
+            'comment' => $request->comment,
+        ]);
+
+        return redirect()->route('admin.ratings.index')->with('success', 'Rating updated successfully.');
+    }
+
+    public function deleteRating($id)
+    {
+        $rating = Rating::findOrFail($id);
+        $rating->delete();
+        return redirect()->route('admin.ratings.index')->with('success', 'Rating deleted successfully.');
     }
 }

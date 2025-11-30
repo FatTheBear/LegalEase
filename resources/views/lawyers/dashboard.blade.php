@@ -8,7 +8,7 @@
     <!-- Statistics Cards -->
     <div class="row">
         <div class="col-md-3 mb-3">
-            <div class="card text-white bg-primary">
+            <div class="card text-white btn-primary">
                 <div class="card-body">
                     <h5 class="card-title">Total Appointments</h5>
                     <h2 class="mb-0">{{ $totalAppointments }}</h2>
@@ -17,7 +17,7 @@
         </div>
 
         <div class="col-md-3 mb-3">
-            <div class="card text-white bg-warning">
+            <div class="card text-white btn-primary">
                 <div class="card-body">
                     <h5 class="card-title">Pending Appointments</h5>
                     <h2 class="mb-0">{{ $pendingAppointments }}</h2>
@@ -26,7 +26,7 @@
         </div>
 
         <div class="col-md-3 mb-3">
-            <div class="card text-white bg-info">
+            <div class="card text-white btn-primary">
                 <div class="card-body">
                     <h5 class="card-title">Average Rating</h5>
                     <h2 class="mb-0">{{ $averageRating ? number_format($averageRating, 1) : 'N/A' }}</h2>
@@ -35,7 +35,7 @@
         </div>
 
         <div class="col-md-3 mb-3">
-            <div class="card text-white bg-info">
+            <div class="card text-white btn-primary">
                 <div class="card-body">
                     <h5 class="card-title">Average Rating</h5>
                     <h2 class="mb-0">{{ $averageRating ? number_format($averageRating, 1) . ' ⭐' : 'N/A' }}</h2>
@@ -49,7 +49,7 @@
         <div class="col-md-4 mb-3">
             <div class="card">
                 <div class="card-body text-center">
-                    <i class="bi bi-calendar-check" style="font-size: 3rem; color: #0d6efd;"></i>
+                    <i class="bi bi-calendar-check" style="font-size: 3rem; color: #123c29;"></i>
                     <h5 class="card-title mt-3">View Appointments</h5>
                     <p class="card-text">Manage your bookings and schedule</p>
                     <a href="{{ route('appointments.index') }}" class="btn btn-primary">View Appointments</a>
@@ -60,10 +60,10 @@
         <div class="col-md-4 mb-3">
             <div class="card">
                 <div class="card-body text-center">
-                    <i class="bi bi-calendar-plus" style="font-size: 3rem; color: #198754;"></i>
+                    <i class="bi bi-calendar-plus" style="font-size: 3rem; color: #123c29;"></i>
                     <h5 class="card-title mt-3">Manage Availability</h5>
                     <p class="card-text">Set your available time slots</p>
-                    <a href="{{ route('lawyer.schedule') }}" class="btn btn-success">Manage Schedule</a>
+                    <a href="{{ route('lawyer.schedule') }}" class="btn btn-primary">Manage Schedule</a>
                 </div>
             </div>
         </div>
@@ -71,10 +71,10 @@
         <div class="col-md-4 mb-3">
             <div class="card">
                 <div class="card-body text-center">
-                    <i class="bi bi-person-badge" style="font-size: 3rem; color: #ffc107;"></i>
+                    <i class="bi bi-person-badge" style="font-size: 3rem; color: #123c29;"></i>
                     <h5 class="card-title mt-3">My Profile</h5>
                     <p class="card-text">Update your professional information</p>
-                    <a href="{{ route('lawyer.profile.edit') }}" class="btn btn-warning">Edit Profile</a>
+                    <a href="{{ route('lawyer.profile.edit') }}" class="btn btn-primary">Edit Profile</a>
                 </div>
             </div>
         </div>
@@ -82,7 +82,7 @@
 
     <!-- Upcoming Appointments -->
     <div class="card mt-4">
-    <div class="card-header bg-primary text-white">
+    <div class="card-header">
         <h5 class="mb-0">Upcoming Appointments</h5>
     </div>
     <div class="card-body">
@@ -128,7 +128,7 @@
     </div>
 </div>
 
-
+{{-- 
     <!-- Recent Client Reviews -->
     <div class="card mt-4">
         <div class="card-header">
@@ -137,6 +137,63 @@
         <div class="card-body">
             <p class="text-muted">No reviews yet</p>
         </div>
+    </div> --}}
+    <!-- Recent Client Reviews -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">Recent Client Reviews</h5>
+        </div>
+        <div class="card-body">
+            @if($ratings->count() > 0)
+                @foreach($ratings as $fb)
+                    <div class="mb-3 p-3 border rounded d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ $fb->client->name }}</strong>
+                            <span class="text-warning">
+                                @for($i = 1; $i <= 5; $i++)
+                                    <i class="bi bi-star{{ $i <= $fb->rating ? '-fill' : '' }}"></i>
+                                @endfor
+                            </span>
+                            <br>
+                            <small class="text-muted">{{ $fb->created_at->diffForHumans() }}</small>
+                        </div>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#feedbackModal{{ $fb->id }}">
+                            View
+                        </button>
+                    </div>
+
+                    <!-- Modal Detail -->
+                    <div class="modal fade text-center" id="feedbackModal{{ $fb->id }}" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header btn-primary text-white">
+                                    <h5 class="modal-title ">Feedback Details</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <br>
+                                    <p><strong>Client:</strong> {{ $fb->client->name }}</p>
+                                    <p><strong>Rating:</strong>
+                                        <span class="text-warning">
+                                            @for($i = 1; $i <= 5; $i++)
+                                                <i class="bi bi-star{{ $i <= $fb->rating ? '-fill' : '' }}"></i>
+                                            @endfor
+                                        </span>
+                                    </p>
+                                    <p><strong>Comment:</strong><br>{{ $fb->comment ?? 'No comment' }}</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            @else
+                <p class="text-muted">No reviews yet.</p>
+            @endif
+        </div>
     </div>
+
 </div>
 @endsection
