@@ -22,7 +22,7 @@ class AdminController extends Controller
         $pendingAppointments = Appointment::where('status', 'pending')->count();
         $totalAppointments = Appointment::count();
         $recentLawyers = User::where('role', 'lawyer')->latest()->take(5)->get();
-        $recentAppointments = Appointment::with(['customer', 'lawyer'])->latest()->take(5)->get();
+        $recentAppointments = Appointment::with(['client', 'lawyer'])->latest()->take(5)->get();
      
         return view('admin.dashboard', compact(
             'totalUsers',
