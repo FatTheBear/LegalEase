@@ -15,9 +15,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AppointmentController as AdminAppointmentController;
 use App\Http\Controllers\Admin\AnnouncementController as AdminAnnouncementController;
-
-
-// ĐÃ XÓA DÒNG NÀY: use App\Http\Controllers\PublicLawyerController; ← Không tồn tại → lỗi
+use App\Http\Controllers\Admin\LandingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -84,6 +82,7 @@ Route::middleware(['auth'])->group(function () {
     });
     // Admin Routes
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/landing', [LandingController::class, 'index'])->name('landing');
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard'); // nếu cần riêng
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
