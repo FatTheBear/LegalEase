@@ -16,12 +16,12 @@ class ProfileController extends Controller
     {
         $request->validate([
             'name'  => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,'.Auth::id(),
+            'email' => 'required|email|unique:users,email,' . Auth::id(),
             'phone' => 'nullable|string|max:15',
         ]);
 
         Auth::user()->update($request->only('name', 'email', 'phone'));
 
-        return back()->with('success', 'Cập nhật hồ sơ thành công!');
+        return back()->with('success', 'Profile updated successfully!');
     }
 }

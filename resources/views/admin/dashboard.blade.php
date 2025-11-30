@@ -17,12 +17,13 @@
         border-color: #8b6f5f;
         color: white;
     }
+
+    /* Đã loại bỏ CSS tùy chỉnh dashboard-card-item vì 4 thẻ x 3 cột đã hợp lý */
 </style>
 
 <div class="container-fluid">
-    <h2 class="mb-4"><i class="bi bi-speedometer2"></i> Admin Dashboard</h2>
+    <h2 class="mb-4 text-center"><i class="bi bi-speedometer2 "></i> Admin Dashboard</h2>
     
-    <!-- Statistics Cards -->
     <div class="row g-4 mb-4">
         <div class="col-md-3">
             <div class="card card-beige">
@@ -59,13 +60,35 @@
                 <div class="card-body text-center">
                     <h1 class="display-4" style="color: #5d4037;">{{ \App\Models\Announcement::count() }}</h1>
                     <p class="mb-3" style="color: #795548;"><i class="bi bi-megaphone"></i> Announcements</p>
-                    <a href="{{ route('admin.announcements.index') }}" class="btn btn-beige btn-sm w-100">Manage Announcements</a>
+                    <a href="{{ route('admin.announcements.index') }}" class="btn btn-beige btn-sm w-100">Announcements</a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Recent Lawyer Applications -->
+    <div class="card card-beige mb-4 shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="mb-0" style="color: #5d4037;"><i class="bi bi-star me-2"></i> Manage All Ratings & Reviews</h4>
+                <p class="text-muted mb-0">Total Ratings Recorded: <span class="fw-bold">{{ $totalRatings }}</span></p>
+            </div>
+            <a href="{{ route('admin.ratings.index') }}" class="btn btn-beige px-4">
+                View & Manage Ratings
+            </a>
+        </div>
+    </div>
+    <div class="card card-beige mb-4 shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="mb-0" style="color: #5d4037;"><i class="bi bi-calendar2-week me-2"></i> Manage Lawyer Schedules</h4>
+                <p class="text-muted mb-0">View and manage all lawyers’ availability slots</p>
+            </div>
+            <a href="{{ route('admin.lawyer.schedules') }}" class="btn btn-beige px-4">
+                Go to Schedules
+            </a>
+        </div>
+    </div>
+
     <div class="card">
         <div class="card-header">
             <h4 class="mb-0"><i class="bi bi-list"></i> Recent Lawyer Applications</h4>

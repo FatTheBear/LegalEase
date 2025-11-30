@@ -1,14 +1,14 @@
 @component('mail::message')
-# Bạn có thông báo mới từ LegalEase
+# You have a new notification from LegalEase
 
 **{{ $notification->title }}**
 
 {{ $notification->message }}
 
 @component('mail::button', ['url' => route('notifications.index')])
-Xem tất cả thông báo
+View all notifications
 @endcomponent
 
-Cảm ơn bạn đã sử dụng dịch vụ,<br>
+Thank you for using our service,<br>
 {{ config('app.name') }}
 @endcomponent

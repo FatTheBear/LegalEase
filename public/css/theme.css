@@ -1,0 +1,266 @@
+/* ============================
+  THEME VARIABLES
+============================ */
+:root {
+    --primary: #3A4B41;     /* Feldgrau */
+    --secondary: #E6CFA7;   /* Wheat */
+    --text-dark: #1E1E1E;
+    --text-light: #FFFFFF;
+    --background: #F9F6EF;
+    --radius: 10px;
+    --shadow: 0 4px 16px rgba(0,0,0,0.1);
+    --transition: 0.25s ease;
+}
+
+/* ============================
+  GLOBAL
+============================ */
+body {
+    /* THAY ĐỔI: Sử dụng Palatino làm font chính, Georgia làm dự phòng. */
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--background);
+    color: var(--text-dark);
+    margin: 0;
+    padding: 0;
+    /* THAY ĐỔI 1: Tăng độ đậm cơ bản lên 500 (Medium) */
+    font-weight: 500;
+    /* THAY ĐỔI 2: Thêm text-shadow mỏng để làm chữ dày hơn (faux bold) */
+    text-shadow: 0.01em 0.01em 0.01em rgba(0, 0, 0, 0.005);
+}
+
+/* THAY ĐỔI: Đảm bảo tiêu đề luôn đậm */
+h1, h2, h3, h4 {
+    font-weight: 700;
+}
+.fw-bold {
+    font-weight: 700 !important;
+}
+
+
+a {
+    text-decoration: none;
+    color: var(--primary);
+    transition: var(--transition);
+}
+
+a:hover {
+    opacity: 0.8;
+}
+
+/* ============================
+  NAVBAR
+============================ */
+.navbar {
+    background: var(--primary);
+    color: var(--text-light);
+    padding: 18px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar .brand {
+    font-size: 22px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: var(--secondary);
+}
+
+.navbar .menu a {
+    margin-left: 24px;
+    color: var(--secondary);
+    font-size: 16px;
+}
+
+/* ============================
+  HERO SECTION
+============================ */
+.hero {
+    background: var(--primary);
+    color: var(--secondary);
+    padding: 80px 40px;
+    text-align: center;
+}
+
+.hero h1 {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.hero p {
+    font-size: 20px;
+    opacity: 0.9;
+}
+
+/* ============================
+  CARD
+============================ */
+.card {
+    background: var(--secondary);
+    padding: 24px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+}
+
+.card h3 {
+    margin: 0 0 10px 0;
+    color: var(--primary);
+}
+
+/* ============================
+  BUTTON
+============================ */
+.btn {
+    padding: 12px 22px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    border: none;
+    font-size: 16px;
+    /* Giữ font Sans-serif cho nút (tính dễ đọc cao) */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    transition: var(--transition);
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: var(--secondary);
+}
+
+.btn-primary:hover {
+    opacity: 0.85;
+}
+
+/* ============================
+  FOOTER
+============================ */
+.footer {
+    background: var(--primary);
+    color: var(--secondary);
+    padding: 40px;
+    margin-top: 40px;
+    text-align: center;
+    font-size: 14px;
+}
+/* ============================
+  BUTTONS - ALL TYPES
+============================ */
+.btn {
+    padding: 12px 22px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    border: none;
+    font-size: 16px;
+    /* font-weight 500 đã được áp dụng thông qua body, nhưng đặt lại 500 cho chắc chắn */
+    font-weight: 500; 
+    transition: var(--transition);
+    text-align: center;
+    display: inline-block;
+    line-height: 1.5;
+    box-shadow: var(--shadow);
+}
+
+/* PRIMARY BUTTON */
+.btn-primary {
+    background-color: var(--primary);
+    color: var(--secondary);
+}
+.btn-primary:hover {
+    background-color: #2f3d34; /* hơi tối hơn */
+    color: var(--secondary);
+}
+
+/* SECONDARY BUTTON */
+.btn-secondary {
+    background-color: var(--secondary);
+    color: var(--primary);
+}
+.btn-secondary:hover {
+    background-color: #d1c79a; /* tối nhẹ */
+    color: var(--primary);
+}
+
+/* SUCCESS BUTTON */
+.btn-success {
+    background-color: #28a745;
+    color: #fff;
+}
+.btn-success:hover {
+    background-color: #218838;
+    color: #fff;
+}
+
+/* DANGER BUTTON */
+.btn-danger {
+    background-color: #dc3545;
+    color: #fff;
+}
+.btn-danger:hover {
+    background-color: #c82333;
+    color: #fff;
+}
+
+/* WARNING BUTTON */
+.btn-warning {
+    background-color: #ffc107;
+    color: #1E1E1E;
+}
+.btn-warning:hover {
+    background-color: #e0a800;
+    color: #1E1E1E;
+}
+
+/* INFO BUTTON */
+.btn-info {
+    background-color: #17a2b8;
+    color: #fff;
+}
+.btn-info:hover {
+    background-color: #138496;
+    color: #fff;
+}
+
+/* LIGHT BUTTON */
+.btn-light {
+    background-color: #f8f9fa;
+    color: #1E1E1E;
+}
+.btn-light:hover {
+    background-color: #e2e6ea;
+    color: #1E1E1E;
+}
+
+/* DARK BUTTON */
+.btn-dark {
+    background-color: #343a40;
+    color: #fff;
+}
+.btn-dark:hover {
+    background-color: #23272b;
+    color: #fff;
+}
+
+/* LINK BUTTON */
+.btn-link {
+    background: transparent;
+    color: var(--primary);
+    padding: 0;
+    border: none;
+    box-shadow: none;
+}
+.btn-link:hover {
+    text-decoration: underline;
+    color: #2f3d34;
+}
+
+/* DISABLED BUTTON */
+.btn:disabled, .btn.disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+th, td{
+    background-color: #ffedc7;
+    /* Sử dụng Palatino làm font chính cho bảng */
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}

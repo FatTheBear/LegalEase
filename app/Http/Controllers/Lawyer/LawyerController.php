@@ -14,8 +14,7 @@ use Carbon\Carbon;
 class LawyerController extends Controller
 {
     /**
-     * Danh sách luật sư (public - customer xem)
-     * Hỗ trợ tìm kiếm theo chuyên môn + tỉnh/thành phố
+     * Danh sách luật sư (public)
      */
     public function index(Request $request)
     {
@@ -23,8 +22,8 @@ class LawyerController extends Controller
         $province  = $request->query('province');
 
         $query = User::where('role', 'lawyer')
-                     ->where('status', 'active')
-                     ->with(['lawyerProfile', 'ratings']);
+                    ->where('status', 'active')
+                    ->with(['lawyerProfile', 'ratings']);
 
         if ($specialty) {
             $query->whereHas('lawyerProfile', function ($q) use ($specialty) {
@@ -40,11 +39,17 @@ class LawyerController extends Controller
 
         $lawyers = $query->paginate(9)->withQueryString();
 
-        return view('lawyers.index', compact('lawyers'));
+        $specializations = \App\Models\LawyerProfile::where('approval_status', 'approved')
+                            ->distinct()->pluck('specialization')->sort()->toArray();
+
+        $provinces = \App\Models\LawyerProfile::where('approval_status', 'approved')
+                            ->distinct()->pluck('province')->sort()->toArray();
+
+        return view('lawyers.index', compact('lawyers', 'specializations', 'provinces'));
     }
 
     /**
-     * Trang chi tiết luật sư + chọn slot đặt lịch
+     * Trang chi tiết luật sư + chọn slot
      */
     public function show($id)
     {
@@ -53,16 +58,22 @@ class LawyerController extends Controller
                     ->with(['lawyerProfile', 'ratings'])
                     ->findOrFail($id);
 
-        $availableSlots = AvailabilitySlot::where('lawyer_id', $id)
+        return view('lawyers.show', compact('lawyer'));
+    }
+
+    /**
+     * Lấy slot theo ngày (AJAX)
+     */
+    public function getSlotsByDay($id, $date)
+    {
+        $slots = AvailabilitySlot::where('lawyer_id', $id)
             ->where('is_booked', false)
-            ->where('date', '>=', today())
-            ->orderBy('date')
+            ->where('date', $date)
             ->orderBy('start_time')
             ->get();
 
-        return view('lawyers.show', compact('lawyer', 'availableSlots'));
+        return response()->json($slots);
     }
-
     /**
      * Dashboard của Lawyer
      */
@@ -70,7 +81,6 @@ class LawyerController extends Controller
     {
         $user = Auth::user();
 
-        // Chỉ lấy các cuộc hẹn sắp tới (>= hiện tại) và status = pending hoặc confirmed
         $appointments = Appointment::where('lawyer_id', $user->id)
             ->where('appointment_time', '>=', Carbon::now())
             ->whereIn('status', ['pending', 'confirmed'])
@@ -78,14 +88,12 @@ class LawyerController extends Controller
             ->orderBy('appointment_time')
             ->get();
 
-        // Thông báo chưa đọc
         $notifications = Notification::where('user_id', $user->id)
             ->where('is_read', false)
             ->latest()
             ->take(5)
             ->get();
 
-        // Thống kê
         $totalAppointments = Appointment::where('lawyer_id', $user->id)->count();
         $pendingAppointments = Appointment::where('lawyer_id', $user->id)
             ->where('status', 'pending')
@@ -94,9 +102,13 @@ class LawyerController extends Controller
             ->where('status', 'confirmed')
             ->count();
 
-        // Điểm đánh giá trung bình
         $averageRating = $user->ratings()->avg('rating') ?? 0;
         $averageRating = $averageRating > 0 ? number_format($averageRating, 1) : null;
+
+        $ratings = $user->ratings()
+            ->with('client')
+            ->latest()
+            ->get();
 
         return view('lawyers.dashboard', compact(
             'appointments',
@@ -104,7 +116,8 @@ class LawyerController extends Controller
             'totalAppointments',
             'pendingAppointments',
             'confirmedAppointments',
-            'averageRating'
+            'averageRating',
+            'ratings'
         ));
     }
 }

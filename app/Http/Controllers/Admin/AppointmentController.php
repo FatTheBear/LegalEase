@@ -12,11 +12,11 @@ use Carbon\Carbon;
 class AppointmentController extends Controller
 {
     /**
-     * Hiển thị danh sách tất cả các cuộc hẹn
+     * Display a listing of all appointments
      */
     public function index(Request $request)
     {
-        $query = Appointment::with(['customer', 'lawyer', 'lawyer.lawyerProfile']);
+        $query = Appointment::with(['client', 'lawyer', 'lawyer.lawyerProfile']);
         
         // Filter by status
         if ($request->filled('status')) {
@@ -28,15 +28,15 @@ class AppointmentController extends Controller
             $query->where('lawyer_id', $request->lawyer_id);
         }
         
-        // Filter by customer
-        if ($request->filled('customer_id')) {
-            $query->where('customer_id', $request->customer_id);
+        // Filter by client
+        if ($request->filled('client_id')) {
+            $query->where('client_id', $request->client_id);
         }
         
         // Search by name or email
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('customer', function($q) use ($search) {
+            $query->whereHas('client', function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%");
             })->orWhereHas('lawyer', function($q) use ($search) {
@@ -62,7 +62,7 @@ class AppointmentController extends Controller
         
         // Get data for filters
         $lawyers = User::where('role', 'lawyer')->with('lawyerProfile')->get();
-        $customers = User::where('role', 'customer')->get();
+        $clients = User::where('role', 'client')->get();
         
         // Get statistics
         $stats = [
@@ -76,38 +76,38 @@ class AppointmentController extends Controller
         return view('admin.appointments.index', compact(
             'appointments',
             'lawyers',
-            'customers',
+            'clients',
             'stats'
         ));
     }
 
     /**
-     * Hiển thị chi tiết một cuộc hẹn
+     * Display the specified appointment details
      */
     public function show($id)
     {
-        $appointment = Appointment::with(['customer', 'lawyer', 'lawyer.lawyerProfile', 'slot'])->findOrFail($id);
+        $appointment = Appointment::with(['client', 'lawyer', 'lawyer.lawyerProfile', 'slot'])->findOrFail($id);
         return view('admin.appointments.show', compact('appointment'));
     }
 
     /**
-     * Hiển thị form chỉnh sửa cuộc hẹn
+     * Show the form for editing the specified appointment
      */
     public function edit($id)
     {
-        $appointment = Appointment::with(['customer', 'lawyer'])->findOrFail($id);
+        $appointment = Appointment::with(['client', 'lawyer'])->findOrFail($id);
         $lawyers = User::where('role', 'lawyer')->with('lawyerProfile')->get();
-        $customers = User::where('role', 'customer')->get();
+        $clients = User::where('role', 'client')->get();
         
         return view('admin.appointments.edit', compact(
             'appointment',
             'lawyers',
-            'customers'
+            'clients'
         ));
     }
 
     /**
-     * Cập nhật trạng thái hoặc thông tin cuộc hẹn
+     * Update the appointment status or information
      */
     public function update(Request $request, $id)
     {
@@ -116,93 +116,117 @@ class AppointmentController extends Controller
         $validated = $request->validate([
             'status' => 'required|in:pending,confirmed,completed,cancelled',
             'appointment_time' => 'nullable|date_format:Y-m-d H:i',
-            'note' => 'nullable|string|max:500',
+            'notes' => 'nullable|string|max:500',
         ]);
         
         $oldStatus = $appointment->status;
         $appointment->update($validated);
         
-        // Tạo notification khi trạng thái thay đổi
+        // Create notification when status changes
         if ($oldStatus !== $validated['status']) {
             $this->createStatusChangeNotifications($appointment, $oldStatus, $validated['status']);
         }
         
         return redirect()->route('admin.appointments.index')
-                       ->with('success', 'Cập nhật cuộc hẹn thành công!');
+                         ->with('success', 'Appointment updated successfully!');
     }
 
     /**
-     * Xác nhận cuộc hẹn
+     * Confirm the appointment
      */
     public function confirm($id)
     {
         $appointment = Appointment::findOrFail($id);
-        
-        if ($appointment->status === 'pending') {
-            $appointment->update(['status' => 'confirmed']);
-            
-            // Gửi notification
-            Notification::create([
-                'user_id' => $appointment->customer_id,
-                'type' => 'appointment_confirmed',
-                'message' => 'Cuộc hẹn của bạn với ' . $appointment->lawyer->name . ' vào lúc ' . $appointment->appointment_time . ' đã được xác nhận.',
-            ]);
-            
-            Notification::create([
-                'user_id' => $appointment->lawyer_id,
-                'type' => 'appointment_confirmed',
-                'message' => 'Cuộc hẹn với ' . $appointment->customer->name . ' vào lúc ' . $appointment->appointment_time . ' đã được xác nhận.',
-            ]);
-            
-            return response()->json(['success' => true, 'message' => 'Xác nhận cuộc hẹn thành công!']);
+
+        $oldStatus = $appointment->status;
+
+        // Update status to confirmed
+        $appointment->status = 'confirmed';
+        $appointment->save();
+
+        // Send notification using try-catch
+        try {
+            notify(
+                $appointment->client_id,
+                'Appointment Confirmed',
+                "Your appointment with {$appointment->lawyer->name} on {$appointment->appointment_time} has been confirmed!",
+                'appointment_confirmed'
+            );
+        } catch (\Exception $e) {
+            \Log::warning("Notification to client failed: " . $e->getMessage());
         }
-        
-        return response()->json(['success' => false, 'message' => 'Chỉ có thể xác nhận cuộc hẹn đang chờ xử lý!'], 400);
+
+        try {
+            notify(
+                $appointment->lawyer_id,
+                'Appointment Confirmed',
+                "The appointment with {$appointment->client->name} on {$appointment->appointment_time} has been confirmed!",
+                'appointment_confirmed'
+            );
+        } catch (\Exception $e) {
+            \Log::warning("Notification to lawyer failed: " . $e->getMessage());
+        }
+
+        // Redirect back to appointment list page (or previous page)
+        return redirect()->route('admin.appointments.index')
+                         ->with('success', 'Appointment confirmed and notifications sent!');
     }
 
+
     /**
-     * Hủy cuộc hẹn
+     * Cancel the appointment
      */
     public function cancel(Request $request, $id)
     {
         $appointment = Appointment::findOrFail($id);
-        
+
         $validated = $request->validate([
             'reason' => 'nullable|string|max:500',
         ]);
-        
+
         if ($appointment->status !== 'cancelled') {
-            $oldStatus = $appointment->status;
             $appointment->update([
                 'status' => 'cancelled',
-                'note' => $validated['reason'] ?? $appointment->note,
+                'notes' => $validated['reason'] ?? $appointment->notes,
             ]);
-            
-            // Gửi notification
-            $reason = $validated['reason'] ?? 'Không có lý do được cung cấp';
-            
-            Notification::create([
-                'user_id' => $appointment->customer_id,
-                'type' => 'appointment_cancelled',
-                'message' => 'Cuộc hẹn vào lúc ' . $appointment->appointment_time . ' đã bị hủy. Lý do: ' . $reason,
-            ]);
-            
-            Notification::create([
-                'user_id' => $appointment->lawyer_id,
-                'type' => 'appointment_cancelled',
-                'message' => 'Cuộc hẹn vào lúc ' . $appointment->appointment_time . ' đã bị hủy. Lý do: ' . $reason,
-            ]);
-            
+
+            $reason = $validated['reason'] ?? 'No reason provided';
+
+            // Send notification to client
+            try {
+                notify(
+                    $appointment->client_id,
+                    'Appointment Cancelled',
+                    "The appointment on {$appointment->appointment_time} has been cancelled. Reason: {$reason}",
+                    'appointment_cancelled'
+                );
+            } catch (\Exception $e) {
+                \Log::warning("Notification to client failed: " . $e->getMessage());
+            }
+
+            // Send notification to lawyer
+            try {
+                notify(
+                    $appointment->lawyer_id,
+                    'Appointment Cancelled',
+                    "The appointment with {$appointment->client->name} on {$appointment->appointment_time} has been cancelled. Reason: {$reason}",
+                    'appointment_cancelled'
+                );
+            } catch (\Exception $e) {
+                \Log::warning("Notification to lawyer failed: " . $e->getMessage());
+            }
+
             return redirect()->route('admin.appointments.index')
-                           ->with('success', 'Hủy cuộc hẹn thành công!');
+                             ->with('success', 'Appointment successfully cancelled and users notified!');
         }
-        
+
         return redirect()->route('admin.appointments.index')
-                       ->with('error', 'Cuộc hẹn này đã được hủy!');
+                         ->with('error', 'This appointment is already cancelled!');
     }
 
+
     /**
-     * Xóa cuộc hẹn
+     * Delete the appointment
      */
     public function destroy($id)
     {
@@ -210,11 +234,11 @@ class AppointmentController extends Controller
         $appointment->delete();
         
         return redirect()->route('admin.appointments.index')
-                       ->with('success', 'Xóa cuộc hẹn thành công!');
+                         ->with('success', 'Appointment successfully deleted!');
     }
 
     /**
-     * Lấy dữ liệu thống kê appointments
+     * Retrieve appointment statistics data
      */
     public function getStatistics()
     {
@@ -224,34 +248,34 @@ class AppointmentController extends Controller
         return [
             'today_count' => Appointment::whereDate('appointment_time', $today)->count(),
             'today_pending' => Appointment::whereDate('appointment_time', $today)
-                                         ->where('status', 'pending')->count(),
+                                          ->where('status', 'pending')->count(),
             'today_confirmed' => Appointment::whereDate('appointment_time', $today)
-                                           ->where('status', 'confirmed')->count(),
+                                            ->where('status', 'confirmed')->count(),
             'this_month_count' => Appointment::whereBetween('appointment_time', [$thisMonth, $thisMonth->endOfMonth()])->count(),
             'upcoming' => Appointment::where('appointment_time', '>', now())
-                                    ->where('status', '!=', 'cancelled')
-                                    ->count(),
+                                     ->where('status', '!=', 'cancelled')
+                                     ->count(),
             'overdue' => Appointment::where('appointment_time', '<', now())
-                                   ->where('status', 'pending')->count(),
+                                    ->where('status', 'pending')->count(),
         ];
     }
 
     /**
-     * Helper: Tạo notifications khi trạng thái thay đổi
+     * Helper: Create notifications when status changes
      */
     private function createStatusChangeNotifications($appointment, $oldStatus, $newStatus)
     {
         $statusMessages = [
-            'pending' => 'chờ xử lý',
-            'confirmed' => 'đã xác nhận',
-            'completed' => 'đã hoàn thành',
-            'cancelled' => 'đã hủy',
+            'pending' => 'pending',
+            'confirmed' => 'confirmed',
+            'completed' => 'completed',
+            'cancelled' => 'cancelled',
         ];
         
-        $message = 'Trạng thái cuộc hẹn đã thay đổi từ ' . $statusMessages[$oldStatus] . ' thành ' . $statusMessages[$newStatus];
+        $message = 'The appointment status has changed from ' . $statusMessages[$oldStatus] . ' to ' . $statusMessages[$newStatus];
         
         Notification::create([
-            'user_id' => $appointment->customer_id,
+            'user_id' => $appointment->client_id,
             'type' => 'appointment_status_changed',
             'message' => $message,
         ]);
