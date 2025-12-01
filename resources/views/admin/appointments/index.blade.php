@@ -18,7 +18,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="w-100 text-center">
             <h2 class="mb-0"><i class="bi bi-calendar-event"></i> Manage Appointments</h2>
-            <p class="text-muted mb-0">Manage all appointments of lawyers and customers</p>
+            <p class="text-muted mb-0">Manage all appointments of lawyers and clients</p>
         </div>
     </div>
 
@@ -158,13 +158,13 @@
                                value="{{ request('end_date') }}">
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Customer</label>
-                        <select name="customer_id" class="form-select">
-                            <option value="">-- All Customers --</option>
-                            @foreach($clients as $customer)
-                                <option value="{{ $customer->id }}" 
-                                    {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
-                                    {{ $customer->name }} ({{ $customer->email }})
+                        <label class="form-label">Client</label>
+                        <select name="client_id" class="form-select">
+                            <option value="">-- All Clients --</option>
+                            @foreach($clients as $client)
+                                <option value="{{ $client->id }}" 
+                                    {{ request('client_id') == $client->id ? 'selected' : '' }}>
+                                    {{ $client->name }} ({{ $client->email }})
                                 </option>
                             @endforeach
                         </select>
@@ -194,7 +194,7 @@
                     <thead class="table-light">
                         <tr>
                             <th style="width: 5%">#</th>
-                            <th style="width: 15%">Customer</th>
+                            <th style="width: 15%">Client</th>
                             <th style="width: 15%">Lawyer</th>
                             <th style="width: 15%">Date & Time</th>
                             <th style="width: 10%">Status</th>
@@ -208,9 +208,9 @@
                             <td>{{ $appointments->firstItem() + $index }}</td>
                             <td>
                                 <div>
-                                    <strong>{{ $appointment->customer->name ?? 'N/A' }}</strong>
+                                    <strong>{{ $appointment->client->name ?? 'N/A' }}</strong>
                                     <br>
-                                    <small class="text-muted">{{ $appointment->customer->email ?? 'N/A' }}</small>
+                                    <small class="text-muted">{{ $appointment->client->email ?? 'N/A' }}</small>
                                 </div>
                             </td>
                             <td>
@@ -228,28 +228,30 @@
                             </td>
                             <td>
                                 <div>
-                                    <strong>{{ $appointment->appointment_time ? \Carbon\Carbon::parse($appointment->appointment_time)->format('m/d/Y') : 'N/A' }}</strong>
-                                    <br>
-                                    <small class="text-muted">{{ $appointment->appointment_time ? \Carbon\Carbon::parse($appointment->appointment_time)->format('H:i') : 'N/A' }}</small>
+                                    @if($appointment->slot)
+                                        <strong>{{ \Carbon\Carbon::parse($appointment->slot->date)->format('m/d/Y') }}</strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            {{ \Carbon\Carbon::parse($appointment->slot->start_time)->format('H:i') }}
+                                            →
+                                            {{ \Carbon\Carbon::parse($appointment->slot->end_time)->format('H:i') }}
+                                        </small>
+                                    @else
+                                        <strong>N/A</strong>
+                                        <br>
+                                        <small class="text-muted">N/A</small>
+                                    @endif
                                 </div>
                             </td>
                             <td>
                                 @if($appointment->status === 'pending')
-                                    <span class="badge bg-warning">
-                                        <i class="bi bi-hourglass-split"></i> Pending
-                                    </span>
+                                    <span class="badge bg-warning"><i class="bi bi-hourglass-split"></i> Pending</span>
                                 @elseif($appointment->status === 'confirmed')
-                                    <span class="badge bg-success">
-                                        <i class="bi bi-check-circle"></i> Confirmed
-                                    </span>
+                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Confirmed</span>
                                 @elseif($appointment->status === 'completed')
-                                    <span class="badge bg-info">
-                                        <i class="bi bi-check2-all"></i> Completed
-                                    </span>
+                                    <span class="badge bg-info"><i class="bi bi-check2-all"></i> Completed</span>
                                 @else
-                                    <span class="badge bg-danger">
-                                        <i class="bi bi-x-circle"></i> Cancelled
-                                    </span>
+                                    <span class="badge bg-danger"><i class="bi bi-x-circle"></i> Cancelled</span>
                                 @endif
                             </td>
                             <td>
@@ -292,10 +294,10 @@
                                     <div class="modal-body">
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <h6 class="text-muted mb-1">Customer</h6>
+                                                <h6 class="text-muted mb-1">Client</h6>
                                                 <p class="mb-3">
-                                                    <strong>{{ $appointment->customer->name ?? 'N/A' }}</strong><br>
-                                                    <small class="text-muted">{{ $appointment->customer->email ?? 'N/A' }}</small>
+                                                    <strong>{{ $appointment->client->name ?? 'N/A' }}</strong><br>
+                                                    <small class="text-muted">{{ $appointment->client->email ?? 'N/A' }}</small>
                                                 </p>
                                             </div>
                                             <div class="col-md-6">
@@ -318,7 +320,7 @@
                                                 <h6 class="text-muted mb-1">Appointment Date</h6>
                                                 <p class="mb-3">
                                                     <strong>
-                                                        {{ $appointment->appointment_time ? \Carbon\Carbon::parse($appointment->appointment_time)->format('m/d/Y') : 'N/A' }}
+                                                        {{ $appointment->slot ? \Carbon\Carbon::parse($appointment->slot->date)->format('m/d/Y') : 'N/A' }}
                                                     </strong>
                                                 </p>
                                             </div>
@@ -326,7 +328,9 @@
                                                 <h6 class="text-muted mb-1">Time</h6>
                                                 <p class="mb-3">
                                                     <strong>
-                                                        {{ $appointment->appointment_time ? \Carbon\Carbon::parse($appointment->appointment_time)->format('H:i') : 'N/A' }}
+                                                        {{ $appointment->slot ? \Carbon\Carbon::parse($appointment->slot->start_time)->format('H:i') : 'N/A' }}
+                                                        →
+                                                        {{ $appointment->slot ? \Carbon\Carbon::parse($appointment->slot->end_time)->format('H:i') : '' }}
                                                     </strong>
                                                 </p>
                                             </div>
@@ -346,10 +350,10 @@
                                                 @endif
                                             </p>
                                         </div>
-                                        @if($appointment->note)
+                                        @if($appointment->notes)
                                             <div class="mb-3">
                                                 <h6 class="text-muted mb-1">Notes</h6>
-                                                <p class="bg-light p-3 rounded">{{ $appointment->note }}</p>
+                                                <p class="bg-light p-3 rounded">{{ $appointment->notes }}</p>
                                             </div>
                                         @endif
                                     </div>
