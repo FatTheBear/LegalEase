@@ -94,7 +94,52 @@
 <!-- FullCalendar CSS & JS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+{{-- css calendar --}}
+{{-- tạo hiệu ứng hover  và active, các ngày khác nhau có khoảng cách nhẹ, bo góc mỗi ngày nhẹ với tone màu 3A4B41 nhạt hơn tùy chỉnh --}}
+<style>
+    /* Tùy chỉnh giao diện calendar */
+    .fc .fc-daygrid-day {
+        border: 1px solid #E6CFA7;
+        border-radius: 8px;
+        margin: 2px;
+        transition: background-color 0.3s, transform 0.3s;
+    }
 
+    .fc .fc-daygrid-day:hover {
+        background-color: rgba(58, 75, 65, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .fc .fc-daygrid-day.fc-day-today {
+        background-color: rgba(58, 75, 65, 0.2);
+        border: 2px solid #3A4B41;
+    }
+
+    .fc .fc-toolbar-title {
+        color: #3A4B41 ;
+        font-weight: 600;
+    }
+
+    .fc .fc-button {
+        background-color: #E6CFA7;
+        border: none;
+        color: #3A4B41;
+        font-weight: 600;
+    }
+
+    .fc .fc-button:hover {
+        background-color: #d9c395;
+        color: #3A4B41;
+    }
+
+    .fc .fc-button:focus {
+        box-shadow: none;
+    }
+
+    .fc .fc-button:active {
+        background-color: #E6CFA7;
+    }
+</style>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     let calendarEl = document.getElementById('calendar');
