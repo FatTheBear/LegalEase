@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Announcement;
+use App\Models\Faq;
 
 class HomeController extends Controller
 {
@@ -19,7 +20,6 @@ class HomeController extends Controller
         // Featured lawyers (6 lawyers)
         $featuredLawyers = User::where('role', 'lawyer')
             ->where('status', 'active')
-            ->whereNotNull('email_verified_at')
             ->with(['lawyerProfile', 'ratings'])
             ->latest()
             ->take(6)
@@ -31,7 +31,6 @@ class HomeController extends Controller
                 ->join('lawyer_profiles', 'lawyer_profiles.user_id', '=', 'users.id')
                 ->where('users.role', 'lawyer')
                 ->where('users.status', 'active')
-                ->whereNotNull('users.email_verified_at')
                 ->whereNotIn('users.id', $featuredLawyers->pluck('id'))
                 ->with(['lawyerProfile', 'ratings'])
                 ->orderByDesc('lawyer_profiles.experience')
@@ -62,6 +61,9 @@ class HomeController extends Controller
         // Announcements
         $announcements = Announcement::latest()->take(5)->get();
 
+        // FAQs for landing page
+        $faqs = Faq::all();
+
         // Dropdown values
         $allLawyers = User::where('role', 'lawyer')
             ->where('status', 'active')
@@ -80,14 +82,21 @@ class HomeController extends Controller
             ->sort()
             ->values();
 
-        return view('home', compact(
+        $data = compact(
             'featuredLawyers',
             'announcements',
             'specializations',
             'provinces',
             'searchResults',
             'specialization',
-            'province'
-        ));
+            'province',
+            'faqs'
+        );
+
+        if (auth()->check()) {
+            return view('home-auth', $data);
+        } else {
+            return view('home-guest', $data);
+        }
     }
 }

@@ -57,6 +57,8 @@ Route::get('/faqs', function () {
     return view('faqs.index', compact('faqs'));
 })->name('faqs.index');
 
+Route::get('/landing', [\App\Http\Controllers\Admin\LandingController::class, 'index'])->name('landing');
+
 // ==================== CHỈ TỪ ĐÂY MỚI CẦN ĐĂNG NHẬP ====================
 Route::middleware(['auth'])->group(function () {
 
@@ -114,7 +116,6 @@ Route::middleware('role:lawyer')->group(function () {
 
     // Admin Routes
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/landing', [LandingController::class, 'index'])->name('landing');
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard'); // nếu cần riêng
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');

@@ -1,53 +1,109 @@
 @extends('layouts.app')
-@section('title', 'Customer Dashboard')
+@section('title', 'My Dashboard')
 
 @section('content')
-<div class="container mt-4">
-    <h1 class="mb-4 text-center">Customer Dashboard</h1>
+<style>
+    :root {
+        --primary: #6366f1;
+        --secondary: #a0826d;
+    }
     
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <div class="card">
-                <div class="card-body text-center">
-                    <i class="bi bi-search" style="font-size: 3rem; color: #123c29;"></i>
-                    <h5 class="card-title mt-3">Find Lawyers</h5>
-                    <p class="card-text">Search for lawyers by specialization</p>
-                    <a href="{{ route('lawyers.index') }}" class="btn btn-primary">Search Now</a>
-                </div>
-            </div>
-        </div>
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    
+    .dashboard-header h1 {
+        margin: 0;
+        font-size: 2rem;
+    }
+    
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+    }
+    
+    .action-card {
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .action-card:hover {
+        border-color: var(--primary);
+        box-shadow: 0 6px 12px rgba(99, 102, 241, 0.15);
+        transform: translateY(-3px);
+    }
+    
+    .action-card i {
+        font-size: 3rem;
+        color: var(--primary);
+        margin-bottom: 1rem;
+        display: block;
+    }
+    
+    .action-card h3 {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #333;
+        font-size: 1.2rem;
+    }
+    
+    .action-card p {
+        color: #666;
+        margin-bottom: 1.5rem;
+    }
+    
+    .action-card .btn {
+        padding: 0.7rem 1.5rem;
+        background-color: var(--primary);
+        border-color: var(--primary);
+        color: white;
+        font-weight: 500;
+    }
+    
+    .action-card .btn:hover {
+        background-color: #4f46e5;
+        border-color: #4f46e5;
+    }
+</style>
 
-        <div class="col-md-4 mb-3">
-            <div class="card">
-                <div class="card-body text-center">
-                    <i class="bi bi-calendar-check" style="font-size: 3rem; color: #123c29;"></i>
-                    <h5 class="card-title mt-3">My Appointments</h5>
-                    <p class="card-text">View and manage your bookings</p>
-                    <a href="{{ route('appointments.index') }}" class="btn btn-primary">View Appointments</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4 mb-3">
-            <div class="card">
-                <div class="card-body text-center">
-                    <i class="bi bi-person-circle" style="font-size: 3rem; color: #123c29;"></i>
-                    <h5 class="card-title mt-3">My Profile</h5>
-                    <p class="card-text">Update your personal information</p>
-                    <a href="{{ route('profile.edit') }}" class="btn btn-primary">Edit Profile</a>
-                </div>
-            </div>
-        </div>
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <h1>My Dashboard</h1>
     </div>
-
-    <!-- Recent Appointments -->
-    <div class="card mt-4">
-        <div class="card-header">
-            <h5 class="mb-0">Recent Appointments</h5>
+    
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <div class="action-card">
+            <i class="bi bi-search"></i>
+            <h3>Find Lawyers</h3>
+            <p>Search and browse available lawyers</p>
+            <a href="{{ route('lawyers.index') }}" class="btn btn-sm">Browse Lawyers</a>
         </div>
-        <div class="card-body">
-            <p class="text-muted">No appointments yet. <a href="{{ route('lawyers.index') }}">Book your first consultation!</a></p>
+
+        <div class="action-card">
+            <i class="bi bi-calendar-check"></i>
+            <h3>My Appointments</h3>
+            <p>View and manage your bookings</p>
+            <a href="{{ route('appointments.index') }}" class="btn btn-sm">View Appointments</a>
+        </div>
+
+        <div class="action-card">
+            <i class="bi bi-person-circle"></i>
+            <h3>My Profile</h3>
+            <p>Update your personal information</p>
+            <a href="{{ route('profile.edit') }}" class="btn btn-sm">Edit Profile</a>
         </div>
     </div>
 </div>
+
 @endsection

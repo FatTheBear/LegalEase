@@ -81,7 +81,7 @@ class LoginController extends Controller
             case 'lawyer':
                 return redirect()->route('lawyer.dashboard');
             case 'customer':
-                return redirect()->route('customer.dashboard');
+                return redirect()->route('home');
             default:
                 return redirect()->route('home');
         }

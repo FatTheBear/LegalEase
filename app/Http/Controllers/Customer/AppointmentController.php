@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Mail\AppointmentBookedMail;
 use App\Models\Appointment;
 use App\Models\AvailabilitySlot;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class AppointmentController extends Controller
 {
@@ -71,7 +73,17 @@ class AppointmentController extends Controller
             'appointment_id' => $appointment->id,
         ]);
 
-        // Send notification if notify function exists
+        // Get lawyer info
+        $lawyer = \App\Models\User::findOrFail($slot->lawyer_id);
+
+        // Send email to CUSTOMER
+        try {
+            Mail::to($client->email)->send(new AppointmentBookedMail($appointment, $client, $lawyer));
+        } catch (\Exception $e) {
+            \Log::error("Failed to send booking confirmation email to customer: " . $e->getMessage());
+        }
+
+        // Send notification to LAWYER
         try {
             notify($slot->lawyer_id, 'New Booking', "Customer {$client->name} booked your slot!", 'booking');
         } catch (\Exception $e) {
@@ -79,7 +91,7 @@ class AppointmentController extends Controller
         }
 
         return redirect()->route('appointments.index')
-                         ->with('success', 'Booking successful! Awaiting lawyer confirmation.');
+                         ->with('success', 'Booking successful! A confirmation email has been sent to ' . $client->email . '. Awaiting lawyer confirmation.');
     }
 
     // ==================== LAWYER CONFIRMATION ====================
