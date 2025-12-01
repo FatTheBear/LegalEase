@@ -4,6 +4,7 @@
 @section('content')
 <div class="container mt-5">
     <div class="row justify-content-center">
+        <!-- Thông tin luật sư -->
         <div class="col-md-4 text-center mb-4">
             @php
             $avatarUrl = $lawyer->avatar
@@ -27,6 +28,7 @@
             </p>
         </div>
 
+        <!-- Lịch và chọn slot -->
         <div class="col-md-8">
             <div class="card shadow">
                 <div class="card-header">
@@ -35,7 +37,6 @@
                     </h4>
                 </div>
                 <div class="card-body">
-
                     <div class="row">
                         <div class="col-md-12 mb-4">
                             <div id="calendar"></div>
@@ -72,6 +73,7 @@
     </div>
 </div>
 
+<!-- FullCalendar CSS & JS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
@@ -84,7 +86,13 @@ document.addEventListener('DOMContentLoaded', function () {
         selectable: true,
         height: "auto",
         dateClick(info) {
-            let date = info.dateStr;
+            // Lấy ngày theo múi giờ local: YYYY-MM-DD
+            const localDate = info.date;
+            const year = localDate.getFullYear();
+            const month = String(localDate.getMonth() + 1).padStart(2, '0');
+            const day = String(localDate.getDate()).padStart(2, '0');
+            const date = `${year}-${month}-${day}`;
+            
             fetchSlots(date);
         }
     });
@@ -112,6 +120,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     });
                 }
                 document.getElementById('slot-list').innerHTML = list;
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('slot-list').innerHTML = '<p class="text-danger">Error fetching slots.</p>';
             });
     }
 });
