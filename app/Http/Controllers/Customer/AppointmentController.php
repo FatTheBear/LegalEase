@@ -29,7 +29,6 @@ class AppointmentController extends Controller
         return view('appointments.index', compact('appointments', 'feedbacks'));
     }
 
-
     // ==================== CREATE REDIRECT ====================
     public function create($lawyer_id)
     {
@@ -52,19 +51,36 @@ class AppointmentController extends Controller
 
         $client = Auth::user();
 
-        // Avoid concatenating date + time if start_time/end_time are already datetime objects
-        $appointment_time = $slot->start_time;
-        $end_time         = $slot->end_time;
+        // Create proper datetime from slot's date + start/end time
+        $appointment_time = \Carbon\Carbon::parse($slot->date->format('Y-m-d') . ' ' . $slot->start_time);
+        $end_time         = \Carbon\Carbon::parse($slot->date->format('Y-m-d') . ' ' . $slot->end_time);
+
+        // ===== Check if client already has appointment overlapping this slot =====
+        $hasConflict = Appointment::where('client_id', $client->id)
+            ->where('status', '!=', 'cancelled')
+            ->where(function ($q) use ($appointment_time, $end_time) {
+                $q->where(function ($q2) use ($appointment_time, $end_time) {
+                    $q2->where('appointment_time', '<', $end_time)
+                       ->where('end_time', '>', $appointment_time);
+                });
+            })
+            ->exists();
+
+        if ($hasConflict) {
+            return back()->with('error', 'You already have an appointment overlapping this time slot.');
+        }
 
         // Create appointment
         $appointment = Appointment::create([
-            'client_id'          => $client->id,
-            'lawyer_id'          => $slot->lawyer_id,
-            'slot_id'            => $slot->id,
-            'appointment_time' => $appointment_time,
-            'end_time'         => $end_time,
-            'status'             => 'pending',
-            'notes'              => $request->notes ?? null,
+            'client_id'       => $client->id,
+            'lawyer_id'       => $slot->lawyer_id,
+            'slot_id'         => $slot->id,
+            'date'            => $slot->date,
+            'start_time'      => $slot->start_time,
+            'end_time'        => $slot->end_time,
+            'appointment_time'=> $appointment_time,
+            'status'          => 'pending',
+            'notes'           => $request->notes ?? null,
         ]);
 
         // Update slot
@@ -73,17 +89,16 @@ class AppointmentController extends Controller
             'appointment_id' => $appointment->id,
         ]);
 
-        // Get lawyer info
         $lawyer = \App\Models\User::findOrFail($slot->lawyer_id);
 
-        // Send email to CUSTOMER
+        // Send email to customer
         try {
             Mail::to($client->email)->send(new AppointmentBookedMail($appointment, $client, $lawyer));
         } catch (\Exception $e) {
-            \Log::error("Failed to send booking confirmation email to customer: " . $e->getMessage());
+            \Log::error("Failed to send booking confirmation email: " . $e->getMessage());
         }
 
-        // Send notification to LAWYER kèm theo notes 
+        // Notify lawyer
         try {
             notify(
                 $request->lawyer_id,
@@ -96,9 +111,8 @@ class AppointmentController extends Controller
             \Log::warning("Notification failed: " . $e->getMessage());
         }
 
-
         return redirect()->route('appointments.index')
-                         ->with('success', 'Booking successful! A confirmation email has been sent to ' . $client->email . '. Awaiting lawyer confirmation.');
+                         ->with('success', 'Booking successful! Confirmation email sent to ' . $client->email . '. Awaiting lawyer confirmation.');
     }
 
     // ==================== LAWYER CONFIRMATION ====================
@@ -116,7 +130,7 @@ class AppointmentController extends Controller
         // Notify the client
         try {
             notify(
-                $client->id, // → send to client
+                $client->id,
                 'Appointment Confirmed',
                 "Your appointment with {$lawyer->name} has been confirmed.",
                 'confirmed',
@@ -125,7 +139,6 @@ class AppointmentController extends Controller
         } catch (\Exception $e) {
             \Log::warning("Failed to notify client ID {$client->id}: " . $e->getMessage());
         }
-
 
         return back()->with('success', 'Appointment confirmed successfully!');
     }
@@ -171,16 +184,16 @@ class AppointmentController extends Controller
 
         return back()->with('success', 'Appointment cancelled successfully.');
     }
+
     // ==================== RATING HISTORY (CLIENT) ====================
     public function history()
     {
         $feedbacks = Auth::user()
-            ->feedbacks()   // relationship in User model
-            ->with('lawyer') // load lawyer information
+            ->feedbacks()
+            ->with('lawyer')
             ->latest()
             ->get();
 
         return view('appointments.history', compact('feedbacks'));
     }
-
 }
