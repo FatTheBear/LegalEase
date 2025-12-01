@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'LegalEase Admin - Welcome')
+@section('title', 'LegalEase - Welcome')
 
 @section('content')
 <style>
@@ -216,9 +216,11 @@
 <!-- ==================== HERO SECTION ==================== -->
 <section class="hero" id="hero">
     <div class="hero-content">
-        <h1>Welcome to LegalEase Admin</h1>
-        <p>Manage your legal services platform with ease and efficiency</p>
-        <a href="{{ route('admin.dashboard') }}" class="btn-get-started">Get Started</a>
+        <h1>Welcome to LegalEase</h1>
+        <p>Connect with experienced lawyers and manage your legal services with ease</p>
+        @guest
+            <a href="{{ route('login') }}" class="btn-get-started">Get Started</a>
+        @endguest
     </div>
 </section>
 

@@ -16,7 +16,6 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AppointmentController as AdminAppointmentController;
 use App\Http\Controllers\Admin\AnnouncementController as AdminAnnouncementController;
 use App\Http\Controllers\Admin\LandingController;
-use App\Http\Controllers\Admin\LandingController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\Admin\LawyerScheduleController;
@@ -57,6 +56,8 @@ Route::get('/faqs', function () {
     $faqs = \App\Models\Faq::all();
     return view('faqs.index', compact('faqs'));
 })->name('faqs.index');
+
+Route::get('/landing', [\App\Http\Controllers\Admin\LandingController::class, 'index'])->name('landing');
 
 // ==================== CHỈ TỪ ĐÂY MỚI CẦN ĐĂNG NHẬP ====================
 Route::middleware(['auth'])->group(function () {
@@ -115,7 +116,6 @@ Route::middleware('role:lawyer')->group(function () {
 
     // Admin Routes
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/landing', [LandingController::class, 'index'])->name('landing');
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard'); // nếu cần riêng
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Announcement;
+use App\Models\Faq;
 
 class HomeController extends Controller
 {
@@ -62,6 +63,9 @@ class HomeController extends Controller
         // Announcements
         $announcements = Announcement::latest()->take(5)->get();
 
+        // FAQs for landing page
+        $faqs = Faq::all();
+
         // Dropdown values
         $allLawyers = User::where('role', 'lawyer')
             ->where('status', 'active')
@@ -80,14 +84,21 @@ class HomeController extends Controller
             ->sort()
             ->values();
 
-        return view('home', compact(
+        $data = compact(
             'featuredLawyers',
             'announcements',
             'specializations',
             'provinces',
             'searchResults',
             'specialization',
-            'province'
-        ));
+            'province',
+            'faqs'
+        );
+
+        if (auth()->check()) {
+            return view('home-auth', $data);
+        } else {
+            return view('home-guest', $data);
+        }
     }
 }
