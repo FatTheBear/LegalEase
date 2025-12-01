@@ -83,12 +83,19 @@ class AppointmentController extends Controller
             \Log::error("Failed to send booking confirmation email to customer: " . $e->getMessage());
         }
 
-        // Send notification to LAWYER
+        // Send notification to LAWYER kèm theo notes 
         try {
-            notify($slot->lawyer_id, 'New Booking', "Customer {$client->name} booked your slot!", 'booking');
+            notify(
+                $request->lawyer_id,
+                'New Booking',
+                "Customer {$client->name} booked your slot! Notes: " . ($request->notes ?? 'No additional notes.'),
+                'booking',
+                ['appointment_id' => $appointment->id]
+            );
         } catch (\Exception $e) {
             \Log::warning("Notification failed: " . $e->getMessage());
         }
+
 
         return redirect()->route('appointments.index')
                          ->with('success', 'Booking successful! A confirmation email has been sent to ' . $client->email . '. Awaiting lawyer confirmation.');
