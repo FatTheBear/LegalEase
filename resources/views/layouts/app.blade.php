@@ -282,6 +282,7 @@
             toggleNavbarOpacity();
         });
     </script>
+    @include('components.chat-live')
 </body>
 </html>
 
