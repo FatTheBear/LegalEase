@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\LandingController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\Admin\LawyerScheduleController;
+use App\Http\Controllers\ChatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -183,3 +184,11 @@ Route::get('/notifications/{id}/read', function ($id) {
 
     return redirect($url);
 })->name('notifications.read');
+// Chat Routes
+// routes/web.php – thêm vào cuối
+Route::middleware('auth')->group(function () {
+    Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
+    Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
+    Route::get('/chat/conversation/{user}', [ChatController::class, 'conversation'])->name('chat.conversation');
+    Route::get('/chat/messages', [ChatController::class, 'userMessagesView'])->name('chat.messages');
+});
