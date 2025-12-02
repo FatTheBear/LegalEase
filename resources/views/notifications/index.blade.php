@@ -72,6 +72,7 @@
     <h2>Your Notifications</h2>
 
     @foreach($notifications as $notif)
+    <a href="{{ $notif->data['url'] ?? '#' }}" style="text-decoration: none;">
         <div class="card mb-3 notif-card {{ $notif->is_read ? '' : 'notif-unread' }}">
             <div class="card-body">
                 <h6 class="card-title">{{ $notif->title }}</h6>
@@ -79,6 +80,7 @@
                 <small class="text-muted">{{ $notif->created_at->diffForHumans() }}</small>
             </div>
         </div>
+    </a>
     @endforeach
 
     <div class="mt-3">
