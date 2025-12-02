@@ -34,6 +34,7 @@ class AppointmentBookedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
+            to: [$this->client->email],
             subject: 'Appointment Booking Confirmation - LegalEase',
         );
     }
