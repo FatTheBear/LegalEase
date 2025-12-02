@@ -36,7 +36,7 @@
                     <td>{{ $r->comment ?? '-' }}</td>
                     <td>{{ $r->created_at->format('M d, Y') }}</td>
                     <td>
-                        <a href="{{ route('admin.ratings.edit', $r->id) }}" class="btn btn-sm btn-primary">Edit</a>
+                        {{-- <a href="{{ route('admin.ratings.edit', $r->id) }}" class="btn btn-sm btn-primary">Edit</a> --}}
                         <form action="{{ route('admin.ratings.destroy', $r->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure?');">
                             @csrf @method('DELETE')
                             <button class="btn btn-sm btn-danger">Delete</button>

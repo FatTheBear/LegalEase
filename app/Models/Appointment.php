@@ -14,6 +14,8 @@ class Appointment extends Model
         'client_id',
         'lawyer_id',
         'slot_id',
+        'date',
+        'start_time',
         'appointment_time',
         'end_time',           // ← THÊM MỚI
         'status',

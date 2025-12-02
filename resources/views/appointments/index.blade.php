@@ -60,9 +60,13 @@
                             @foreach($appointments as $appt)
                                 <tr class="{{ $appt->status === 'cancelled' ? 'table-danger' : '' }}">
                                     <td>
-                                        <div class="fw-bold">
+                                        {{-- <div class="fw-bold">
                                             {{ \Carbon\Carbon::parse($appt->appointment_time)->format('M d, Y') }}
-                                        </div>
+                                        </div> --}}
+                                        {{-- lấy đúng ngày trên calendar mà khách hàng đã book --}}
+                                        <div class="fw-bold">
+        {{ \Carbon\Carbon::parse($appt->slot->date)->format('M d, Y') }}
+    </div>
                                         <small class="text-muted">
                                             {{ \Carbon\Carbon::parse($appt->appointment_time)->format('h:i A') }}
                                             &rarr; {{ \Carbon\Carbon::parse($appt->end_time)->format('h:i A') }}
