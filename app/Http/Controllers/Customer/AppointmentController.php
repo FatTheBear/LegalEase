@@ -108,7 +108,7 @@ class AppointmentController extends Controller
             'booking',
             [
                 'appointment_id' => $appointment->id,
-                'url' => route('appointments.show', $appointment->id)
+                'url' => route('home', $appointment->id)
             ]
         );
     } catch (\Exception $e) {
@@ -140,7 +140,7 @@ class AppointmentController extends Controller
                 "Your appointment with {$lawyer->name} has been confirmed.",
                 'confirmed',
                 ['appointment_id' => $appointment->id,
-                'url' => route('appointments.index', $appointment->id)]
+                'url' => route('home', $appointment->id)]
             );
         } catch (\Exception $e) {
             \Log::warning("Failed to notify client ID {$client->id}: " . $e->getMessage());
@@ -186,7 +186,7 @@ class AppointmentController extends Controller
             ". Reason: {$reason}",
             'cancelled',
             ['appointment_id' => $appointment->id,
-            'url' => route('appointments.index', $appointment->id)]
+            'url' => route('home', $appointment->id)]
         );
 
         return back()->with('success', 'Appointment cancelled successfully.');

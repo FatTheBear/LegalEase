@@ -169,3 +169,17 @@ Route::middleware('role:lawyer')->group(function () {
         ->name('ratings.store')
         ->middleware('auth');
 });
+// Đánh dấu thông báo đã đọc + chuyển hướng
+Route::get('/notifications/{id}/read', function ($id) {
+    $notification = auth()->user()->notifications()->findOrFail($id);
+
+    // TỰ ĐÁNH DẤU ĐÃ ĐỌC (vì bạn không dùng Laravel Notification)
+    $notification->update([
+        'is_read' => true,
+        'read_at' => now(),
+    ]);
+
+    $url = $notification->data['url'] ?? route('appointments.index');
+
+    return redirect($url);
+})->name('notifications.read');

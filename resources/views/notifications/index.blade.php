@@ -72,7 +72,9 @@
     <h2>Your Notifications</h2>
 
     @foreach($notifications as $notif)
-    <a href="{{ $notif->data['url'] ?? '#' }}" style="text-decoration: none;">
+    <a href="{{ route('notifications.read', $notif->id) }}" 
+       style="text-decoration: none;" 
+       class="d-block">
         <div class="card mb-3 notif-card {{ $notif->is_read ? '' : 'notif-unread' }}">
             <div class="card-body">
                 <h6 class="card-title">{{ $notif->title }}</h6>
