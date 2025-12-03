@@ -219,4 +219,87 @@
         </div>
     </div>
 </div>
+
+<!-- Documents Section for Lawyers -->
+@if($user->role === 'lawyer' && $user->documents && $user->documents->count() > 0)
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0"><i class="bi bi-file-earmark"></i> Uploaded Documents & Certificates</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>File Name</th>
+                                    <th>Type</th>
+                                    <th>Size</th>
+                                    <th>Uploaded Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($user->documents as $index => $document)
+                                <tr>
+                                    <td>{{ $index + 1 }}</td>
+                                    <td>
+                                        <i class="bi bi-file-earmark"></i>
+                                        {{ $document->file_name }}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ ucfirst($document->document_type) }}</span>
+                                        <br>
+                                        <small class="text-muted">{{ strtoupper($document->file_extension) }}</small>
+                                    </td>
+                                    <td>{{ $document->formatted_size }}</td>
+                                    <td>{{ $document->created_at->format('M d, Y H:i') }}</td>
+                                    <td>
+                                        @if(in_array($document->file_extension, ['jpg', 'jpeg', 'png', 'gif']))
+                                            <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#imageModal{{ $document->id }}">
+                                                <i class="bi bi-eye"></i> View
+                                            </button>
+                                        @else
+                                            <a href="{{ Storage::url($document->file_path) }}" class="btn btn-sm btn-primary" target="_blank">
+                                                <i class="bi bi-download"></i> Download
+                                            </a>
+                                        @endif
+                                    </td>
+                                </tr>
+
+                                <!-- Image Modal for Preview -->
+                                @if(in_array($document->file_extension, ['jpg', 'jpeg', 'png', 'gif']))
+                                    <div class="modal fade" id="imageModal{{ $document->id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">{{ $document->file_name }}</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body text-center">
+                                                    <img src="{{ Storage::url($document->file_path) }}" alt="{{ $document->file_name }}" class="img-fluid" style="max-height: 600px;">
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <a href="{{ Storage::url($document->file_path) }}" class="btn btn-primary" download>
+                                                        <i class="bi bi-download"></i> Download
+                                                    </a>
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 @endsection

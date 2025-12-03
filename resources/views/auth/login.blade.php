@@ -27,7 +27,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('login') }}">
+    <form method="POST" action="{{ route('login') }}" novalidate>
         @csrf
         
         <div class="mb-3">
@@ -38,12 +38,13 @@
                    class="form-control @error('email') is-invalid @enderror" 
                    id="email" 
                    name="email" 
-                   value="{{ old('email') }}" 
+                   value="{{ old('email', request()->cookie('remember_email')) }}" 
+                   required
                    autocomplete="email" 
                    autofocus
                    placeholder="Enter your email">
             @error('email')
-                <div class="invalid-feedback">{{ $message }}</div>
+                <div class="invalid-feedback" style="display: block;">{{ $message }}</div>
             @enderror
         </div>
 
@@ -51,19 +52,24 @@
             <label for="password" class="form-label">
                 <i class="fas fa-lock me-1"></i>Password
             </label>
-            <input type="password" 
-                   class="form-control @error('password') is-invalid @enderror" 
-                   id="password" 
-                   name="password" 
-                   autocomplete="current-password"
-                   placeholder="Enter your password">
+            <div class="password-input-wrapper" style="position: relative;">
+                <input type="password" 
+                       class="form-control @error('password') is-invalid @enderror" 
+                       id="password" 
+                       name="password" 
+                       required
+                       autocomplete="current-password"
+                       placeholder="Enter your password"
+                       style="padding-right: 2.5rem;">
+                <i class="fas fa-eye" id="togglePassword" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
+            </div>
             @error('password')
-                <div class="invalid-feedback">{{ $message }}</div>
+                <div class="invalid-feedback" style="display: block;">{{ $message }}</div>
             @enderror
         </div>
 
         <div class="mb-3 form-check">
-            <input type="checkbox" class="form-check-input" id="remember" name="remember">
+            <input type="checkbox" class="form-check-input" id="remember" name="remember" value="1">
             <label class="form-check-label" for="remember">
                 Remember me
             </label>
@@ -100,4 +106,34 @@
         </a>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+document.getElementById('togglePassword').addEventListener('click', function() {
+    const passwordInput = document.getElementById('password');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        this.classList.add('fa-eye');
+        this.classList.remove('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        this.classList.add('fa-eye-slash');
+        this.classList.remove('fa-eye');
+    }
+});
+
+// Remember checkbox styling
+document.getElementById('remember').addEventListener('change', function() {
+    const label = document.querySelector('label[for="remember"]');
+    if (this.checked) {
+        label.classList.add('text-primary');
+        label.classList.add('fw-semibold');
+    } else {
+        label.classList.remove('text-primary');
+        label.classList.remove('fw-semibold');
+    }
+});
+</script>
 @endsection

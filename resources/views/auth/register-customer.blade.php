@@ -23,7 +23,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('register.customer.submit') }}">
+    <form method="POST" action="{{ route('register.customer.submit') }}" novalidate>
         @csrf
         
         <div class="mb-3">
@@ -35,12 +35,11 @@
                    id="name" 
                    name="name" 
                    value="{{ old('name') }}" 
-                   required 
                    autocomplete="name" 
                    autofocus
                    placeholder="Enter your full name">
             @error('name')
-                <div class="invalid-feedback">{{ $message }}</div>
+                <div class="invalid-feedback" style="display: block;">{{ $message }}</div>
             @enderror
         </div>
 
@@ -48,16 +47,15 @@
             <label for="email" class="form-label">
                 <i class="fas fa-envelope me-1"></i>Email Address
             </label>
-            <input type="email" 
+            <input type="text" 
                    class="form-control @error('email') is-invalid @enderror" 
                    id="email" 
                    name="email" 
                    value="{{ old('email') }}" 
-                   required 
                    autocomplete="email"
                    placeholder="Enter your email address">
             @error('email')
-                <div class="invalid-feedback">{{ $message }}</div>
+                <div class="invalid-feedback" style="display: block;">{{ $message }}</div>
             @enderror
         </div>
 
@@ -65,15 +63,18 @@
             <label for="password" class="form-label">
                 <i class="fas fa-lock me-1"></i>Password
             </label>
-            <input type="password" 
-                   class="form-control @error('password') is-invalid @enderror" 
-                   id="password" 
-                   name="password" 
-                   required 
-                   autocomplete="new-password"
-                   placeholder="Create a strong password">
+            <div class="password-input-wrapper" style="position: relative;">
+                <input type="password" 
+                       class="form-control @error('password') is-invalid @enderror" 
+                       id="password" 
+                       name="password" 
+                       autocomplete="new-password"
+                       placeholder="Create a strong password"
+                       style="padding-right: 2.5rem;">
+                <i class="fas fa-eye toggle-password-eye" data-target="password" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
+            </div>
             @error('password')
-                <div class="invalid-feedback">{{ $message }}</div>
+                <div class="invalid-feedback" style="display: block;">{{ $message }}</div>
             @enderror
         </div>
 
@@ -81,13 +82,16 @@
             <label for="password_confirmation" class="form-label">
                 <i class="fas fa-lock me-1"></i>Confirm Password
             </label>
-            <input type="password" 
-                   class="form-control" 
-                   id="password_confirmation" 
-                   name="password_confirmation" 
-                   required 
-                   autocomplete="new-password"
-                   placeholder="Confirm your password">
+            <div class="password-input-wrapper" style="position: relative;">
+                <input type="password" 
+                       class="form-control" 
+                       id="password_confirmation" 
+                       name="password_confirmation" 
+                       autocomplete="new-password"
+                       placeholder="Confirm your password"
+                       style="padding-right: 2.5rem;">
+                <i class="fas fa-eye toggle-password-eye" data-target="password_confirmation" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
+            </div>
         </div>
 
         <div class="d-grid">
@@ -113,4 +117,25 @@
         </a>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+document.querySelectorAll('.toggle-password-eye').forEach(icon => {
+    icon.addEventListener('click', function() {
+        const targetId = this.getAttribute('data-target');
+        const passwordInput = document.getElementById(targetId);
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            this.classList.add('fa-eye');
+            this.classList.remove('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            this.classList.add('fa-eye-slash');
+            this.classList.remove('fa-eye');
+        }
+    });
+});
+</script>
 @endsection

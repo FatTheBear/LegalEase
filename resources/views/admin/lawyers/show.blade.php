@@ -103,7 +103,87 @@
 
                     <hr>
 
-                    <!-- Approval Actions -->
+                    <!-- Documents/Certificates Section -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h4><i class="glyphicon glyphicon-file"></i> Uploaded Documents & Certificates</h4>
+                            
+                            @if($lawyer->documents && $lawyer->documents->count() > 0)
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered">
+                                        <thead class="bg-info">
+                                            <tr>
+                                                <th>#</th>
+                                                <th>File Name</th>
+                                                <th>Type</th>
+                                                <th>Size</th>
+                                                <th>Uploaded Date</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($lawyer->documents as $index => $document)
+                                                <tr>
+                                                    <td>{{ $index + 1 }}</td>
+                                                    <td>
+                                                        <i class="glyphicon glyphicon-file"></i>
+                                                        {{ $document->file_name }}
+                                                    </td>
+                                                    <td>
+                                                        <span class="label label-info">{{ ucfirst($document->document_type) }}</span>
+                                                        <br>
+                                                        <small class="text-muted">{{ strtoupper($document->file_extension) }}</small>
+                                                    </td>
+                                                    <td>{{ $document->formatted_size }}</td>
+                                                    <td>{{ $document->created_at->format('M d, Y H:i') }}</td>
+                                                    <td>
+                                                        @if(in_array($document->file_extension, ['jpg', 'jpeg', 'png', 'gif']))
+                                                            <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#imageModal{{ $document->id }}">
+                                                                <i class="bi bi-eye"></i> View
+                                                            </button>
+                                                        @else
+                                                            <a href="{{ Storage::url($document->file_path) }}" class="btn btn-sm btn-primary" target="_blank">
+                                                                <i class="bi bi-download"></i> Download
+                                                            </a>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+
+                                                <!-- Image Modal for Preview -->
+                                                @if(in_array($document->file_extension, ['jpg', 'jpeg', 'png', 'gif']))
+                                                    <div class="modal fade" id="imageModal{{ $document->id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                                                        <div class="modal-dialog modal-lg" role="document">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title">{{ $document->file_name }}</h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body text-center">
+                                                                    <img src="{{ Storage::url($document->file_path) }}" alt="{{ $document->file_name }}" class="img-fluid" style="max-height: 600px;">
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <a href="{{ Storage::url($document->file_path) }}" class="btn btn-primary" download>
+                                                                        <i class="bi bi-download"></i> Download
+                                                                    </a>
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @else
+                                <div class="alert alert-warning">
+                                    <i class="glyphicon glyphicon-exclamation-sign"></i> No documents uploaded yet.
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <hr>
                     @if($lawyer->approval_status == 'pending')
                         <div class="alert alert-warning">
                             <h4><i class="glyphicon glyphicon-exclamation-sign"></i> Action Required</h4>
@@ -127,11 +207,7 @@
                                 </form>
                             </div>
                         </div>
-                    @elseif($lawyer->approval_status == 'approved')
-                        <div class="alert alert-success">
-                            <i class="glyphicon glyphicon-ok-sign"></i> This lawyer has been <strong>approved</strong>.
-                        </div>
-                    @else
+                    @elseif($lawyer->approval_status == 'rejected')
                         <div class="alert alert-danger">
                             <i class="glyphicon glyphicon-ban-circle"></i> This lawyer application has been <strong>rejected</strong>.
                         </div>

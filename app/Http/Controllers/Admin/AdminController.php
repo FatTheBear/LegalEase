@@ -64,7 +64,7 @@ class AdminController extends Controller
     public function showLawyerProfile($id)
     {
         $lawyer = User::where('role', 'lawyer')
-            ->with('lawyerProfile')
+            ->with('lawyerProfile', 'documents')
             ->findOrFail($id);
         return view('admin.lawyers.show', compact('lawyer'));
     }

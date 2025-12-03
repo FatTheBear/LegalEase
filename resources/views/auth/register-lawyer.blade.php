@@ -27,7 +27,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('register.lawyer.submit') }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('register.lawyer.submit') }}" enctype="multipart/form-data" novalidate>
         @csrf
         
         <!-- Personal Information -->
@@ -67,24 +67,32 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="password" class="form-label">Password *</label>
-                        <input type="password" 
-                               class="form-control @error('password') is-invalid @enderror" 
-                               id="password" 
-                               name="password" 
-                               required 
-                               placeholder="Create a strong password">
+                        <div class="password-input-wrapper" style="position: relative;">
+                            <input type="password" 
+                                   class="form-control @error('password') is-invalid @enderror" 
+                                   id="password" 
+                                   name="password" 
+                                   required 
+                                   placeholder="Create a strong password"
+                                   style="padding-right: 2.5rem;">
+                            <i class="fas fa-eye toggle-password-eye" data-target="password" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
+                        </div>
                         @error('password')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback" style="display: block;">{{ $message }}</div>
                         @enderror
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="password_confirmation" class="form-label">Confirm Password *</label>
-                        <input type="password" 
-                               class="form-control" 
-                               id="password_confirmation" 
-                               name="password_confirmation" 
-                               required 
-                               placeholder="Confirm your password">
+                        <div class="password-input-wrapper" style="position: relative;">
+                            <input type="password" 
+                                   class="form-control" 
+                                   id="password_confirmation" 
+                                   name="password_confirmation" 
+                                   required 
+                                   placeholder="Confirm your password"
+                                   style="padding-right: 2.5rem;">
+                            <i class="fas fa-eye toggle-password-eye" data-target="password_confirmation" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -163,7 +171,7 @@
             </div>
             <div class="card-body">
                 <div class="mb-3">
-                    <label for="documents" class="form-label">Upload Certificates & Licenses *</label>
+                    <label for="documents" class="form-label">Upload Certificates & Licenses * <span class="badge bg-info ms-2">Max 3 files</span></label>
                     <input type="file" 
                            class="form-control @error('documents.*') is-invalid @enderror" 
                            id="documents" 
@@ -173,15 +181,22 @@
                            required>
                     <div class="form-text">
                         <i class="fas fa-info-circle me-1"></i>
-                        Upload your law degree, bar admission certificate, professional licenses, etc. 
-                        <br>Accepted formats: PDF, JPG, PNG. Maximum 2MB per file.
+                        Upload your law degree, bar admission certificate, professional licenses, and other relevant credentials. 
+                        <br>Accepted formats: PDF, JPG, PNG. Maximum 3 files, 2MB per file.
                     </div>
+                    @error('documents')
+                        <div class="invalid-feedback" style="display: block;">{{ $message }}</div>
+                    @enderror
                     @error('documents.*')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback" style="display: block;">{{ $message }}</div>
                     @enderror
                 </div>
 
                 <div id="file-preview" class="mt-3"></div>
+                <div id="error-message" class="alert alert-warning mt-2" style="display: none;">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span id="error-text"></span>
+                </div>
             </div>
         </div>
 
@@ -212,28 +227,79 @@
 
 @section('scripts')
 <script>
+const MAX_FILES = 3;
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB in bytes
+
 document.getElementById('documents').addEventListener('change', function(e) {
     const preview = document.getElementById('file-preview');
+    const errorMessage = document.getElementById('error-message');
+    const errorText = document.getElementById('error-text');
     preview.innerHTML = '';
+    errorMessage.style.display = 'none';
     
-    if (e.target.files.length > 0) {
+    const files = e.target.files;
+    let hasError = false;
+    
+    // Check file count
+    if (files.length > MAX_FILES) {
+        errorMessage.style.display = 'block';
+        errorText.textContent = `You can only upload a maximum of ${MAX_FILES} certificates. You selected ${files.length} files.`;
+        hasError = true;
+    }
+    
+    if (files.length > 0) {
         const fileList = document.createElement('div');
         fileList.className = 'mt-2';
         
-        for (let i = 0; i < e.target.files.length; i++) {
-            const file = e.target.files[i];
+        for (let i = 0; i < Math.min(files.length, MAX_FILES); i++) {
+            const file = files[i];
+            const fileSize = file.size / (1024 * 1024);
+            
+            // Check individual file size
+            let fileStatus = 'alert-light';
+            let warningIcon = '';
+            if (file.size > MAX_FILE_SIZE) {
+                fileStatus = 'alert-danger';
+                warningIcon = '<i class="fas fa-exclamation-circle me-2 text-danger"></i>';
+                hasError = true;
+            }
+            
             const fileItem = document.createElement('div');
-            fileItem.className = 'alert alert-light d-flex align-items-center mb-2';
+            fileItem.className = `alert ${fileStatus} d-flex align-items-center mb-2`;
             fileItem.innerHTML = `
-                <i class="fas fa-file me-2"></i>
+                ${warningIcon || '<i class="fas fa-file me-2"></i>'}
                 <span class="me-auto">${file.name}</span>
-                <small class="text-muted">${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+                <small class="${file.size > MAX_FILE_SIZE ? 'text-danger' : 'text-muted'}">${fileSize.toFixed(2)} MB</small>
             `;
             fileList.appendChild(fileItem);
         }
         
+        // Show count info
+        const countInfo = document.createElement('div');
+        countInfo.className = 'alert alert-info mt-2';
+        countInfo.innerHTML = `<i class="fas fa-check-circle me-2"></i>Selected: <strong>${Math.min(files.length, MAX_FILES)} of ${MAX_FILES}</strong> certificates`;
+        fileList.appendChild(countInfo);
+        
         preview.appendChild(fileList);
     }
+});
+
+// Toggle password visibility
+document.querySelectorAll('.toggle-password-eye').forEach(icon => {
+    icon.addEventListener('click', function() {
+        const targetId = this.getAttribute('data-target');
+        const passwordInput = document.getElementById(targetId);
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            this.classList.add('fa-eye');
+            this.classList.remove('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            this.classList.add('fa-eye-slash');
+            this.classList.remove('fa-eye');
+        }
+    });
 });
 </script>
 @endsection

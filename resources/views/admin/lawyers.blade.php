@@ -42,7 +42,6 @@
                             <th style="width: 20%">Email</th>
                             <th style="width: 15%">Specialization</th>
                             <th style="width: 15%">Status</th>
-                            <th style="width: 15%">Approval</th>
                             <th style="width: 10%">Actions</th>
                         </tr>
                     </thead>
@@ -67,15 +66,6 @@
                                 @endif
                             </td>
                             <td>
-                                @if($lawyer->approval_status === 'pending')
-                                    <span class="badge bg-secondary"><i class="bi bi-hourglass"></i> Pending</span>
-                                @elseif($lawyer->approval_status === 'approved')
-                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Approved</span>
-                                @else
-                                    <span class="badge bg-danger"><i class="bi bi-x-circle"></i> Rejected</span>
-                                @endif
-                            </td>
-                            <td>
                                 <a href="{{ route('admin.lawyers.show', $lawyer->id) }}" class="btn btn-sm btn-primary">
                                     <i class="bi bi-eye"></i> View
                                 </a>
@@ -83,7 +73,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="text-center py-5">
+                            <td colspan="6" class="text-center py-5">
                                 <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
                                 <p class="text-muted mt-3">No lawyers found</p>
                             </td>

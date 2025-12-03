@@ -65,7 +65,7 @@ class UserController extends Controller
      */
     public function edit($id)
     {
-        $user = User::findOrFail($id);
+        $user = User::with('documents')->findOrFail($id);
         
         // Prevent editing admin users
         if ($user->role === 'admin') {
