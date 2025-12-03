@@ -140,4 +140,21 @@ class User extends Authenticatable
     {
         $this->notify(new VerifyEmailNotification());
     }
+    // Relationships for messaging system
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    public function receivedMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id');
+    }
+
+    public function unreadMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id') // từ user gửi
+                    ->where('receiver_id', 1) // admin nhận
+                    ->where('is_read', false);
+    }
 }

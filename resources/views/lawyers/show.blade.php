@@ -3,7 +3,26 @@
 
 @section('content')
 <div class="container mt-5">
+
+    <!-- Flash Messages -->
+    <div class="container mt-3">
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+    </div>
+
     <div class="row justify-content-center">
+        <!-- Thông tin luật sư -->
         <div class="col-md-4 text-center mb-4">
             @php
             $avatarUrl = $lawyer->avatar
@@ -27,6 +46,7 @@
             </p>
         </div>
 
+        <!-- Lịch và chọn slot -->
         <div class="col-md-8">
             <div class="card shadow">
                 <div class="card-header">
@@ -35,7 +55,6 @@
                     </h4>
                 </div>
                 <div class="card-body">
-
                     <div class="row">
                         <div class="col-md-12 mb-4">
                             <div id="calendar"></div>
@@ -72,9 +91,55 @@
     </div>
 </div>
 
+<!-- FullCalendar CSS & JS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+{{-- css calendar --}}
+{{-- tạo hiệu ứng hover  và active, các ngày khác nhau có khoảng cách nhẹ, bo góc mỗi ngày nhẹ với tone màu 3A4B41 nhạt hơn tùy chỉnh --}}
+<style>
+    /* Tùy chỉnh giao diện calendar */
+    .fc .fc-daygrid-day {
+        border: 1px solid #E6CFA7;
+        border-radius: 8px;
+        margin: 2px;
+        transition: background-color 0.3s, transform 0.3s;
+    }
 
+    .fc .fc-daygrid-day:hover {
+        background-color: rgba(58, 75, 65, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .fc .fc-daygrid-day.fc-day-today {
+        background-color: rgba(58, 75, 65, 0.2);
+        border: 2px solid #3A4B41;
+    }
+
+    .fc .fc-toolbar-title {
+        color: #3A4B41 ;
+        font-weight: 600;
+    }
+
+    .fc .fc-button {
+        background-color: #E6CFA7;
+        border: none;
+        color: #3A4B41;
+        font-weight: 600;
+    }
+
+    .fc .fc-button:hover {
+        background-color: #d9c395;
+        color: #3A4B41;
+    }
+
+    .fc .fc-button:focus {
+        box-shadow: none;
+    }
+
+    .fc .fc-button:active {
+        background-color: #E6CFA7;
+    }
+</style>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     let calendarEl = document.getElementById('calendar');
@@ -84,7 +149,13 @@ document.addEventListener('DOMContentLoaded', function () {
         selectable: true,
         height: "auto",
         dateClick(info) {
-            let date = info.dateStr;
+            // Lấy ngày theo múi giờ local: YYYY-MM-DD
+            const localDate = info.date;
+            const year = localDate.getFullYear();
+            const month = String(localDate.getMonth() + 1).padStart(2, '0');
+            const day = String(localDate.getDate()).padStart(2, '0');
+            const date = `${year}-${month}-${day}`;
+            
             fetchSlots(date);
         }
     });
@@ -112,8 +183,20 @@ document.addEventListener('DOMContentLoaded', function () {
                     });
                 }
                 document.getElementById('slot-list').innerHTML = list;
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('slot-list').innerHTML = '<p class="text-danger">Error fetching slots.</p>';
             });
     }
 });
+
+// Auto-hide flash messages after 5 seconds
+setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(alert => {
+        alert.classList.remove('show');
+        alert.classList.add('hide');
+    });
+}, 5000);
 </script>
 @endsection

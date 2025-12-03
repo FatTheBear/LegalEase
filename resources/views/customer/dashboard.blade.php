@@ -70,8 +70,8 @@
     }
     
     .action-card .btn:hover {
-        background-color: #4f46e5;
-        border-color: #4f46e5;
+        background-color: #0c3b0f;
+        border-color: #123e1e;
     }
 </style>
 
