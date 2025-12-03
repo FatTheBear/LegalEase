@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\LandingController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\Admin\LawyerScheduleController;
+use App\Http\Controllers\ChatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -168,4 +169,26 @@ Route::middleware('role:lawyer')->group(function () {
     Route::post('/appointments/{appointment}/rate', [RatingController::class, 'store'])
         ->name('ratings.store')
         ->middleware('auth');
+});
+// Đánh dấu thông báo đã đọc + chuyển hướng
+Route::get('/notifications/{id}/read', function ($id) {
+    $notification = auth()->user()->notifications()->findOrFail($id);
+
+    // TỰ ĐÁNH DẤU ĐÃ ĐỌC (vì bạn không dùng Laravel Notification)
+    $notification->update([
+        'is_read' => true,
+        'read_at' => now(),
+    ]);
+
+    $url = $notification->data['url'] ?? route('appointments.index');
+
+    return redirect($url);
+})->name('notifications.read');
+// Chat Routes
+// routes/web.php – thêm vào cuối
+Route::middleware('auth')->group(function () {
+    Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
+    Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
+    Route::get('/chat/conversation/{user}', [ChatController::class, 'conversation'])->name('chat.conversation');
+    Route::get('/chat/messages', [ChatController::class, 'userMessagesView'])->name('chat.messages');
 });

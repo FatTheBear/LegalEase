@@ -41,16 +41,30 @@ class RatingController extends Controller
         ]);
 
         // Optional: send notification to lawyer
-        try {
-            notify(
-                $appointment->lawyer_id,
-                'New Review Received',
-                "You received a {$request->rating}-star rating!",
-                'rating'
-            );
-        } catch (\Exception $e) {
-            \Log::warning('Rating notification failed: ' . $e->getMessage());
-        }
+    try {
+        $stars = str_repeat('★', $request->rating);
+
+        $title = "New {$request->rating}-star review {$stars}";
+
+        $message = "Client {$appointment->client->name} just gave you a {$request->rating}-star rating.\n\n";
+
+        $message .= $request->filled('comment')
+            ? "Review:\n\"{$request->comment}\""
+            : "No written review was provided.";
+
+        notify(
+            $appointment->lawyer_id,
+            $title,
+            $message,
+            'rating',
+            [
+                'appointment_id' => $appointment->id,
+                'rating'        => $request->rating,
+            ]
+        );
+    } catch (\Exception $e) {
+        \Log::warning('Rating notification failed: ' . $e->getMessage());
+    }
 
         return back()->with('success', 'Thank you for your review!');
     } // ← ĐÂY LÀ DÒNG BẠN THIẾU TRƯỚC ĐÓ!
