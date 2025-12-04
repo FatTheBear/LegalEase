@@ -1,16 +1,37 @@
-{{-- Nút chat nổi góc dưới --}}
+{{-- Nút chat nổi góc dưới + Badge tin nhắn chưa đọc --}}
 <div class="position-fixed bottom-0 end-0 m-4" style="z-index: 1020;">
-    @if(auth()->id() === 1)
-        {{-- Admin: click thẳng vào trang chat --}}
-        <a href="{{ route('chat.index') }}" class="btn btn-primary btn-lg rounded-circle shadow-lg p-4">
-            <i class="bi bi-chat-dots-fill fs-3"></i>
-        </a>
-    @else
-        {{-- User thường: hiện modal chọn --}}
-        <button class="btn btn-primary btn-lg rounded-circle shadow-lg p-4" data-bs-toggle="modal" data-bs-target="#chatModal">
-            <i class="bi bi-chat-dots-fill fs-3"></i>
-        </button>
-    @endif
+    <div class="position-relative d-inline-block">
+        @if(auth()->id() === 1)
+            {{-- Admin: click thẳng vào trang chat --}}
+            <a href="{{ route('chat.index') }}" 
+               id="chat-float-btn" 
+               class="btn btn-primary btn-lg rounded-circle shadow-lg p-4 position-relative">
+                <i class="bi bi-chat-dots-fill fs-3"></i>
+                {{-- Badge cho Admin --}}
+                <span id="unread-badge" 
+                      class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                      style="font-size: 0.75rem; display: none;">
+                    0
+                    <span class="visually-hidden">unread messages</span>
+                </span>
+            </a>
+        @else
+            {{-- User thường: hiện modal chọn --}}
+            <button id="chat-float-btn"
+                    class="btn btn-primary btn-lg rounded-circle shadow-lg p-4 position-relative"
+                    data-bs-toggle="modal" 
+                    data-bs-target="#chatModal">
+                <i class="bi bi-chat-dots-fill fs-3"></i>
+                {{-- Badge cho User --}}
+                <span id="unread-badge" 
+                      class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                      style="font-size: 0.75rem; display: none;">
+                    0
+                    <span class="visually-hidden">unread messages</span>
+                </span>
+            </button>
+        @endif
+    </div>
 </div>
 
 {{-- Modal chỉ hiện cho user thường --}}
@@ -45,6 +66,8 @@
     </div>
 </div>
 @endif
+
+{{-- CSS giữ nguyên của bạn + thêm hiệu ứng badge đẹp --}}
 <style>
     /* Tùy chỉnh nút chat nổi */
     .btn-lg.rounded-circle {
@@ -54,48 +77,58 @@
         align-items: center;
         justify-content: center;
     }
-    /* tùy chỉnh khi hover */
+    /* Hover effect */
     .btn-lg.rounded-circle:hover {
         background-color: #548e6c;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        /* to ra */
         transform: translateY(-2px);
         transition: all 0.2s ease-in-out;
     }
-    
-    /* icon to ra lòi ra khỏi chính xây dựng */
     .btn-lg.rounded-circle:hover i {
         transform: scale(1.6);
         transition: all 0.4s ease-in-out;
     }
+
+    /* Badge nhảy nhẹ khi có tin mới */
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.3); }
+        100% { transform: scale(1); }
+    }
+    #unread-badge {
+        animation: pulse 2s infinite;
+    }
+
+    /* Các style cũ của bạn */
     .btn-outline-primary {
         color: #1d3e2e;
         border-color: #2e6e35;
     }
-    /* khi hover Live Chat with Admin */
     .btn-outline-primary:hover {
         background-color: #1d3e2e;
         border-color: #2e6e35;
         color: #ffffff;
     }
-    /* khi active Live Chat with Admin */
     .btn-outline-primary:active {
         background-color: #19341f !important;
         border-color: #19341f;
         color: #ffffff;
     }
-    /* khi hover Chat with AI xám kiểu bị khóa */
     .btn-light:hover {
         background-color: #e2e2e2;
         color: #6c757d;
     }
 </style>
-{{-- scrip nổi 1 đoạn chữ "Cần tư vấn trực tiếp bằng tiếng anh" lên khi hover --}}
+
+{{-- Tooltip khi hover + Realtime Badge --}}
 <script>
-    document.querySelector('.btn-lg.rounded-circle').addEventListener('mouseenter', function() {
+    // Tooltip khi hover
+    const chatBtn = document.querySelector('.btn-lg.rounded-circle');
+    chatBtn.addEventListener('mouseenter', function() {
+        if (document.getElementById('chat-tooltip')) return;
         const tooltip = document.createElement('div');
         tooltip.id = 'chat-tooltip';
-        tooltip.className = 'position-absolute bg-dark text-white rounded px-3 py-1';
+        tooltip.className = 'position-absolute bg-dark text-white rounded px-3 py-1 small';
         tooltip.style.bottom = '80px';
         tooltip.style.right = '0';
         tooltip.style.whiteSpace = 'nowrap';
@@ -103,10 +136,37 @@
         tooltip.innerText = 'Online Consultation & FAQs';
         this.appendChild(tooltip);
     });
-    document.querySelector('.btn-lg.rounded-circle').addEventListener('mouseleave', function() {
+    chatBtn.addEventListener('mouseleave', function() {
         const tooltip = document.getElementById('chat-tooltip');
-        if (tooltip) {
-            this.removeChild(tooltip);
-        }
+        if (tooltip) tooltip.remove();
     });
+
+    // Cập nhật badge realtime
+    function updateUnreadBadge() {
+        fetch('/chat/unread-count', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            const badge = document.getElementById('unread-badge');
+            if (data.count > 0) {
+                badge.textContent = data.count > 99 ? '99+' : data.count;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        })
+        .catch(() => {});
+    }
+
+    // Load ngay khi vào trang
+    updateUnreadBadge();
+    // Cập nhật mỗi 5 giây
+    setInterval(updateUnreadBadge, 5000);
+
+    // Cập nhật lại khi mở modal (user)
+    const modalElement = document.getElementById('chatModal');
+    if (modalElement) {
+        modalElement.addEventListener('shown.bs.modal', updateUnreadBadge);
+    }
 </script>

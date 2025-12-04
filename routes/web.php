@@ -192,4 +192,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
     Route::get('/chat/conversation/{user}', [ChatController::class, 'conversation'])->name('chat.conversation');
     Route::get('/chat/messages', [ChatController::class, 'userMessagesView'])->name('chat.messages');
+    Route::get('/chat/conversations', [ChatController::class, 'conversationsJson'])->name('chat.conversations');
+    Route::get('/chat/unread-count', [ChatController::class, 'unreadCount'])->name('chat.unread-count');
 });

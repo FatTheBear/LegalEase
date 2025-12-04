@@ -153,6 +153,8 @@ class User extends Authenticatable
 
     public function unreadMessages()
     {
-        return $this->receivedMessages()->where('is_read', false);
+        return $this->hasMany(Message::class, 'sender_id') // từ user gửi
+                    ->where('receiver_id', 1) // admin nhận
+                    ->where('is_read', false);
     }
 }

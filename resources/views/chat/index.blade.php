@@ -12,10 +12,11 @@
                 <div class="list-group">
                     @forelse($conversations as $user)
                         <a href="#" class="list-group-item list-group-item-action chat-user" data-id="{{ $user->id }}">
-                            <div class="d-flex justify-content-between">
+                            <div class="d-flex justify-content-between align-items-center">
                                 <strong>{{ $user->name }}</strong>
+
                                 @if($user->unread_messages_count > 0)
-                                    <span class="badge bg-danger rounded-pill">{{ $user->unread_messages_count }}</span>
+                                    <span class="unread-dot"></span>
                                 @endif
                             </div>
                         </a>
@@ -30,7 +31,7 @@
                     <p class="text-center text-muted">Select a user to view conversation</p>
                 </div>
 
-                <!-- ⭐ ADDED: QUICK REPLIES FOR ADMIN -->
+                <!-- QUICK REPLIES FOR ADMIN -->
                 <div id="quick-admin" class="p-3 border rounded bg-white mt-3">
                     <h6 class="text-muted mb-2">Quick Replies</h6>
                     <div class="d-flex flex-wrap gap-2">
@@ -54,7 +55,6 @@
                         </button>
                     </div>
                 </div>
-                <!-- END ADDED -->
 
                 <form id="chat-form" class="mt-3" style="display:none;">
                     <input type="hidden" id="selected-user">
@@ -77,7 +77,7 @@
 
             <div id="chat-messages" class="card-body" style="height: 70vh; overflow-y: auto; background:#f8f9fa; padding: 1rem"></div>
 
-            <!-- ⭐ ADDED: QUICK QUESTIONS FOR USER -->
+            <!-- QUICK QUESTIONS FOR USER -->
             <div id="quick-user" class="p-3 border-top bg-white">
                 <h6 class="text-muted mb-2">Quick Questions</h6>
                 <div class="d-flex flex-wrap gap-2">
@@ -95,7 +95,6 @@
                     </button>
                 </div>
             </div>
-            <!-- END ADDED -->
 
             <div class="card-footer bg-light">
                 <form id="chat-form">
@@ -112,117 +111,138 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    // === ORIGINAL JS (GIỮ NGUYÊN 100%) ===
-    @if(auth()->id() === 1)
-        document.querySelectorAll('.chat-user').forEach(el => {
-            el.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                const userId = this.dataset.id;
-                document.getElementById('selected-user').value = userId;
-                document.getElementById('chat-form').style.display = 'block';
+@if(auth()->id() === 1)
+    // ===== ADMIN =====
+    let adminChatInterval;
+    let adminListInterval;
 
-                document.querySelectorAll('.chat-user').forEach(item => item.classList.remove('active'));
-                this.classList.add('active');
+    function loadConversation(userId) {
+        fetch(`/chat/conversation/${userId}`)
+            .then(res => res.json())
+            .then(data => {
+                const chatArea = document.getElementById('chat-area');
+                chatArea.innerHTML = data.html;
+                chatArea.scrollTop = chatArea.scrollHeight;
+            })
+            .catch(err => console.error(err));
+    }
 
-                loadConversation(userId);
-            });
+    function startAdminAutoReload(userId){
+        if(adminChatInterval) clearInterval(adminChatInterval);
+        adminChatInterval = setInterval(() => {
+            loadConversation(userId);
+        }, 3000);
+    }
+
+    // Load conversation on click + start auto reload
+    document.querySelectorAll('.chat-user').forEach(el => {
+        el.addEventListener('click', function(e){
+            e.preventDefault();
+            const userId = this.dataset.id;
+            document.getElementById('selected-user').value = userId;
+            document.getElementById('chat-form').style.display = 'block';
+
+            document.querySelectorAll('.chat-user').forEach(item => item.classList.remove('active'));
+            this.classList.add('active');
+
+            loadConversation(userId);
+            startAdminAutoReload(userId);
         });
+    });
 
-        function loadConversation(userId) {
-            fetch(`/chat/conversation/${userId}`)
-                .then(response => {
-                    if (!response.ok) throw new Error('Network error');
-                    return response.json();
-                })
-                .then(data => {
-                    document.getElementById('chat-area').innerHTML = data.html;
-                    document.getElementById('chat-area').scrollTop = document.getElementById('chat-area').scrollHeight;
-                })
-                .catch(err => {
-                    console.error('Load conversation error:', err);
-                    document.getElementById('chat-area').innerHTML = '<p class="text-danger text-center">Error loading messages</p>';
-                });
-        }
+    // Auto reload conversation list mỗi 5 giây
+    adminListInterval = setInterval(() => {
+        fetch('/chat/conversations')
+            .then(res => res.json())
+            .then(data => {
+                const listGroup = document.querySelector('.list-group');
+                if(listGroup){
+                    listGroup.innerHTML = data.html;
+                }
+            })
+            .catch(err => console.error(err));
+    }, 5000);
+
+@endif
+
+@if(auth()->id() !== 1)
+    // ===== USER =====
+    function loadMessages() {
+        fetch('/chat/messages')
+            .then(r => r.text())
+            .then(html => {
+                const chatMessages = document.getElementById('chat-messages');
+                chatMessages.innerHTML = html;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            })
+            .catch(err => console.error(err));
+    }
+    setInterval(loadMessages, 3000);
+    loadMessages();
+@endif
+
+// ===== SEND MESSAGE =====
+document.getElementById('chat-form')?.addEventListener('submit', async function(e){
+    e.preventDefault();
+    const input = document.getElementById('message-input');
+    const message = input.value.trim();
+    if(!message) return;
+
+    let receiverId = 1;
+    @if(auth()->id() === 1)
+        receiverId = document.getElementById('selected-user').value || 1;
     @endif
 
-    @if(auth()->id() !== 1)
-        function loadMessages() {
-            fetch('/chat/messages')
-                .then(r => r.text())
-                .then(html => {
-                    document.getElementById('chat-messages').innerHTML = html;
-                    document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
-                })
-                .catch(err => console.error(err));
-        }
-        setInterval(loadMessages, 3000);
+    await fetch('/chat/send', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json','X-CSRF-TOKEN': '{{ csrf_token() }}'},
+        body: JSON.stringify({message: message, user_id: receiverId})
+    });
+
+    input.value = '';
+    @if(auth()->id() === 1)
+        if(receiverId) loadConversation(receiverId);
+    @else
         loadMessages();
     @endif
+});
 
-    document.getElementById('chat-form')?.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
+// ===== HIDE QUICK BUTTONS WHEN TYPING =====
+const msgInput = document.getElementById('message-input');
+msgInput?.addEventListener('input', () => {
+    document.getElementById('quick-user')?.classList.add('d-none');
+    document.getElementById('quick-admin')?.classList.add('d-none');
+});
+
+// ===== CLICK QUICK BUTTON → AUTO SEND =====
+document.addEventListener('click', function(e){
+    if(e.target.classList.contains('quick-btn')){
+        const text = e.target.dataset.text;
         const input = document.getElementById('message-input');
-        const message = input.value.trim();
-        if (!message) return;
+        input.value = text;
 
-        let receiverId = 1;
-        @if(auth()->id() === 1)
-            receiverId = document.getElementById('selected-user').value || 1;
-        @endif
-
-        await fetch('/chat/send', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({
-                message: message,
-                user_id: receiverId
-            })
-        });
-
-        input.value = '';
-
-        @if(auth()->id() === 1)
-            if (receiverId) loadConversation(receiverId);
-        @else
-            loadMessages();
-        @endif
-    });
-
-    // ===== ⭐ ADDED: HIDE QUICK BUTTONS WHEN USER TYPE =====
-    const msgInput = document.getElementById('message-input');
-    msgInput?.addEventListener('input', () => {
         document.getElementById('quick-user')?.classList.add('d-none');
         document.getElementById('quick-admin')?.classList.add('d-none');
-    });
 
-    // ===== ⭐ ADDED: CLICK QUICK BUTTON → AUTO SEND =====
-    document.addEventListener('click', function(e){
-        if(e.target.classList.contains('quick-btn')){
-            const text = e.target.dataset.text;
-            const input = document.getElementById('message-input');
-            input.value = text;
-
-            // ẩn quick
-            document.getElementById('quick-user')?.classList.add('d-none');
-            document.getElementById('quick-admin')?.classList.add('d-none');
-
-            document.getElementById('chat-form').dispatchEvent(new Event('submit'));
-        }
-    });
+        document.getElementById('chat-form').dispatchEvent(new Event('submit'));
+    }
+});
 </script>
 
 <style>
-    .chat-user.active {
-        background-color: #1d3e2e !important;
-        border-left: 4px solid #2e6e35;
-    }
-    .chat-user:hover {
-        background-color: #f5f5f5;
-    }
+.chat-user.active {
+    background-color: #1d3e2e !important;
+    border-left: 4px solid #2e6e35;
+}
+.chat-user:hover {
+    background-color: #f5f5f5;
+}
+.unread-dot {
+    width: 12px;
+    height: 12px;
+    background: #dc3545;
+    border-radius: 50%;
+    display: inline-block;
+}
 </style>
 @endsection
