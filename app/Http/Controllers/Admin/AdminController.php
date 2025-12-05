@@ -55,10 +55,30 @@ class AdminController extends Controller
         return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
     }
 
-    public function manageLawyers()
+    public function manageLawyers(Request $request)
     {
-        $lawyers = User::where('role', 'lawyer')->with('lawyerProfile')->get();
-        return view('admin.lawyers', compact('lawyers'));
+        $query = User::where('role', 'lawyer')->with('lawyerProfile');
+        
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        
+        // Search by name or email
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+        }
+        
+        // Sort
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortOrder = $request->input('sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+        
+        $lawyers = $query->paginate(15);
+        
+        return view('admin.lawyers.index', compact('lawyers'));
     }
 
     public function showLawyerProfile($id)

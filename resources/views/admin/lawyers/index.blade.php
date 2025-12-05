@@ -1,13 +1,13 @@
 @extends('layouts.app')
-@section('title', 'Manage Users')
+@section('title', 'Manage Lawyers')
 
 @section('content')
 <style>
-    .user-row {
+    .lawyer-row {
         cursor: pointer;
         transition: background-color 0.2s ease;
     }
-    .user-row:hover {
+    .lawyer-row:hover {
         background-color: #f8f9fa !important;
     }
 </style>
@@ -16,8 +16,8 @@
     <!-- Header Section -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="w-100 text-center">
-            <h2 class="mb-0"><i class="bi bi-people"></i> Manage Users</h2>
-            <p class="text-muted mb-0">View and manage all system users</p>
+            <h2 class="mb-0"><i class="bi bi-briefcase"></i> Manage Lawyers</h2>
+            <p class="text-muted mb-0">View and manage all registered lawyers</p>
         </div>
     </div>
 
@@ -42,19 +42,12 @@
             <h5 class="mb-0"><i class="bi bi-funnel"></i> Search & Filter</h5>
         </div>
         <div class="card-body">
-            <form method="GET" action="{{ route('admin.users.index') }}" class="needs-validation" novalidate>
+            <form method="GET" action="{{ route('admin.lawyers.index') }}" class="needs-validation" novalidate>
                 <div class="row g-3">
                     <div class="col-md-4">
                         <input type="text" name="search" class="form-control" 
                                placeholder="Enter name or email..." 
                                value="{{ request('search') }}">
-                    </div>
-                    
-                    <div class="col-md-2">
-                        <select name="role" class="form-select">
-                            <option value="">-- All Roles --</option>
-                            <option value="customer" {{ request('role') === 'customer' ? 'selected' : '' }}>Customer</option>
-                        </select>
                     </div>
 
                     <div class="col-md-2">
@@ -71,7 +64,7 @@
                         <button type="submit" class="btn btn-primary flex-grow-1">
                             <i class="bi bi-search"></i> Search
                         </button>
-                        <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">
+                        <a href="{{ route('admin.lawyers.index') }}" class="btn btn-secondary">
                             <i class="bi bi-arrow-clockwise"></i> Reset
                         </a>
                     </div>
@@ -80,11 +73,11 @@
         </div>
     </div>
 
-    <!-- Users Table -->
+    <!-- Lawyers Table -->
     <div class="card shadow-sm border-0">
         <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bi bi-list-check"></i> All Users</h5>
-            <small class="text-muted">{{ $users->total() }} users</small>
+            <h5 class="mb-0"><i class="bi bi-list-check"></i> All Lawyers</h5>
+            <small class="text-muted">{{ $lawyers->total() }} lawyers</small>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -92,38 +85,42 @@
                     <thead class="table-light">
                         <tr>
                             <th style="width: 5%">#</th>
-                            <th style="width: 25%">Name</th>
-                            <th style="width: 25%">Email</th>
-                            <th style="width: 15%">Role</th>
-                            <th style="width: 15%">Status</th>
-                            <th style="width: 15%">Registered</th>
+                            <th style="width: 20%">Name</th>
+                            <th style="width: 20%">Email</th>
+                            <th style="width: 15%">Specialization</th>
+                            <th style="width: 10%">Experience</th>
+                            <th style="width: 10%">Status</th>
+                            <th style="width: 10%">Registered</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($users->where('role', 'customer') as $index => $user)
-                        <tr class="user-row" onclick="window.location.href='{{ route('admin.users.edit', $user->id) }}'">
-                            <td>{{ $users->firstItem() + $index }}</td>
+                        @forelse($lawyers as $index => $lawyer)
+                        <tr class="lawyer-row" onclick="window.location.href='{{ route('admin.lawyers.edit', $lawyer->id) }}'">
+                            <td>{{ $lawyers->firstItem() + $index }}</td>
                             <td>
-                                <strong>{{ $user->name }}</strong>
+                                <strong>{{ $lawyer->name }}</strong>
                             </td>
                             <td>
-                                <small class="text-muted">{{ $user->email }}</small>
+                                <small class="text-muted">{{ $lawyer->email }}</small>
                             </td>
                             <td>
-                                <span class="badge bg-success">
-                                    <i class="bi bi-person"></i> Customer
+                                <span class="badge bg-info text-dark">
+                                    {{ $lawyer->lawyerProfile?->specialization ?? 'N/A' }}
                                 </span>
                             </td>
                             <td>
-                                @if($user->status === 'active')
+                                <small>{{ $lawyer->lawyerProfile?->experience_years ?? 0 }} years</small>
+                            </td>
+                            <td>
+                                @if($lawyer->status === 'active')
                                     <span class="badge bg-success">
                                         <i class="bi bi-check-circle"></i> Active
                                     </span>
-                                @elseif($user->status === 'inactive')
+                                @elseif($lawyer->status === 'inactive')
                                     <span class="badge bg-warning">
                                         <i class="bi bi-pause-circle"></i> Inactive
                                     </span>
-                                @elseif($user->status === 'pending')
+                                @elseif($lawyer->status === 'pending')
                                     <span class="badge bg-secondary">
                                         <i class="bi bi-hourglass"></i> Pending
                                     </span>
@@ -134,14 +131,14 @@
                                 @endif
                             </td>
                             <td>
-                                <small class="text-muted">{{ $user->created_at->format('M d, Y') }}</small>
+                                <small class="text-muted">{{ $lawyer->created_at->format('M d, Y') }}</small>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center py-5">
+                            <td colspan="7" class="text-center py-5">
                                 <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
-                                <p class="text-muted mt-3">No users found</p>
+                                <p class="text-muted mt-3">No lawyers found</p>
                             </td>
                         </tr>
                         @endforelse
@@ -150,9 +147,9 @@
             </div>
 
             <!-- Pagination -->
-            @if($users->hasPages())
+            @if($lawyers->hasPages())
             <nav class="mt-4">
-                {{ $users->links( 'pagination::bootstrap-5') }}
+                {{ $lawyers->links('pagination::bootstrap-5') }}
             </nav>
             @endif
         </div>

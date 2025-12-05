@@ -127,6 +127,7 @@ Route::middleware('role:lawyer')->group(function () {
         Route::put('/users/{id}/ban', [UserController::class, 'ban'])->name('users.ban');
         Route::get('/lawyers', [AdminController::class, 'manageLawyers'])->name('lawyers');
         Route::get('/lawyers/{id}', [AdminController::class, 'showLawyerProfile'])->name('lawyers.show');
+        Route::get('/lawyers/{id}/edit', [AdminController::class, 'showLawyerProfile'])->name('lawyers.edit');
         Route::put('/lawyers/{id}/approve', [AdminController::class, 'approveLawyer'])->name('lawyers.approve');
         Route::put('/lawyers/{id}/reject', [AdminController::class, 'rejectLawyer'])->name('lawyers.reject');
         Route::put('/lawyers/{id}', [AdminController::class, 'updateLawyer'])->name('lawyers.update');

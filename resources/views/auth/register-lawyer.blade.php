@@ -3,23 +3,20 @@
 @section('title', 'Lawyer Sign Up - LegalEase')
 
 @section('content')
-<div class="auth-card p-5">
-    <div class="text-center mb-4">
-        <h1 class="h3 mb-3 text-primary">
-            <i class="fas fa-balance-scale me-2"></i>LegalEase
-        </h1>
-        <h2 class="h4 text-warning">
-            <i class="fas fa-user-tie me-2"></i>Lawyer Registration
-        </h2>
-        <p class="text-muted">Join our platform as a professional lawyer</p>
-        <div class="alert alert-info small">
-            <i class="fas fa-info-circle me-1"></i>
-            Your account will be reviewed by our admin team before activation.
-        </div>
+<div style="max-height: 90vh; overflow-y: auto; padding-right: 10px;">
+    <h1 class="auth-title">
+        <i class="fas fa-user-tie me-2" style="color: #3a4b41;"></i>Join as Lawyer
+    </h1>
+    <p class="auth-subtitle">Register and grow your legal practice</p>
+
+    <div class="alert alert-info small mb-3">
+        <i class="fas fa-info-circle me-1"></i>
+        <strong>Note:</strong> Your account will be reviewed by our admin team before activation.
     </div>
 
     @if ($errors->any())
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
             @foreach ($errors->all() as $error)
                 <div>{{ $error }}</div>
             @endforeach
@@ -27,7 +24,7 @@
         </div>
     @endif
 
-        <form method="POST" action="{{ route('register.lawyer.submit') }}" enctype="multipart/form-data" novalidate>
+    <form method="POST" action="{{ route('register.lawyer.submit') }}" enctype="multipart/form-data" novalidate>
         @csrf
         
         <!-- Personal Information -->
@@ -200,29 +197,37 @@
             </div>
         </div>
 
-        <div class="d-grid">
-            <button type="submit" class="btn btn-warning btn-lg">
-                <i class="fas fa-paper-plane me-2"></i>Submit Application for Review
+        <div class="d-grid mb-3">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-paper-plane me-2"></i>Submit for Review
             </button>
         </div>
+
+        <div class="text-center auth-divider">OR</div>
+
+        <div class="text-center mb-4">
+            <p class="mb-3 text-muted">Already have an account?</p>
+            <a href="{{ route('login') }}" class="btn btn-outline-secondary w-100" style="border-color: #3a4b41; color: #3a4b41;">
+                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+            </a>
+        </div>
+
+        <div class="text-center">
+            <p class="text-muted small">Need legal services instead?</p>
+            <a href="{{ route('register.customer') }}" class="auth-link">
+                <i class="fas fa-user me-1"></i>Register as Customer
+            </a>
+        </div>
     </form>
-
-    <hr class="my-4">
-
-    <div class="text-center">
-        <p class="mb-2 text-muted">Already have an account?</p>
-        <a href="{{ route('login') }}" class="btn btn-outline-primary">
-            <i class="fas fa-sign-in-alt me-2"></i>Sign In
-        </a>
-    </div>
-
-    <div class="text-center mt-3">
-        <p class="text-muted small mb-1">Looking for legal services?</p>
-        <a href="{{ route('register.customer') }}" class="text-success">
-            <i class="fas fa-user me-1"></i>Register as Customer instead
-        </a>
-    </div>
 </div>
+@endsection
+
+@section('sidebar')
+<div class="logo">
+    <i class="fas fa-briefcase"></i>
+</div>
+<h2>Expand Your Practice</h2>
+<p>Reach more clients, manage your legal practice efficiently, and grow your business on LegalEase platform.</p>
 @endsection
 
 @section('scripts')
@@ -292,14 +297,22 @@ document.querySelectorAll('.toggle-password-eye').forEach(icon => {
         
         if (passwordInput.type === 'password') {
             passwordInput.type = 'text';
-            this.classList.add('fa-eye');
-            this.classList.remove('fa-eye-slash');
+            this.classList.remove('fa-eye');
+            this.classList.add('fa-eye-slash');
         } else {
             passwordInput.type = 'password';
-            this.classList.add('fa-eye-slash');
-            this.classList.remove('fa-eye');
+            this.classList.add('fa-eye');
+            this.classList.remove('fa-eye-slash');
         }
     });
 });
 </script>
+@endsection
+
+@section('sidebar')
+<div class="logo">
+    <i class="fas fa-balance-scale"></i>
+</div>
+<h2>LegalEase</h2>
+<p>Register as a lawyer and expand your client base on our trusted platform.</p>
 @endsection
