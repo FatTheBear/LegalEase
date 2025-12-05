@@ -58,27 +58,47 @@ class AdminController extends Controller
     public function manageLawyers(Request $request)
     {
         $query = User::where('role', 'lawyer')->with('lawyerProfile');
-        
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%');
+            });
+        }
+
         // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        
-        // Search by name or email
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+
+        // Filter by approval status
+        if ($request->filled('approval_status')) {
+            $query->where('approval_status', $request->approval_status);
         }
-        
+
+        // Filter by specialization
+        if ($request->filled('specialization')) {
+            $query->whereHas('lawyerProfile', function($q) use ($request) {
+                $q->where('specialization', $request->specialization);
+            });
+        }
+
         // Sort
-        $sortBy = $request->input('sort_by', 'created_at');
-        $sortOrder = $request->input('sort_order', 'desc');
-        $query->orderBy($sortBy, $sortOrder);
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
         
-        $lawyers = $query->paginate(15);
-        
-        return view('admin.lawyers.index', compact('lawyers'));
+        if ($sortBy === 'name') {
+            $query->orderBy('name', $sortOrder);
+        } elseif ($sortBy === 'last_login') {
+            $query->orderBy('last_login_at', $sortOrder);
+        } else {
+            $query->orderBy('created_at', $sortOrder);
+        }
+
+        $lawyers = $query->paginate(10);
+        return view('admin.lawyers', compact('lawyers'));
     }
 
     public function showLawyerProfile($id)
@@ -113,10 +133,49 @@ class AdminController extends Controller
     {
         $user = User::findOrFail($id);
         if ($user->role !== 'lawyer') {
-            return redirect()->route('admin.lawyers.index')->with('error', 'Not a lawyer.');
+            return redirect()->route('admin.lawyers')->with('error', 'Not a lawyer.');
         }
         $user->update(['status' => $request->status]);
-        return redirect()->route('admin.lawyers.index')->with('success', 'Lawyer status updated successfully.');
+        return redirect()->route('admin.lawyers')->with('success', 'Lawyer status updated successfully.');
+    }
+
+    public function updateLawyerStatus(Request $request, $id)
+    {
+        $lawyer = User::findOrFail($id);
+        
+        if ($lawyer->role !== 'lawyer') {
+            return redirect()->route('admin.lawyers.show', $id)->with('error', 'Not a lawyer.');
+        }
+
+        $request->validate([
+            'status' => 'required|in:active,banned,inactive'
+        ]);
+
+        $lawyer->update(['status' => $request->status]);
+        
+        $statusLabels = [
+            'active' => 'activated',
+            'banned' => 'banned',
+            'inactive' => 'deactivated'
+        ];
+
+        return redirect()->route('admin.lawyers.show', $id)
+            ->with('success', "Lawyer has been {$statusLabels[$request->status]} successfully.");
+    }
+
+    public function deleteLawyer($id)
+    {
+        $lawyer = User::findOrFail($id);
+        
+        if ($lawyer->role !== 'lawyer') {
+            return redirect()->route('admin.lawyers')->with('error', 'Not a lawyer.');
+        }
+
+        $lawyerName = $lawyer->name;
+        $lawyer->delete();
+
+        return redirect()->route('admin.lawyers')
+            ->with('success', "Lawyer '{$lawyerName}' and all associated data have been deleted successfully.");
     }
 
     public function manageAnnouncements()
