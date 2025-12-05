@@ -54,8 +54,6 @@
                         <select name="role" class="form-select">
                             <option value="">-- All Roles --</option>
                             <option value="customer" {{ request('role') === 'customer' ? 'selected' : '' }}>Customer</option>
-                            <option value="lawyer" {{ request('role') === 'lawyer' ? 'selected' : '' }}>Lawyer</option>
-                            <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Admin</option>
                         </select>
                     </div>
 
@@ -102,34 +100,19 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($users as $index => $user)
-                        <tr class="user-row {{ $user->role === 'admin' ? 'opacity-50' : '' }}" 
-                            @if($user->role !== 'admin') onclick="window.location.href='{{ route('admin.users.edit', $user->id) }}'" @endif>
+                        @forelse($users->where('role', 'customer') as $index => $user)
+                        <tr class="user-row" onclick="window.location.href='{{ route('admin.users.edit', $user->id) }}'">
                             <td>{{ $users->firstItem() + $index }}</td>
                             <td>
-                                <strong>{{ $user->name }}
-                                    @if($user->role === 'admin')
-                                        <span class="badge bg-dark ms-2"><i class="bi bi-lock"></i> Protected</span>
-                                    @endif
-                                </strong>
+                                <strong>{{ $user->name }}</strong>
                             </td>
                             <td>
                                 <small class="text-muted">{{ $user->email }}</small>
                             </td>
                             <td>
-                                @if($user->role === 'customer')
-                                    <span class="badge bg-success">
-                                        <i class="bi bi-person"></i> Customer
-                                    </span>
-                                @elseif($user->role === 'lawyer')
-                                    <span class="badge bg-danger">
-                                        <i class="bi bi-briefcase"></i> Lawyer
-                                    </span>
-                                @else
-                                    <span class="badge bg-warning">
-                                        <i class="bi bi-shield"></i> Admin
-                                    </span>
-                                @endif
+                                <span class="badge bg-success">
+                                    <i class="bi bi-person"></i> Customer
+                                </span>
                             </td>
                             <td>
                                 @if($user->status === 'active')

@@ -13,12 +13,7 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $query = User::query();
-        
-        // Filter by role
-        if ($request->filled('role')) {
-            $query->where('role', $request->role);
-        }
+        $query = User::where('role', 'customer');
         
         // Filter by status
         if ($request->filled('status')) {
@@ -49,12 +44,12 @@ class UserController extends Controller
         
         // Get statistics
         $stats = [
-            'total' => User::count(),
-            'active' => User::where('status', 'active')->count(),
-            'inactive' => User::where('status', 'inactive')->count(),
-            'banned' => User::where('status', 'banned')->count(),
-            'pending' => User::where('status', 'pending')->count(),
-            'new_this_week' => User::where('created_at', '>=', now()->subWeek())->count(),
+            'total' => User::where('role', 'customer')->count(),
+            'active' => User::where('role', 'customer')->where('status', 'active')->count(),
+            'inactive' => User::where('role', 'customer')->where('status', 'inactive')->count(),
+            'banned' => User::where('role', 'customer')->where('status', 'banned')->count(),
+            'pending' => User::where('role', 'customer')->where('status', 'pending')->count(),
+            'new_this_week' => User::where('role', 'customer')->where('created_at', '>=', now()->subWeek())->count(),
         ];
         
         return view('admin.users.index', compact('users', 'stats'));
@@ -65,7 +60,7 @@ class UserController extends Controller
      */
     public function edit($id)
     {
-        $user = User::findOrFail($id);
+        $user = User::with('documents')->findOrFail($id);
         
         // Prevent editing admin users
         if ($user->role === 'admin') {

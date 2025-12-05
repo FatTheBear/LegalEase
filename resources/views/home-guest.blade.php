@@ -12,13 +12,22 @@
     /* ==================== HERO SECTION ==================== */
     .hero {
         min-height: 100vh;
-        background: linear-gradient(135deg, var(--primary) 0%, #2d3d33 100%);
+        background-image: linear-gradient(135deg, rgba(58, 75, 65, 0.7), rgba(45, 61, 51, 0.7)), 
+                          url('https://wallpapers.com/images/hd/monochrome-lawyer-scales-ouqsj5h0cf9421u8.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: scroll;
         display: flex;
         align-items: center;
         justify-content: center;
         text-align: center;
         color: white;
-        padding: 2rem;
+        padding: 0;
+        margin: 0;
+        position: relative;
+        width: 100%;
+        height: 100vh;
     }
     
     .hero-content h1 {

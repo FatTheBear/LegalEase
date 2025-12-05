@@ -14,7 +14,7 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'role', 'status', 'email_verified_at', 'approval_status'];
+    protected $fillable = ['name', 'email', 'password', 'role', 'status', 'email_verified_at', 'approval_status', 'last_login_at'];
 
     protected $hidden = [
         'password',
@@ -23,6 +23,7 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'last_login_at' => 'datetime',
     ];
 
     public function lawyerProfile()

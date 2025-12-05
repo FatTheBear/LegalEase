@@ -26,11 +26,68 @@
         </div>
     @endif
 
+    <!-- Search & Sort Bar -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ route('admin.lawyers') }}" class="d-flex gap-3 align-items-center">
+                <div class="input-group" style="max-width: 400px;">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control" 
+                           placeholder="Search" 
+                           value="{{ request('search') }}">
+                </div>
+
+                <select name="status" class="form-select" style="min-width: 150px;">
+                    <option value="" disabled selected hidden>Status</option>
+                    <option value="">All Status</option>
+                    <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
+                    <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                    <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="banned" {{ request('status') === 'banned' ? 'selected' : '' }}>Banned</option>
+                </select>
+
+                <select name="specialization" class="form-select" style="min-width: 200px;">
+                    <option value="" disabled selected hidden>Specialization</option>
+                    <option value="">All Specializations</option>
+                    <option value="Criminal Law" {{ request('specialization') === 'Criminal Law' ? 'selected' : '' }}>Criminal Law</option>
+                    <option value="Civil Law" {{ request('specialization') === 'Civil Law' ? 'selected' : '' }}>Civil Law</option>
+                    <option value="Family Law" {{ request('specialization') === 'Family Law' ? 'selected' : '' }}>Family Law</option>
+                    <option value="Corporate Law" {{ request('specialization') === 'Corporate Law' ? 'selected' : '' }}>Corporate Law</option>
+                    <option value="Labor Law" {{ request('specialization') === 'Labor Law' ? 'selected' : '' }}>Labor Law</option>
+                    <option value="Real Estate Law" {{ request('specialization') === 'Real Estate Law' ? 'selected' : '' }}>Real Estate Law</option>
+                    <option value="Intellectual Property" {{ request('specialization') === 'Intellectual Property' ? 'selected' : '' }}>Intellectual Property</option>
+                    <option value="Tax Law" {{ request('specialization') === 'Tax Law' ? 'selected' : '' }}>Tax Law</option>
+                    <option value="Immigration Law" {{ request('specialization') === 'Immigration Law' ? 'selected' : '' }}>Immigration Law</option>
+                    <option value="Environmental Law" {{ request('specialization') === 'Environmental Law' ? 'selected' : '' }}>Environmental Law</option>
+                    <option value="Contract Law" {{ request('specialization') === 'Contract Law' ? 'selected' : '' }}>Contract Law</option>
+                    <option value="Administrative Law" {{ request('specialization') === 'Administrative Law' ? 'selected' : '' }}>Administrative Law</option>
+                </select>
+
+                <select name="sort_by" class="form-select" style="min-width: 150px;">
+                    <option value="" disabled selected hidden>Sort By</option>
+                    <option value="created_at" {{ request('sort_by') === 'created_at' ? 'selected' : '' }}>Date</option>
+                    <option value="name" {{ request('sort_by') === 'name' ? 'selected' : '' }}>Name</option>
+                    <option value="last_login" {{ request('sort_by') === 'last_login' ? 'selected' : '' }}>Last Active</option>
+                </select>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-funnel"></i> Filter
+                </button>
+                
+                @if(request()->hasAny(['search', 'status', 'specialization', 'sort_by']))
+                <a href="{{ route('admin.lawyers') }}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> Clear
+                </a>
+                @endif
+            </form>
+        </div>
+    </div>
+
     <!-- Lawyers Table -->
     <div class="card shadow-sm border-0">
         <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center">
             <h5 class="mb-0"><i class="bi bi-list-check"></i> All Lawyers</h5>
-            <small class="text-muted">{{ count($lawyers) }} lawyers</small>
+            <small class="text-muted">{{ $lawyers->total() }} lawyers</small>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -41,15 +98,15 @@
                             <th style="width: 20%">Name</th>
                             <th style="width: 20%">Email</th>
                             <th style="width: 15%">Specialization</th>
-                            <th style="width: 15%">Status</th>
-                            <th style="width: 15%">Approval</th>
-                            <th style="width: 10%">Actions</th>
+                            <th style="width: 12%">Status</th>
+                            <th style="width: 15%">Joined Date</th>
+                            <th style="width: 8%">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($lawyers as $index => $lawyer)
                         <tr>
-                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $lawyers->firstItem() + $index }}</td>
                             <td>
                                 <strong>{{ $lawyer->name }}</strong>
                             </td>
@@ -61,23 +118,21 @@
                             </td>
                             <td>
                                 @if($lawyer->status === 'active')
-                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Active</span>
+                                    <span class="badge bg-success">Active</span>
+                                @elseif($lawyer->status === 'inactive')
+                                    <span class="badge bg-secondary">Inactive</span>
+                                @elseif($lawyer->status === 'pending')
+                                    <span class="badge bg-warning">Pending</span>
                                 @else
-                                    <span class="badge bg-warning"><i class="bi bi-pause-circle"></i> Inactive</span>
+                                    <span class="badge bg-danger">Banned</span>
                                 @endif
                             </td>
                             <td>
-                                @if($lawyer->approval_status === 'pending')
-                                    <span class="badge bg-secondary"><i class="bi bi-hourglass"></i> Pending</span>
-                                @elseif($lawyer->approval_status === 'approved')
-                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Approved</span>
-                                @else
-                                    <span class="badge bg-danger"><i class="bi bi-x-circle"></i> Rejected</span>
-                                @endif
+                                <small class="text-muted">{{ $lawyer->created_at->format('M d, Y') }}</small>
                             </td>
                             <td>
                                 <a href="{{ route('admin.lawyers.show', $lawyer->id) }}" class="btn btn-sm btn-primary">
-                                    <i class="bi bi-eye"></i> View
+                                    <i class="bi bi-eye"></i>
                                 </a>
                             </td>
                         </tr>
@@ -92,6 +147,13 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination -->
+            @if($lawyers->hasPages())
+            <div class="d-flex justify-content-center mt-4">
+                {{ $lawyers->appends(request()->query())->links() }}
+            </div>
+            @endif
         </div>
     </div>
 </div>

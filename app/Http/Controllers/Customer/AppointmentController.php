@@ -17,7 +17,7 @@ class AppointmentController extends Controller
     {
         $appointments = Appointment::where('client_id', Auth::id())
             ->orWhere('lawyer_id', Auth::id())
-            ->with(['lawyer', 'client', 'rating'])
+            ->with(['lawyer', 'client', 'rating', 'slot'])
             ->latest()
             ->get();
 
@@ -48,28 +48,11 @@ class AppointmentController extends Controller
     // Lấy slot muốn book
     $slot = AvailabilitySlot::where('id', $request->slot_id)
         ->where('lawyer_id', $request->lawyer_id)
-        ->where('is_booked', false)
         ->firstOrFail();
 
     // Tạo datetime bắt đầu + kết thúc từ slot
     $appointmentStart = \Carbon\Carbon::parse($slot->date->format('Y-m-d') . ' ' . $slot->start_time);
     $appointmentEnd   = \Carbon\Carbon::parse($slot->date->format('Y-m-d') . ' ' . $slot->end_time);
-
-    // ===== Check trùng lịch =====
-    $hasConflict = Appointment::where('client_id', $client->id)
-        ->where('status', '!=', 'cancelled')
-        ->whereDate('date', $slot->date)
-        ->where(function ($q) use ($appointmentStart, $appointmentEnd) {
-            $q->where(function ($q2) use ($appointmentStart, $appointmentEnd) {
-                $q2->where('appointment_time', '<', $appointmentEnd)
-                   ->where('end_time', '>', $appointmentStart);
-            });
-        })
-        ->exists();
-
-    if ($hasConflict) {
-        return back()->with('error', 'You already have an appointment overlapping this time slot.');
-    }
 
     // ===== Tạo appointment =====
     $appointment = Appointment::create([
@@ -85,10 +68,11 @@ class AppointmentController extends Controller
     ]);
 
     // Update slot
-    $slot->update([
-        'is_booked'      => true,
-        'appointment_id' => $appointment->id,
-    ]);
+    if (method_exists($slot, 'update')) {
+        $slot->update([
+            'appointment_id' => $appointment->id,
+        ]);
+    }
 
     $lawyer = \App\Models\User::findOrFail($slot->lawyer_id);
 

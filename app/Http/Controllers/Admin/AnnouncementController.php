@@ -60,8 +60,15 @@ class AnnouncementController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'type' => 'nullable|string|in:general,info',
         ]);
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('announcements', 'public');
+            $validated['image'] = $imagePath;
+        }
 
         // Thêm created_by = id người đang đăng nhập
         $validated['created_by'] = auth()->id();
@@ -101,8 +108,19 @@ class AnnouncementController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'type' => 'nullable|string|in:general,info',
         ]);
+        
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($announcement->image && \Storage::disk('public')->exists($announcement->image)) {
+                \Storage::disk('public')->delete($announcement->image);
+            }
+            $imagePath = $request->file('image')->store('announcements', 'public');
+            $validated['image'] = $imagePath;
+        }
         
         $announcement->update($validated);
         

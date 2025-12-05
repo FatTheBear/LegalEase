@@ -29,11 +29,12 @@ use App\Http\Controllers\ChatController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-Route::get('/lawyers', [LawyerController::class, 'index'])->name('lawyers.index');
-Route::get('/lawyers/{id}', [LawyerController::class, 'show'])->name('lawyers.show');
+Route::get('/lawyers', [LawyerController::class, 'index'])->middleware('auth')->name('lawyers.index');
+Route::get('/lawyers/{id}', [LawyerController::class, 'show'])->middleware('auth')->name('lawyers.show');
 
 
 Route::get('/lawyers/{id}/slots/{date}', [LawyerController::class, 'getSlotsByDay'])
+    ->middleware('auth')
     ->name('lawyer.slots.by.day');
 
 
@@ -52,11 +53,11 @@ Route::post('/register/lawyer', [RegisterController::class, 'registerLawyer'])->
 Route::get('/email/verify/{id}/{hash}', [\App\Http\Controllers\Auth\VerificationController::class, 'verify'])->name('verification.verify');
 Route::post('/email/resend', [\App\Http\Controllers\Auth\VerificationController::class, 'resend'])->name('verification.resend');
 
-Route::get('/announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
+Route::get('/announcements', [AnnouncementController::class, 'index'])->middleware('auth')->name('announcements.index');
 Route::get('/faqs', function () {
     $faqs = \App\Models\Faq::all();
     return view('faqs.index', compact('faqs'));
-})->name('faqs.index');
+})->middleware('auth')->name('faqs.index');
 
 Route::get('/landing', [\App\Http\Controllers\Admin\LandingController::class, 'index'])->name('landing');
 
@@ -126,6 +127,7 @@ Route::middleware('role:lawyer')->group(function () {
         Route::put('/users/{id}/ban', [UserController::class, 'ban'])->name('users.ban');
         Route::get('/lawyers', [AdminController::class, 'manageLawyers'])->name('lawyers');
         Route::get('/lawyers/{id}', [AdminController::class, 'showLawyerProfile'])->name('lawyers.show');
+        Route::get('/lawyers/{id}/edit', [AdminController::class, 'showLawyerProfile'])->name('lawyers.edit');
         Route::put('/lawyers/{id}/approve', [AdminController::class, 'approveLawyer'])->name('lawyers.approve');
         Route::put('/lawyers/{id}/reject', [AdminController::class, 'rejectLawyer'])->name('lawyers.reject');
         Route::put('/lawyers/{id}', [AdminController::class, 'updateLawyer'])->name('lawyers.update');

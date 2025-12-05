@@ -76,11 +76,14 @@ class RegisterController extends Controller
             'experience_years' => 'required|integer|min:0',
             'workplace' => 'required|string|max:255',
             'license_number' => 'required|string|max:255',
+            'documents' => 'required|array|min:1|max:3',
             'documents.*' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048', // Max 2MB per file
         ], [
-            'documents.*.required' => 'Please upload at least one document.',
-            'documents.*.mimes' => 'Documents must be PDF, JPG, JPEG, or PNG files.',
-            'documents.*.max' => 'Each document must not exceed 2MB.',
+            'documents.required' => 'Please upload at least one certificate.',
+            'documents.min' => 'Please upload at least one certificate.',
+            'documents.max' => 'You can upload a maximum of 3 certificates.',
+            'documents.*.mimes' => 'Each certificate must be a PDF, JPG, JPEG, or PNG file.',
+            'documents.*.max' => 'Each certificate must not exceed 2MB.',
         ]);
 
         // Create user with pending status

@@ -44,7 +44,7 @@
                     <h5 class="mb-0"><i class="bi bi-pencil-square"></i> Announcement Details</h5>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.announcements.update', $announcement->id) }}" method="POST">
+                    <form action="{{ route('admin.announcements.update', $announcement->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
@@ -66,6 +66,31 @@
                                       placeholder="Enter announcement content..."
                                       required>{{ old('content', $announcement->content) }}</textarea>
                             @error('content')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Image -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Featured Image</label>
+                            
+                            @if($announcement->image)
+                                <div class="mb-3">
+                                    <div class="border rounded p-2">
+                                        <img src="{{ asset('storage/' . $announcement->image) }}" alt="Current" class="img-fluid rounded" style="max-height: 200px;">
+                                        <small class="text-muted d-block mt-2">Current image</small>
+                                    </div>
+                                </div>
+                            @endif
+
+                            <input type="file" name="image" class="form-control" 
+                                   accept="image/jpeg,image/png,image/jpg,image/gif"
+                                   id="imageInput">
+                            <small class="text-muted d-block mt-2">
+                                <i class="bi bi-info-circle"></i> Max size: 2MB. Accepted formats: JPEG, PNG, JPG, GIF. Leave empty to keep current image.
+                            </small>
+                            <div id="imagePreview" class="mt-3"></div>
+                            @error('image')
                                 <div class="text-danger small mt-1">{{ $message }}</div>
                             @enderror
                         </div>
@@ -121,14 +146,9 @@
                         </span>
                     </div>
                     <hr>
-                    <div class="mb-3">
+                    <div>
                         <div class="text-muted mb-1"><strong>Created:</strong></div>
                         <div>{{ $announcement->created_at->format('M d, Y @ h:i A') }}</div>
-                    </div>
-                    <hr>
-                    <div>
-                        <div class="text-muted mb-1"><strong>Last Updated:</strong></div>
-                        <div>{{ $announcement->updated_at->format('M d, Y @ h:i A') }}</div>
                     </div>
                 </div>
             </div>
@@ -193,4 +213,28 @@
         </div>
     </div>
 </div>
+
+@section('scripts')
+<script>
+    document.getElementById('imageInput').addEventListener('change', function(e) {
+        const preview = document.getElementById('imagePreview');
+        const file = e.target.files[0];
+        
+        preview.innerHTML = '';
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                preview.innerHTML = `
+                    <div class="border rounded p-2">
+                        <img src="${event.target.result}" alt="Preview" class="img-fluid rounded" style="max-height: 200px;">
+                        <small class="text-muted d-block mt-2">New file: ${file.name}</small>
+                    </div>
+                `;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+@endsection
 @endsection

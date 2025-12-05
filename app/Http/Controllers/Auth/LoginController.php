@@ -33,6 +33,14 @@ class LoginController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $user = Auth::user();
             
+            // Update last login time
+            $user->update(['last_login_at' => now()]);
+            
+            // If remember me is checked, save email to cookie for 7 days
+            if ($remember) {
+                \Cookie::queue('remember_email', $user->email, 60 * 24 * 7); // 7 days
+            }
+            
             // Admin không cần verify email
             if ($user->role !== 'admin') {
                 // Check if email is verified

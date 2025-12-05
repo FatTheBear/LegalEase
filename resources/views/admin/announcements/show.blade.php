@@ -39,6 +39,14 @@
                     </span>
                 </div>
                 <div class="card-body">
+                    <!-- Image -->
+                    @if($announcement->image)
+                        <div class="mb-4">
+                            <h6 class="text-muted fw-semibold mb-3"><i class="bi bi-image"></i> Featured Image</h6>
+                            <img src="{{ asset('storage/' . $announcement->image) }}" alt="{{ $announcement->title }}" class="img-fluid rounded" style="max-height: 400px; width: 100%; object-fit: cover;">
+                        </div>
+                    @endif
+
                     <!-- Content -->
                     <div class="mb-4">
                         <h6 class="text-muted fw-semibold mb-3"><i class="bi bi-file-text"></i> Content</h6>
@@ -54,12 +62,6 @@
                             <div class="mb-2">
                                 <strong><i class="bi bi-calendar3"></i> Created:</strong><br>
                                 <span>{{ $announcement->created_at->format('M d, Y @ h:i A') }}</span>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="mb-2">
-                                <strong><i class="bi bi-calendar3"></i> Updated:</strong><br>
-                                <span>{{ $announcement->updated_at->format('M d, Y @ h:i A') }}</span>
                             </div>
                         </div>
                     </div>
