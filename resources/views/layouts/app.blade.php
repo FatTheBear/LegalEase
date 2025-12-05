@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'LegalEase')</title>
 
+    <link rel="icon" type="image/png" href="{{ asset('images/logohome.png') }}">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
@@ -27,6 +29,23 @@
             color: #ffd700;
             font-size: 1.55rem;
             font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-brand-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffd700, #e6cfa7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #3a4b41;
+            box-shadow: 0 2px 8px rgba(255,215,0,0.3);
         }
 
         .navbar-glass .nav-link {
@@ -110,7 +129,12 @@
 
     <nav class="navbar navbar-expand-lg navbar-glass navbar-shadow fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="{{ url('/') }}">LegalEase</a>
+            <a class="navbar-brand" href="{{ url('/') }}">
+                <div class="navbar-brand-logo">
+                    <i class="bi bi-scale-balanced"></i>
+                </div>
+                <span>LegalEase</span>
+            </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
