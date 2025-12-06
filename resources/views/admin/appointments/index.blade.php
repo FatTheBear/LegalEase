@@ -20,7 +20,30 @@
         color: #e6cfa7 !important;
         border-color: #2d3a31 !important;
         font-weight: 600;
+        padding: 12px 8px;
+        vertical-align: middle;
+    }
+    .table-header-custom th:first-child,
+    .table-header-custom th:last-child {
         text-align: center;
+    }
+    .table-header-custom th:not(:first-child):not(:last-child) {
+        text-align: left;
+    }
+    .table td {
+        vertical-align: middle;
+        padding: 12px 8px;
+    }
+    .table td:first-child,
+    .table td:last-child {
+        text-align: center;
+    }
+    .appointment-row {
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+    .appointment-row:hover {
+        background-color: #f8f9fa !important;
     }
 </style>
 
@@ -53,13 +76,23 @@
         <div class="card-body">
             <form method="GET" action="{{ route('admin.appointments.index') }}" class="needs-validation" novalidate>
                 <div class="row g-3">
-                    <div class="col-md-8">
+                    <div class="col-md-6">
                         <label class="form-label">Search (Name/Email)</label>
                         <input type="text" name="search" class="form-control" 
                                placeholder="Enter name or email..." 
                                value="{{ request('search') }}">
                     </div>
-                    <div class="col-md-4 d-flex gap-2 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-select">
+                            <option value="">-- All Status --</option>
+                            <option value="upcoming" {{ request('status') === 'upcoming' ? 'selected' : '' }}>Upcoming</option>
+                            <option value="ongoing" {{ request('status') === 'ongoing' ? 'selected' : '' }}>Ongoing</option>
+                            <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Completed</option>
+                            <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Canceled</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex gap-2 align-items-end">
                         <button type="submit" class="btn btn-primary flex-grow-1">
                             <i class="bi bi-search"></i> Search
                         </button>
@@ -86,27 +119,21 @@
 
     <!-- Appointments Table -->
     <div class="card shadow-sm border-0">
-        <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bi bi-list-check"></i> Appointments List</h5>
-            <small class="text-muted">{{ $appointments->total() }} appointments</small>
-        </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead class="table-header-custom">
                         <tr>
-                            <th style="width: 5%">#</th>
-                            <th style="width: 15%">Client</th>
-                            <th style="width: 15%">Lawyer</th>
-                            <th style="width: 15%">Date & Time</th>
-                            <th style="width: 10%">Status</th>
-                            <th style="width: 12%">Created</th>
-                            <th style="width: 18%">Actions</th>
+                            <th style="width: 8%">No.</th>
+                            <th style="width: 25%">Client</th>
+                            <th style="width: 25%">Lawyer</th>
+                            <th style="width: 22%">Date & Time</th>
+                            <th style="width: 20%">Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($appointments as $index => $appointment)
-                        <tr>
+                        <tr class="appointment-row" data-bs-toggle="modal" data-bs-target="#viewModal{{ $appointment->id }}">
                             <td>{{ $appointments->firstItem() + $index }}</td>
                             <td>
                                 <div>
@@ -155,31 +182,6 @@
                                 @else
                                     <span class="badge bg-danger"><i class="bi bi-x-circle"></i> Cancelled</span>
                                 @endif
-                            </td>
-                            <td>
-                                <small class="text-muted">{{ $appointment->created_at->format('m/d/Y H:i') }}</small>
-                            </td>
-                            <td>
-                                <div class="btn-group btn-group-sm" role="group">
-                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" 
-                                            data-bs-target="#viewModal{{ $appointment->id }}" title="View Details">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                    <a href="{{ route('admin.appointments.edit', $appointment->id) }}" 
-                                       class="btn btn-outline-warning" title="Edit">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    @if($appointment->status === 'pending')
-                                        <button type="button" class="btn btn-outline-success btn-confirm-appointment" 
-                                                data-id="{{ $appointment->id }}" title="Confirm">
-                                            <i class="bi bi-check"></i>
-                                        </button>
-                                    @endif
-                                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" 
-                                            data-bs-target="#cancelModal{{ $appointment->id }}" title="Cancel">
-                                        <i class="bi bi-x"></i>
-                                    </button>
-                                </div>
                             </td>
                         </tr>
 
@@ -265,38 +267,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Cancel Modal -->
-                        <div class="modal fade" id="cancelModal{{ $appointment->id }}" tabindex="-1">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header bg-light border-danger">
-                                        <h5 class="modal-title text-danger">
-                                            <i class="bi bi-exclamation-triangle"></i> Confirm Cancel Appointment
-                                        </h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                    </div>
-                                    <form action="{{ route('admin.appointments.cancel', $appointment->id) }}" method="POST">
-                                        @csrf
-                                        @method('PUT')
-                                        <div class="modal-body">
-                                            <p class="text-muted">Are you sure you want to cancel this appointment?</p>
-                                            <div class="mb-3">
-                                                <label class="form-label">Reason (Optional)</label>
-                                                <textarea name="reason" class="form-control" rows="3" 
-                                                          placeholder="Enter reason for cancellation..."></textarea>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-                                            <button type="submit" class="btn btn-danger">
-                                                <i class="bi bi-x-circle"></i> Cancel Appointment
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
                         @empty
                         <tr>
                             <td colspan="7" class="text-center py-5">
@@ -319,34 +289,4 @@
     </div>
 </div>
 
-<!-- Scripts -->
-<script>
-document.querySelectorAll('.btn-confirm-appointment').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const appointmentId = this.getAttribute('data-id');
-        if (confirm('Are you sure you want to confirm this appointment?')) {
-            fetch(`/admin/appointments/${appointmentId}/confirm`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Content-Type': 'application/json',
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    location.reload();
-                } else {
-                    alert(data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred!');
-            });
-        }
-    });
-});
-</script>
 @endsection
