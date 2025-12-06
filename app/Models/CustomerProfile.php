@@ -9,7 +9,7 @@ class CustomerProfile extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'phone', 'address'];
+    protected $fillable = ['user_id', 'first_name', 'last_name', 'date_of_birth', 'phone', 'address'];
 
     public function user()
     {

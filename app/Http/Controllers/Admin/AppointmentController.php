@@ -20,7 +20,31 @@ class AppointmentController extends Controller
         
         // Filter by status
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            $status = $request->status;
+            if ($status === 'upcoming') {
+                // Upcoming: pending or confirmed appointments with future date
+                $query->whereIn('status', ['pending', 'confirmed'])
+                      ->whereHas('slot', function($q) {
+                          $q->where('date', '>=', Carbon::today()->toDateString());
+                      });
+            } elseif ($status === 'ongoing') {
+                // Ongoing: confirmed appointments happening today
+                $query->where('status', 'confirmed')
+                      ->whereHas('slot', function($q) {
+                          $today = Carbon::today()->toDateString();
+                          $now = Carbon::now();
+                          $q->where('date', $today)
+                            ->where('start_time', '<=', $now->format('H:i:s'))
+                            ->where('end_time', '>=', $now->format('H:i:s'));
+                      });
+            } elseif ($status === 'completed') {
+                $query->where('status', 'completed');
+            } elseif ($status === 'cancelled') {
+                $query->where('status', 'cancelled');
+            } else {
+                // Fallback to exact status match
+                $query->where('status', $status);
+            }
         }
         
         // Filter by lawyer

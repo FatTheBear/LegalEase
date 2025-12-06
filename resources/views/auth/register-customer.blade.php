@@ -22,19 +22,52 @@
     <form method="POST" action="{{ route('register.customer.submit') }}" novalidate>
         @csrf
         
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="first_name" class="form-label">
+                    <i class="fas fa-user me-2" style="color: #3a4b41;"></i>First Name
+                </label>
+                <input type="text" 
+                       class="form-control @error('first_name') is-invalid @enderror" 
+                       id="first_name" 
+                       name="first_name" 
+                       value="{{ old('first_name') }}" 
+                       autocomplete="given-name" 
+                       autofocus
+                       placeholder="Enter your first name">
+                @error('first_name')
+                    <div class="invalid-feedback" style="display: block;">{{ $message }}</div>
+                @enderror
+            </div>
+            <div class="col-md-6">
+                <label for="last_name" class="form-label">
+                    <i class="fas fa-user me-2" style="color: #3a4b41;"></i>Last Name
+                </label>
+                <input type="text" 
+                       class="form-control @error('last_name') is-invalid @enderror" 
+                       id="last_name" 
+                       name="last_name" 
+                       value="{{ old('last_name') }}" 
+                       autocomplete="family-name"
+                       placeholder="Enter your last name">
+                @error('last_name')
+                    <div class="invalid-feedback" style="display: block;">{{ $message }}</div>
+                @enderror
+            </div>
+        </div>
+
         <div class="mb-3">
-            <label for="name" class="form-label">
-                <i class="fas fa-user me-2" style="color: #3a4b41;"></i>Full Name
+            <label for="date_of_birth" class="form-label">
+                <i class="fas fa-calendar-alt me-2" style="color: #3a4b41;"></i>Date of Birth
             </label>
-            <input type="text" 
-                   class="form-control @error('name') is-invalid @enderror" 
-                   id="name" 
-                   name="name" 
-                   value="{{ old('name') }}" 
-                   autocomplete="name" 
-                   autofocus
-                   placeholder="Enter your full name">
-            @error('name')
+            <input type="date" 
+                   class="form-control @error('date_of_birth') is-invalid @enderror" 
+                   id="date_of_birth" 
+                   name="date_of_birth" 
+                   value="{{ old('date_of_birth') }}" 
+                   autocomplete="bday"
+                   max="{{ date('Y-m-d') }}">
+            @error('date_of_birth')
                 <div class="invalid-feedback" style="display: block;">{{ $message }}</div>
             @enderror
         </div>

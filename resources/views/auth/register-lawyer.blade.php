@@ -168,18 +168,17 @@
             </div>
             <div class="card-body">
                 <div class="mb-3">
-                    <label for="documents" class="form-label">Upload Certificates & Licenses * <span class="badge bg-info ms-2">Max 3 files</span></label>
+                    <label for="documents" class="form-label">Upload Certificates & Licenses <span class="badge bg-secondary ms-2">Optional - Max 3 files</span></label>
                     <input type="file" 
                            class="form-control @error('documents.*') is-invalid @enderror" 
                            id="documents" 
                            name="documents[]" 
                            multiple 
-                           accept=".pdf,.jpg,.jpeg,.png" 
-                           required>
+                           accept=".pdf,.jpg,.jpeg,.png">
                     <div class="form-text">
                         <i class="fas fa-info-circle me-1"></i>
-                        Upload your law degree, bar admission certificate, professional licenses, and other relevant credentials. 
-                        <br>Accepted formats: PDF, JPG, PNG. Maximum 3 files, 2MB per file.
+                        You can select 1 to 3 files at once. Upload your law degree, bar admission certificate, professional licenses, and other relevant credentials. 
+                        <br>Accepted formats: PDF, JPG, PNG. Maximum 3 files total, 2MB per file.
                     </div>
                     @error('documents')
                         <div class="invalid-feedback" style="display: block;">{{ $message }}</div>
@@ -242,47 +241,57 @@ document.getElementById('documents').addEventListener('change', function(e) {
     preview.innerHTML = '';
     errorMessage.style.display = 'none';
     
-    const files = e.target.files;
+    const files = Array.from(e.target.files);
     let hasError = false;
     
     // Check file count
     if (files.length > MAX_FILES) {
         errorMessage.style.display = 'block';
-        errorText.textContent = `You can only upload a maximum of ${MAX_FILES} certificates. You selected ${files.length} files.`;
-        hasError = true;
+        errorText.textContent = `You can only upload a maximum of ${MAX_FILES} files. Please select up to ${MAX_FILES} files only.`;
+        // Reset input
+        e.target.value = '';
+        return;
     }
     
     if (files.length > 0) {
         const fileList = document.createElement('div');
         fileList.className = 'mt-2';
         
-        for (let i = 0; i < Math.min(files.length, MAX_FILES); i++) {
-            const file = files[i];
+        // Display all selected files
+        files.forEach((file, index) => {
             const fileSize = file.size / (1024 * 1024);
             
             // Check individual file size
-            let fileStatus = 'alert-light';
-            let warningIcon = '';
+            let fileStatus = 'alert-success';
+            let statusIcon = '<i class="fas fa-check-circle me-2 text-success"></i>';
             if (file.size > MAX_FILE_SIZE) {
                 fileStatus = 'alert-danger';
-                warningIcon = '<i class="fas fa-exclamation-circle me-2 text-danger"></i>';
+                statusIcon = '<i class="fas fa-exclamation-circle me-2 text-danger"></i>';
                 hasError = true;
             }
             
             const fileItem = document.createElement('div');
-            fileItem.className = `alert ${fileStatus} d-flex align-items-center mb-2`;
+            fileItem.className = `alert ${fileStatus} d-flex align-items-center mb-2 py-2`;
             fileItem.innerHTML = `
-                ${warningIcon || '<i class="fas fa-file me-2"></i>'}
-                <span class="me-auto">${file.name}</span>
-                <small class="${file.size > MAX_FILE_SIZE ? 'text-danger' : 'text-muted'}">${fileSize.toFixed(2)} MB</small>
+                ${statusIcon}
+                <span class="me-auto">
+                    <strong>${index + 1}.</strong> ${file.name}
+                </span>
+                <small class="${file.size > MAX_FILE_SIZE ? 'text-danger fw-bold' : 'text-muted'}">${fileSize.toFixed(2)} MB</small>
             `;
             fileList.appendChild(fileItem);
-        }
+        });
         
-        // Show count info
+        // Show summary
+        const summaryClass = hasError ? 'alert-warning' : 'alert-info';
+        const summaryIcon = hasError ? '<i class="fas fa-exclamation-triangle me-2"></i>' : '<i class="fas fa-info-circle me-2"></i>';
         const countInfo = document.createElement('div');
-        countInfo.className = 'alert alert-info mt-2';
-        countInfo.innerHTML = `<i class="fas fa-check-circle me-2"></i>Selected: <strong>${Math.min(files.length, MAX_FILES)} of ${MAX_FILES}</strong> certificates`;
+        countInfo.className = `alert ${summaryClass} mt-2 py-2`;
+        countInfo.innerHTML = `
+            ${summaryIcon}
+            <strong>${files.length} of ${MAX_FILES}</strong> file(s) selected
+            ${hasError ? ' - <span class="text-danger">Please check file sizes!</span>' : ' - Ready to upload'}
+        `;
         fileList.appendChild(countInfo);
         
         preview.appendChild(fileList);

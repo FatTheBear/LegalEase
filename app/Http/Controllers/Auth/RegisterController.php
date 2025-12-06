@@ -43,17 +43,29 @@ class RegisterController extends Controller
     public function registerCustomer(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:100',
+            'last_name' => 'required|string|max:100',
+            'date_of_birth' => 'required|date|before:today',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // Combine first_name and last_name for the name field
+        $fullName = $request->first_name . ' ' . $request->last_name;
+
         $user = User::create([
-            'name' => $request->name,
+            'name' => $fullName,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => 'customer',
             'status' => 'active', // Customer can use immediately
+        ]);
+
+        // Create customer profile with personal information
+        $user->customerProfile()->create([
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'date_of_birth' => $request->date_of_birth,
         ]);
 
         // Send email verification notification

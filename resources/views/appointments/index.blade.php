@@ -240,8 +240,8 @@
 
                 {{-- Avatar --}}
                 <div class="d-flex align-items-center">
-                    <img src="{{ $fb->lawyer->avatar 
-                        ? asset('storage/'.$fb->lawyer->avatar) 
+                    <img src="{{ $fb->lawyer->hasAvatar() 
+                        ? $fb->lawyer->getAvatarUrl() 
                         : 'https://ui-avatars.com/api/?name=' . urlencode($fb->lawyer->name) . '&background=35563c&color=ffffff&size=80' }}"
                         class="rounded-circle me-3"
                         width="60" height="60">
