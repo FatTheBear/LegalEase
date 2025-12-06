@@ -225,16 +225,6 @@
         </div>
     </nav>
 
-    @if(session('success'))
-    <div class="container mt-3">
-        <div class="custom-alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <span>{{ session('success') }}</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    </div>
-    @endif
-
     <main class="container mt-4 mb-5">
         <div class="content-wrapper shadow-sm p-4 rounded-3 bg-white">
             @yield('content')

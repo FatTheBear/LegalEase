@@ -246,46 +246,54 @@
                                                 </p>
                                             </div>
                                             <div class="col-md-9">
-                                                <label class="form-label fw-bold d-block">Change Status:</label>
-                                                <div class="d-flex gap-2 flex-wrap">
-                                                    @if($lawyer->status !== 'active')
-                                                        <form action="{{ url('/admin/lawyers/' . $lawyer->id . '/change-status') }}" method="POST" style="display: inline;">
-                                                            @csrf
-                                                            <input type="hidden" name="status" value="active">
-                                                            <button type="submit" class="btn btn-sm btn-success">
-                                                                <i class="bi bi-check-circle"></i> Activate
-                                                            </button>
-                                                        </form>
-                                                    @endif
+                                                @if($lawyer->status === 'banned')
+                                                    <div class="alert alert-danger mb-0">
+                                                        <i class="bi bi-exclamation-triangle"></i> 
+                                                        <strong>This account has been banned by the system.</strong>
+                                                        <p class="mb-0 small">The account exists in the database but is restricted from accessing the system.</p>
+                                                    </div>
+                                                @else
+                                                    <label class="form-label fw-bold d-block">Change Status:</label>
+                                                    <div class="d-flex gap-2 flex-wrap">
+                                                        @if($lawyer->status !== 'active')
+                                                            <form action="{{ route('admin.lawyers.update-status', $lawyer->id) }}" method="POST" style="display: inline;">
+                                                                @csrf
+                                                                <input type="hidden" name="status" value="active">
+                                                                <button type="submit" class="btn btn-sm btn-success">
+                                                                    <i class="bi bi-check-circle"></i> Activate
+                                                                </button>
+                                                            </form>
+                                                        @endif
 
-                                                    @if($lawyer->status !== 'banned')
-                                                        <form action="{{ url('/admin/lawyers/' . $lawyer->id . '/change-status') }}" method="POST" style="display: inline;">
+                                                        <form id="banForm" action="{{ route('admin.lawyers.update-status', $lawyer->id) }}" method="POST" style="display: inline;">
                                                             @csrf
+                                                            @method('PUT')
                                                             <input type="hidden" name="status" value="banned">
-                                                            <button type="submit" class="btn btn-sm btn-warning">
-                                                                <i class="bi bi-exclamation-circle"></i> Ban
-                                                            </button>
                                                         </form>
-                                                    @endif
+                                                        <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#banModal">
+                                                            <i class="bi bi-exclamation-circle"></i> Ban
+                                                        </button>
 
-                                                    @if($lawyer->status !== 'inactive')
-                                                        <form action="{{ url('/admin/lawyers/' . $lawyer->id . '/change-status') }}" method="POST" style="display: inline;">
-                                                            @csrf
-                                                            <input type="hidden" name="status" value="inactive">
-                                                            <button type="submit" class="btn btn-sm btn-secondary">
+                                                        @if($lawyer->status !== 'inactive')
+                                                            <form id="deactivateForm" action="{{ route('admin.lawyers.update-status', $lawyer->id) }}" method="POST" style="display: inline;">
+                                                                @csrf
+                                                                @method('PUT')
+                                                                <input type="hidden" name="status" value="inactive">
+                                                            </form>
+                                                            <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#deactivateModal">
                                                                 <i class="bi bi-pause-circle"></i> Deactivate
                                                             </button>
-                                                        </form>
-                                                    @endif
+                                                        @endif
 
-                                                    <form action="{{ url('/admin/lawyers/' . $lawyer->id) }}" method="POST" style="display: inline;">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-danger">
+                                                        <form id="deleteForm" action="{{ route('admin.lawyers.delete', $lawyer->id) }}" method="POST" style="display: inline;">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                        </form>
+                                                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
                                                             <i class="bi bi-trash"></i> Delete
                                                         </button>
-                                                    </form>
-                                                </div>
+                                                    </div>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
@@ -298,4 +306,109 @@
         </div>
     </div>
 </div>
+
+<!-- Ban Confirmation Modal -->
+<div class="modal fade" id="banModal" tabindex="-1" aria-labelledby="banModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-white">
+                <h5 class="modal-title" id="banModalLabel">
+                    <i class="bi bi-exclamation-triangle"></i> Confirm Ban
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3">Are you sure you want to ban this lawyer?</p>
+                <p class="text-muted small mb-3">This action will prevent the lawyer from accessing the system and an email notification will be sent.</p>
+                
+                <div class="mb-3">
+                    <label for="banReasonSelect" class="form-label fw-bold">Select Ban Reason:</label>
+                    <select class="form-select" id="banReasonSelect" name="ban_reason_id" required>
+                        <option value="">-- Choose a reason --</option>
+                        @foreach(\App\Models\BanReason::all() as $reason)
+                            <option value="{{ $reason->id }}">{{ $reason->reason }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-warning" onclick="submitBanForm();">
+                    <i class="bi bi-exclamation-circle"></i> Yes, Ban Lawyer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="bi bi-trash"></i> Confirm Delete
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">Are you sure you want to delete this lawyer?</p>
+                <p class="text-danger small mb-0"><strong>This action cannot be undone.</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="document.getElementById('deleteForm').submit();">
+                    <i class="bi bi-trash"></i> Yes, Delete Lawyer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Deactivate Confirmation Modal -->
+<div class="modal fade" id="deactivateModal" tabindex="-1" aria-labelledby="deactivateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title" id="deactivateModalLabel">
+                    <i class="bi bi-pause-circle"></i> Confirm Deactivate
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">Are you sure you want to deactivate this lawyer?</p>
+                <p class="text-muted small mb-0">The lawyer will not be able to receive new appointments but their profile will remain in the system.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('deactivateForm').submit();">
+                    <i class="bi bi-pause-circle"></i> Yes, Deactivate Lawyer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function submitBanForm() {
+    const reasonSelect = document.getElementById('banReasonSelect');
+    const selectedReason = reasonSelect.value;
+    
+    if (!selectedReason) {
+        alert('Please select a ban reason.');
+        return;
+    }
+    
+    // Thêm ban_reason_id vào form
+    const form = document.getElementById('banForm');
+    const reasonInput = document.createElement('input');
+    reasonInput.type = 'hidden';
+    reasonInput.name = 'ban_reason_id';
+    reasonInput.value = selectedReason;
+    form.appendChild(reasonInput);
+    
+    // Submit form
+    form.submit();
+}
+</script>
 @endsection

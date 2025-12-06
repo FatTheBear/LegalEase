@@ -113,20 +113,26 @@ class AdminController extends Controller
     {
         $user = User::findOrFail($id);
         if ($user->role !== 'lawyer') {
-            return redirect()->route('admin.lawyers')->with('error', 'Not a lawyer.');
+            return redirect()->route('admin.lawyers.index')->with('error', 'Not a lawyer.');
         }
+        
+        // Update approval status
         $user->update(['approval_status' => 'approved']);
-        return redirect()->route('admin.lawyers')->with('success', 'Lawyer approved successfully.');
+        
+        // Send approval email
+        \Mail::to($user->email)->send(new \App\Mail\LawyerApproved($user));
+        
+        return redirect()->route('admin.lawyers.index')->with('success', 'Lawyer approved successfully and notification email sent.');
     }
 
     public function rejectLawyer($id)
     {
         $user = User::findOrFail($id);
         if ($user->role !== 'lawyer') {
-            return redirect()->route('admin.lawyers')->with('error', 'Not a lawyer.');
+            return redirect()->route('admin.lawyers.index')->with('error', 'Not a lawyer.');
         }
         $user->update(['approval_status' => 'rejected']);
-        return redirect()->route('admin.lawyers')->with('success', 'Lawyer rejected.');
+        return redirect()->route('admin.lawyers.index')->with('success', 'Lawyer rejected.');
     }
 
     public function updateLawyer(Request $request, $id)
@@ -136,7 +142,7 @@ class AdminController extends Controller
             return redirect()->route('admin.lawyers')->with('error', 'Not a lawyer.');
         }
         $user->update(['status' => $request->status]);
-        return redirect()->route('admin.lawyers')->with('success', 'Lawyer status updated successfully.');
+        return redirect()->route('admin.lawyers');
     }
 
     public function updateLawyerStatus(Request $request, $id)
@@ -148,10 +154,21 @@ class AdminController extends Controller
         }
 
         $request->validate([
-            'status' => 'required|in:active,banned,inactive'
+            'status' => 'required|in:active,banned,inactive',
+            'ban_reason_id' => 'required_if:status,banned|exists:ban_reasons,id'
         ]);
 
-        $lawyer->update(['status' => $request->status]);
+        // Cập nhật status
+        $lawyer->update([
+            'status' => $request->status,
+            'ban_reason_id' => $request->status === 'banned' ? $request->ban_reason_id : null
+        ]);
+        
+        // Gửi email nếu bị ban
+        if ($request->status === 'banned' && $request->ban_reason_id) {
+            $banReason = \App\Models\BanReason::find($request->ban_reason_id);
+            \Mail::to($lawyer->email)->send(new \App\Mail\LawyerBanned($lawyer, $banReason));
+        }
         
         $statusLabels = [
             'active' => 'activated',
@@ -168,13 +185,13 @@ class AdminController extends Controller
         $lawyer = User::findOrFail($id);
         
         if ($lawyer->role !== 'lawyer') {
-            return redirect()->route('admin.lawyers')->with('error', 'Not a lawyer.');
+            return redirect()->route('admin.lawyers.index')->with('error', 'Not a lawyer.');
         }
 
         $lawyerName = $lawyer->name;
         $lawyer->delete();
 
-        return redirect()->route('admin.lawyers')
+        return redirect()->route('admin.lawyers.index')
             ->with('success', "Lawyer '{$lawyerName}' and all associated data have been deleted successfully.");
     }
 

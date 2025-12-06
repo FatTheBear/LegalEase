@@ -124,13 +124,19 @@ Route::middleware('role:lawyer')->group(function () {
         Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
         Route::put('/users/{id}/activate', [UserController::class, 'activate'])->name('users.activate');
         Route::put('/users/{id}/deactivate', [UserController::class, 'deactivate'])->name('users.deactivate');
-        Route::put('/users/{id}/ban', [UserController::class, 'ban'])->name('users.ban');
-        Route::get('/lawyers', [AdminController::class, 'manageLawyers'])->name('lawyers');
-        Route::get('/lawyers/{id}', [AdminController::class, 'showLawyerProfile'])->name('lawyers.show');
-        Route::get('/lawyers/{id}/edit', [AdminController::class, 'showLawyerProfile'])->name('lawyers.edit');
+        Route::get('/users/{id}/ban', [UserController::class, 'ban'])->name('users.ban');
+        // Lawyers management
+        Route::get('/lawyers', [AdminController::class, 'manageLawyers'])->name('lawyers.index');
+        // Custom actions first (more specific)
         Route::put('/lawyers/{id}/approve', [AdminController::class, 'approveLawyer'])->name('lawyers.approve');
+        Route::post('/lawyers/{id}/approve', [AdminController::class, 'approveLawyer']);
         Route::put('/lawyers/{id}/reject', [AdminController::class, 'rejectLawyer'])->name('lawyers.reject');
+        Route::post('/lawyers/{id}/reject', [AdminController::class, 'rejectLawyer']);
+        Route::match(['put', 'post'], '/lawyers/{id}/change-status', [AdminController::class, 'updateLawyerStatus'])->name('lawyers.update-status');
+        Route::delete('/lawyers/{id}', [AdminController::class, 'deleteLawyer'])->name('lawyers.delete');
+        Route::post('/lawyers/{id}', [AdminController::class, 'deleteLawyer']);
         Route::put('/lawyers/{id}', [AdminController::class, 'updateLawyer'])->name('lawyers.update');
+        Route::get('/lawyers/{id}', [AdminController::class, 'showLawyerProfile'])->name('lawyers.show');
         
         // Appointment Management
         Route::get('/appointments', [AdminAppointmentController::class, 'index'])->name('appointments.index');

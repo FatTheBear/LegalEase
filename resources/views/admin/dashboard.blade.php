@@ -40,7 +40,7 @@
                 <div class="card-body text-center">
                     <h1 class="display-4" style="color: #5d4037;">{{ $totalLawyers }}</h1>
                     <p class="mb-3" style="color: #795548;"><i class="bi bi-briefcase"></i> Total Lawyers</p>
-                    <a href="{{ route('admin.lawyers') }}" class="btn btn-beige btn-sm w-100">Manage Lawyers</a>
+                    <a href="{{ route('admin.lawyers.index') }}" class="btn btn-beige btn-sm w-100">Manage Lawyers</a>
                 </div>
             </div>
         </div>
