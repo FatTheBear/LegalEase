@@ -19,8 +19,8 @@
                 <div class="card lawyer-card text-center h-100 cursor-pointer" 
                      data-lawyer-id="{{ $lawyer->id }}">
                     @php
-                        $avatarUrl = $lawyer->avatar 
-                            ? asset('storage/' . $lawyer->avatar) 
+                        $avatarUrl = $lawyer->hasAvatar() 
+                            ? $lawyer->getAvatarUrl() 
                             : 'https://ui-avatars.com/api/?name=' . urlencode($lawyer->name) . '&background=35563c&color=ffffff&size=150';
                     @endphp
                     <img src="{{ $avatarUrl }}" class="card-img-top rounded-circle mx-auto mt-2" style="width:70px; height:70px;" alt="{{ $lawyer->name }}">

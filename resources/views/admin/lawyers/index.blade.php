@@ -100,7 +100,11 @@
                             <td><input type="checkbox"></td>
                             <td>
                                 <div class="d-flex align-items-center gap-2">
-                                    <img src="https://i.pravatar.cc/32?u={{ $lawyer->email }}" alt="{{ $lawyer->name }}" class="rounded-circle" width="32" height="32">
+                                    @if($lawyer->hasAvatar())
+                                        <img src="{{ $lawyer->getAvatarUrl() }}" alt="{{ $lawyer->name }}" class="rounded-circle" width="32" height="32" style="object-fit: cover;">
+                                    @else
+                                        <img src="https://i.pravatar.cc/32?u={{ $lawyer->email }}" alt="{{ $lawyer->name }}" class="rounded-circle" width="32" height="32">
+                                    @endif
                                     <strong>{{ $lawyer->name }}</strong>
                                 </div>
                             </td>

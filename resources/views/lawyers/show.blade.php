@@ -25,8 +25,8 @@
         <!-- Thông tin luật sư -->
         <div class="col-md-4 text-center mb-4">
             @php
-            $avatarUrl = $lawyer->avatar
-                ? asset('storage/' . $lawyer->avatar)
+            $avatarUrl = $lawyer->hasAvatar()
+                ? $lawyer->getAvatarUrl()
                 : 'https://ui-avatars.com/api/?name=' . urlencode($lawyer->name) . '&background=35563c&color=ffffff&size=150';
             @endphp
 

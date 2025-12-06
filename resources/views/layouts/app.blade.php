@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'LegalEase')</title>
 
     <link rel="icon" type="image/png" href="{{ asset('images/logohome.png') }}">
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" preload>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
     <link rel="stylesheet" href="/css/theme.css">
+    @yield('styles')
 
     <style>
         /* ========================= NAVBAR GLASS EFFECT ========================= */
@@ -207,13 +209,31 @@
                         <li class="nav-item"><a class="nav-link" href="{{ route('register.choice') }}">Register</a></li>
                     @else
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-person-circle"></i> {{ Auth::user()->name }}
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                                @if(Auth::user()->hasAvatar())
+                                    <img src="{{ Auth::user()->getAvatarUrl() }}" 
+                                         alt="{{ Auth::user()->name }}" 
+                                         class="rounded-circle me-2" 
+                                         style="width: 32px; height: 32px; object-fit: cover;">
+                                @else
+                                    <div class="rounded-circle bg-light border border-2 border-primary me-2" 
+                                         style="width: 32px; height: 32px;">
+                                    </div>
+                                @endif
+                                {{ Auth::user()->name }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end dropdown-menu-glass"> 
                                 <li>
+                                    <a class="dropdown-item" href="{{ route('profile.edit') }}">
+                                        <i class="bi bi-person-gear me-2"></i>Profile Settings
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
                                     <form action="{{ route('logout') }}" method="POST">@csrf
-                                        <button class="dropdown-item text-danger">Logout</button>
+                                        <button class="dropdown-item text-danger">
+                                            <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                        </button>
                                     </form>
                                 </li>
                             </ul>
@@ -297,6 +317,7 @@
         });
     </script>
     @include('components.chat-live')
+    @yield('scripts')
 </body>
 </html>
 

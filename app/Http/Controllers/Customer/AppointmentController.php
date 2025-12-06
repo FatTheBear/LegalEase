@@ -54,6 +54,22 @@ class AppointmentController extends Controller
     $appointmentStart = \Carbon\Carbon::parse($slot->date->format('Y-m-d') . ' ' . $slot->start_time);
     $appointmentEnd   = \Carbon\Carbon::parse($slot->date->format('Y-m-d') . ' ' . $slot->end_time);
 
+    // ===== Check trùng lịch =====
+    $hasConflict = Appointment::where('client_id', $client->id)
+        ->where('status', '!=', 'cancelled')
+        ->whereDate('date', $slot->date)
+        ->where(function ($q) use ($appointmentStart, $appointmentEnd) {
+            $q->where(function ($q2) use ($appointmentStart, $appointmentEnd) {
+                $q2->where('appointment_time', '<', $appointmentEnd)
+                   ->where('end_time', '>', $appointmentStart);
+            });
+        })
+        ->exists();
+
+    if ($hasConflict) {
+        return back()->with('error', 'You already have an appointment overlapping this time slot.');
+    }
+
     // ===== Tạo appointment =====
     $appointment = Appointment::create([
         'client_id'       => $client->id,
