@@ -284,14 +284,6 @@
                                                                 <i class="bi bi-pause-circle"></i> Deactivate
                                                             </button>
                                                         @endif
-
-                                                        <form id="deleteForm" action="{{ route('admin.lawyers.delete', $lawyer->id) }}" method="POST" style="display: inline;">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                        </form>
-                                                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                                                            <i class="bi bi-trash"></i> Delete
-                                                        </button>
                                                     </div>
                                                 @endif
                                             </div>
@@ -335,30 +327,6 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-warning" onclick="submitBanForm();">
                     <i class="bi bi-exclamation-circle"></i> Yes, Ban Lawyer
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="deleteModalLabel">
-                    <i class="bi bi-trash"></i> Confirm Delete
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p class="mb-0">Are you sure you want to delete this lawyer?</p>
-                <p class="text-danger small mb-0"><strong>This action cannot be undone.</strong></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" onclick="document.getElementById('deleteForm').submit();">
-                    <i class="bi bi-trash"></i> Yes, Delete Lawyer
                 </button>
             </div>
         </div>
