@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Notifications\VerifyEmailNotification;
+use Illuminate\Support\Facades\Storage;
 
 
 class User extends Authenticatable
@@ -157,5 +158,29 @@ class User extends Authenticatable
         return $this->hasMany(Message::class, 'sender_id') // từ user gửi
                     ->where('receiver_id', 1) // admin nhận
                     ->where('is_read', false);
+    }
+
+    /**
+     * Check if user has a valid avatar
+     */
+    public function hasAvatar()
+    {
+        if (empty($this->avatar)) {
+            return false;
+        }
+
+        // Check if file exists in storage
+        return Storage::disk('public')->exists($this->avatar);
+    }
+
+    /**
+     * Get avatar URL or null if not exists
+     */
+    public function getAvatarUrl()
+    {
+        if ($this->hasAvatar()) {
+            return asset('storage/' . $this->avatar);
+        }
+        return null;
     }
 }

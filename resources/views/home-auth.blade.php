@@ -127,7 +127,7 @@
         @forelse($lawyersToShow as $lawyer)
             <div class="col">
                 <div class="card h-100 shadow-sm card-lawyer">
-                    <img src="{{ $lawyer->avatar ?? '/images/default-lawyer.jpg' }}" class="card-img-top" alt="{{ $lawyer->name }}">
+                    <img src="{{ $lawyer->hasAvatar() ? $lawyer->getAvatarUrl() : '/images/default-lawyer.jpg' }}" class="card-img-top" alt="{{ $lawyer->name }}">
                     <div class="card-body">
                         <h5 class="card-title">{{ $lawyer->name }}</h5>
                         <p class="card-text">{{ $lawyer->lawyerProfile->specialization ?? 'General Lawyer' }}</p>

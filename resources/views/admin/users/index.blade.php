@@ -100,7 +100,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($users->where('role', 'customer') as $index => $user)
+                        @forelse($users as $index => $user)
                         <tr class="user-row" onclick="window.location.href='{{ route('admin.users.edit', $user->id) }}'">
                             <td>{{ $users->firstItem() + $index }}</td>
                             <td>

@@ -146,6 +146,13 @@
             cursor: pointer;
             transition: color 0.2s;
             pointer-events: all;
+            z-index: 10;
+            font-size: 16px;
+            display: block;
+            width: 20px;
+            height: 20px;
+            line-height: 20px;
+            text-align: center;
         }
 
         .password-input-wrapper i:hover {

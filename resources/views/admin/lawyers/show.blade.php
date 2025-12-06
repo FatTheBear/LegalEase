@@ -216,6 +216,7 @@
                                     <div class="d-flex gap-2 flex-wrap">
                                         <form action="{{ url('/admin/lawyers/' . $lawyer->id . '/approve') }}" method="POST" style="display: inline;">
                                             @csrf
+                                            @method('PUT')
                                             <button type="submit" class="btn btn-success" onclick="return confirm('Are you sure you want to approve this lawyer?')">
                                                 <i class="glyphicon glyphicon-ok"></i> Approve
                                             </button>
@@ -223,6 +224,7 @@
 
                                         <form action="{{ url('/admin/lawyers/' . $lawyer->id . '/reject') }}" method="POST" style="display: inline;">
                                             @csrf
+                                            @method('PUT')
                                             <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to reject this lawyer?')">
                                                 <i class="glyphicon glyphicon-remove"></i> Reject
                                             </button>

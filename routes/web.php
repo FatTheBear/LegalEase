@@ -49,6 +49,23 @@ Route::post('/register/customer', [RegisterController::class, 'registerCustomer'
 Route::get('/register/lawyer', [RegisterController::class, 'showLawyerRegistrationForm'])->name('register.lawyer');
 Route::post('/register/lawyer', [RegisterController::class, 'registerLawyer'])->name('register.lawyer.submit');
 
+// Password Reset Routes (không cần login)
+Route::get('/profile/reset-password/{token}', [App\Http\Controllers\ProfileController::class, 'showResetPasswordForm'])->name('profile.reset.password');
+Route::get('/profile/reset-password', [App\Http\Controllers\ProfileController::class, 'reloadResetPasswordForm'])->name('profile.reset.password.reload');
+Route::post('/profile/reset-password', [App\Http\Controllers\ProfileController::class, 'resetPasswordWithoutCurrent'])->name('profile.reset.password.submit');
+
+// Test route để xem trang reset password (CHỈ CHẠY TRONG MÔI TRƯỜNG DEVELOPMENT)
+// LƯU Ý: Route này chỉ để test giao diện, sẽ không submit được vì không có token hợp lệ trong database
+// Tự động vô hiệu hóa khi deploy production (APP_ENV != local)
+if (app()->environment('local')) {
+    Route::get('/test-reset-password', function () {
+        return view('auth.reset-password', [
+            'token' => 'test-token-for-ui-preview-only',
+            'email' => 'test@example.com',
+        ]);
+    })->name('test.reset.password');
+}
+
 // Email Verification Routes
 Route::get('/email/verify/{id}/{hash}', [\App\Http\Controllers\Auth\VerificationController::class, 'verify'])->name('verification.verify');
 Route::post('/email/resend', [\App\Http\Controllers\Auth\VerificationController::class, 'resend'])->name('verification.resend');
@@ -85,6 +102,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/avatar', [App\Http\Controllers\ProfileController::class, 'updateAvatar'])->name('profile.update.avatar');
     Route::post('/profile/password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.update.password');
+    Route::post('/profile/forgot-password', [App\Http\Controllers\ProfileController::class, 'sendPasswordResetLink'])->name('profile.forgot.password');
 
     Route::get('/lawyer/profile/edit', [ProfileController::class, 'edit'])
     ->name('lawyer.profile.edit');
@@ -133,6 +151,8 @@ Route::middleware('role:lawyer')->group(function () {
         Route::put('/lawyers/{id}/approve', [AdminController::class, 'approveLawyer'])->name('lawyers.approve');
         Route::put('/lawyers/{id}/reject', [AdminController::class, 'rejectLawyer'])->name('lawyers.reject');
         Route::put('/lawyers/{id}', [AdminController::class, 'updateLawyer'])->name('lawyers.update');
+        Route::put('/lawyers/{id}/change-status', [AdminController::class, 'updateLawyerStatus'])->name('lawyers.change-status');
+        Route::delete('/lawyers/{id}', [AdminController::class, 'deleteLawyer'])->name('lawyers.delete');
         
         // Appointment Management
         Route::get('/appointments', [AdminAppointmentController::class, 'index'])->name('appointments.index');
